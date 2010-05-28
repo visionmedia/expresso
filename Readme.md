@@ -5,10 +5,12 @@
 
 ## Features
 
-  - serial execution
+  - serial execution to report multiple failures
   - intuitive async support
   - intuitive test runner executable
   - test coverage support and reporting
+  - uses the _assert_ module
+  - light-weight
 
 ## Installation
 
@@ -20,7 +22,41 @@ To install expresso alone (no build required) run:
 
     $ make install-expresso
 
-## Usage
+## Examples
+
+To define tests we simply export several functions:
+
+    module.exports = {
+      'test String#length': function(assert){
+        assert.equal(6, 'foobar');
+      }
+    }
+
+Async tests simply accept a second argument (usually named _done_):
+
+    exports['test async] = function(assert, done){
+      setTimeout(function(){
+        assert.ok(true);
+        done();
+      }, 200);
+    }
+
+When testing more than a single async routine, we simple _return_
+the number of expected calls to _done_:
+
+    exports['test async] = function(assert, done){
+      setTimeout(function(){
+        assert.ok(true);
+        done();
+      }, 200);
+      setTimeout(function(){
+        assert.ok(true);
+        done();
+      }, 200);
+      return 2;
+    }
+
+## Executable Usage
 
 To run a single test suite (file) run:
 
