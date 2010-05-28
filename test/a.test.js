@@ -21,5 +21,9 @@ module.exports = {
         a.lowerAsync({}, function(str){
            assert.equal('', str);
         });
+    },
+    
+    'test failures': function(){
+        assert.ok(false);
     }
 }

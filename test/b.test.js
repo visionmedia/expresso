@@ -13,3 +13,11 @@ exports['test select()'] = function(assert){
         assert.equal(501, arr[arr.length-1]);
     })
 }
+
+exports['test exception'] = function(assert){
+    assert.equal('foo', 'bar');
+}
+
+exports['test exception again'] = function(assert){
+    throw new Error('oh no!');
+}

@@ -25,6 +25,12 @@ var assert = require('assert'),
 var version = '0.0.1';
 
 /**
+ * Failures hash.
+ */
+
+var failures = {};
+
+/**
  * Usage documentation.
  */
 
@@ -225,6 +231,26 @@ function run(files) {
             var title = path.basename(file, '.js')
             runSuite(title, require(cwd + '/' + file.replace('.js', '')));
         });
+        reportFailures();
+    }
+}
+
+/**
+ * Report global failures.
+ *
+ * @api private
+ */
+
+function reportFailures() {
+    for (var suite in failures) {
+        var n = 0;
+        sys.puts('\n   Failures in' + suite);
+        for (var test in failures[suite]) {
+            var assertion = failures[suite][test],
+                msg = assertion.toString(),
+                msg = assertion.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+            sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
+        }
     }
 }
 
@@ -241,7 +267,7 @@ function runSuite(title, tests) {
         keys = Object.keys(tests),
         total = keys.length,
         start = new Date,
-        failures = [],
+        failed = 0,
         current = 0;
     (function next(){
         if (keys.length) {
@@ -252,19 +278,17 @@ function runSuite(title, tests) {
             try {
                 test(assert);
             } catch (err) {
-                err.test = key; 
-                failures.push(err);
+                ++failed;
+                failures[title] = failures[title] || {};
+                failures[title][key] = err;
             }
             next();
         } else {
             var duration = ((new Date - start) / 1000).toFixed(3),
-                passes = total - failures.length;
-            sys.print('\x1B[K   %100' + title + '\x1B[32m' + passes + '\x1B[0m'
-                + ' \x1B[31m' + failures.length + '\x1B[0m'
+                passed = total - failed;
+            sys.print('\x1B[K   %100' + title + '\x1B[32m' + passed + '\x1B[0m'
+                + ' \x1B[31m' + failed + '\x1B[0m'
                 + ' in ' + duration + ' seconds\n');
-            failures.forEach(function(assertion, i){
-                sys.puts('\n   \x1B[1m' + i + ')\x1B[0m ' + assertion.stack);
-            });
         }
     })();
 }
