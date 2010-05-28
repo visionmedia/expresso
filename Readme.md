@@ -27,6 +27,10 @@ To install expresso alone (no build required) run:
 
     $ make install-expresso
 
+Install via [kiwi](http://github.com/visionmedia/kiwi):
+
+    $ kiwi install expresso
+
 ## Examples
 
 To define tests we simply export several functions:
