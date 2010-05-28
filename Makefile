@@ -6,11 +6,8 @@ JSCOV = deps/jscoverage/node-jscoverage
 test: $(BIN)
 	@./$(BIN) -I lib test/*.test.js
 
-test-cov: $(BIN) $(JSCOV) lib-cov
-	@./$(BIN) -I lib-cov test/*.test.js
-
-lib-cov:
-	@./$(JSCOV) lib lib-cov
+test-cov: $(BIN)
+	@./$(BIN) -I lib --cov test/*.test.js
 
 install: $(JSCOV) install-expresso
 	install $(JSCOV) $(PREFIX)/bin
