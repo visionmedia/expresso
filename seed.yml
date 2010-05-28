@@ -1,5 +1,6 @@
 ---
-    name: Expresso
-    description: TDD framework by the creator of JSpec
-    build: sudo make install
-    version: 0.0.1
+  name: Expresso
+  description: TDD framework by the creator of JSpec
+  build: sudo make install
+  version: 0.0.1
+  
