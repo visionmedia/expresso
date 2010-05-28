@@ -276,7 +276,7 @@ function reportFailures() {
  */
 
 function runSuite(title, tests) {
-    var title = ' \x1B[1m' + title + '\x1B[0m ',
+    var title = ' \x1B[1m' + title.replace(/\./g, ' ').replace(/ test$/, '') + '\x1B[0m ',
         keys = Object.keys(tests),
         total = keys.length,
         start = new Date,
