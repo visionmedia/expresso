@@ -15,6 +15,12 @@ Globbing is of course possible as well:
 
     $ expresso test/*.test.js
 
+The test results for the command above will look similar to below,
+displaying the test progress, suite name, passes, failures, and duration:
+
+    %100 a.test 3 0 in 0.002 seconds
+    %100 b.test 1 0 in 0.000 seconds
+
 If you wish to unshift a path to `require.paths` before
 running tests, you may use the `-I` or `--include` flag.
 
