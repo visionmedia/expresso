@@ -15,7 +15,8 @@ var assert = require('assert'),
     path = require('path'),
     sys = require('sys'),
     cwd = process.cwd(),
-    fs = require('fs');
+    fs = require('fs'),
+    defer;
 
 /**
  * Expresso version.
@@ -29,7 +30,7 @@ var version = '0.0.1';
 
 var usage = [
     'usage: expresso [-h|--help] [-v|--version] [-i|-I|--include <path>]',
-    '       [-r|--require <module>] <file ...>'
+    '       [-c|--coverage] [-r|--require <module>] <file ...>'
 ].join('\n')
 
 // Parse arguments
@@ -66,6 +67,16 @@ while (args.length) {
             } else {
                 throw new Error('--require requires a path');
             }
+            break;
+        case '-c':
+        case '--cov':
+        case '--coverage':
+            defer = true;
+            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
+                if (err) throw err;
+                require.paths.unshift('lib-cov');
+                run(files);
+            })
             break;
         default:
             files.push(arg);
@@ -280,4 +291,4 @@ function runSuite(title, tests) {
 
 // Run test files
 
-run(files);
+if (!defer) run(files);
