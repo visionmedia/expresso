@@ -213,18 +213,6 @@ function coverage(data, val) {
 };
 
 /**
- * Assert that the given array-like object
- * is empty (length of 0).
- *
- * @param  {Array} arr
- * @api public
- */
-
-assert.empty = function(arr, msg) {
-    assert.equal(arr.length, 0, msg);
-};
-
-/**
  * Run all test files.
  *
  * @param  {Array} files

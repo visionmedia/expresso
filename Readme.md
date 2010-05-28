@@ -1,5 +1,14 @@
 
-coming soon...
+# Expresso
+
+  TDD framework for [nodejs](http://nodejs.org).
+
+## Features
+
+  - serial execution
+  - intuitive async support
+  - intuitive test runner executable
+  - test coverage support and reporting
 
 ## Installation
 
