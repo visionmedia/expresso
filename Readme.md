@@ -2,6 +2,12 @@
 # Expresso
 
   TDD framework for [nodejs](http://nodejs.org).
+  
+  Expresso is a 1-hour creation, for TDD and nodejs. I
+  was frustrated with what was currently available, I wanted something
+  fast (_not executed serially_), with reasonable reporting,
+  drop-dead simple async support (_you dont have to do anything!_),
+  and code coverage.
 
 ## Features
 
