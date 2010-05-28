@@ -25,5 +25,11 @@ module.exports = {
     
     'test failures': function(){
         assert.ok(false);
+    },
+    
+    'async failure': function(){
+        setTimeout(function(){
+            throw new Error('failed in timeout');
+        }, 100);
     }
 }

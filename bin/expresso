@@ -226,6 +226,11 @@ function coverage(data, val) {
  */
 
 function run(files) {
+    process.addListener('uncaughtException', function(err){
+        var msg = err.toString(),
+            msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+        sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
+    })
     if (files.length) {
         files.forEach(function(file){
             var title = path.basename(file, '.js')
@@ -246,9 +251,9 @@ function reportFailures() {
         var n = 0;
         sys.puts('\n   Failures in' + suite);
         for (var test in failures[suite]) {
-            var assertion = failures[suite][test],
-                msg = assertion.toString(),
-                msg = assertion.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+            var err = failures[suite][test],
+                msg = err.toString(),
+                msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
             sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
         }
     }
