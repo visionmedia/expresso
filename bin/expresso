@@ -15,7 +15,8 @@ var assert = require('assert'),
     path = require('path'),
     sys = require('sys'),
     cwd = process.cwd(),
-    fs = require('fs');
+    fs = require('fs'),
+    defer;
 
 /**
  * Expresso version.
@@ -24,12 +25,18 @@ var assert = require('assert'),
 var version = '0.0.1';
 
 /**
+ * Failures hash.
+ */
+
+var failures = {};
+
+/**
  * Usage documentation.
  */
 
 var usage = [
     'usage: expresso [-h|--help] [-v|--version] [-i|-I|--include <path>]',
-    '       [-r|--require <module>] <file ...>'
+    '       [-c|--coverage] [-r|--require <module>] <file ...>'
 ].join('\n')
 
 // Parse arguments
@@ -66,6 +73,16 @@ while (args.length) {
             } else {
                 throw new Error('--require requires a path');
             }
+            break;
+        case '-c':
+        case '--cov':
+        case '--coverage':
+            defer = true;
+            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
+                if (err) throw err;
+                require.paths.unshift('lib-cov');
+                run(files);
+            })
             break;
         default:
             files.push(arg);
@@ -202,18 +219,6 @@ function coverage(data, val) {
 };
 
 /**
- * Assert that the given array-like object
- * is empty (length of 0).
- *
- * @param  {Array} arr
- * @api public
- */
-
-assert.empty = function(arr, msg) {
-    assert.equal(arr.length, 0, msg);
-};
-
-/**
  * Run all test files.
  *
  * @param  {Array} files
@@ -221,11 +226,36 @@ assert.empty = function(arr, msg) {
  */
 
 function run(files) {
+    process.addListener('uncaughtException', function(err){
+        var msg = err.toString(),
+            msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+        sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
+    })
     if (files.length) {
         files.forEach(function(file){
             var title = path.basename(file, '.js')
             runSuite(title, require(cwd + '/' + file.replace('.js', '')));
         });
+        reportFailures();
+    }
+}
+
+/**
+ * Report global failures.
+ *
+ * @api private
+ */
+
+function reportFailures() {
+    for (var suite in failures) {
+        var n = 0;
+        sys.puts('\n   Failures in' + suite);
+        for (var test in failures[suite]) {
+            var err = failures[suite][test],
+                msg = err.toString(),
+                msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+            sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
+        }
     }
 }
 
@@ -242,42 +272,32 @@ function runSuite(title, tests) {
         keys = Object.keys(tests),
         total = keys.length,
         start = new Date,
-        failures = [],
+        failed = 0,
         current = 0;
     (function next(){
         if (keys.length) {
             var percent = Math.round(++current / (total + 1) * 100),
                 key = keys.shift(),
-                test = tests[key],
-                async = test.length === 2;
+                test = tests[key];
             sys.print('\x1B[K   %' + percent + ' ' + title + ' ' + key + '\r');
             try {
-                if (async) {
-                    var n = test(assert, function(){
-                        if (!--n) next();
-                    }) || 1;
-                } else {
-                    test(assert);
-                    next();
-                }
+                test(assert);
             } catch (err) {
-                err.test = key; 
-                failures.push(err);
-                next();
+                ++failed;
+                failures[title] = failures[title] || {};
+                failures[title][key] = err;
             }
+            next();
         } else {
             var duration = ((new Date - start) / 1000).toFixed(3),
-                passes = total - failures.length;
-            sys.print('\x1B[K   %100' + title + '\x1B[32m' + passes + '\x1B[0m'
-                + ' \x1B[31m' + failures.length + '\x1B[0m'
+                passed = total - failed;
+            sys.print('\x1B[K   %100' + title + '\x1B[32m' + passed + '\x1B[0m'
+                + ' \x1B[31m' + failed + '\x1B[0m'
                 + ' in ' + duration + ' seconds\n');
-            failures.forEach(function(assertion, i){
-                sys.puts('\n   \x1B[1m' + i + ')\x1B[0m ' + assertion.stack);
-            });
         }
     })();
 }
 
 // Run test files
 
-run(files);
+if (!defer) run(files);
