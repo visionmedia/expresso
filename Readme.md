@@ -48,7 +48,7 @@ passing the _src_ and _dest_ directories:
 Now we can run our tests again, using the _lib-cov_ directory that has been
 instrumented with coverage statements:
 
-    $ express -I lib-cov test/*
+    $ expresso -I lib-cov test/*
 
 The output will look similar to below, depending on your test coverage of course :)
 
@@ -61,3 +61,14 @@ The output will look similar to below, depending on your test coverage of course
     +--------------------------------+----------+------+------+--------+
                                      |    93.33 |   38 |   15 |      1 |
                                      +----------+------+------+--------+
+
+To make this process easier expresso has the `-c` or `--cov` which essentiall
+does the same as the two commands above. The following two commands will
+run the same tests, however one will auto-instrument, and unshift _lib-cov_,
+and the other will run tests normally:
+
+    $ expresso -I lib test/*
+    $ expresso -I lib --cov test/*
+
+Currently coverage is bound to the _lib_ directory, however in the
+future `--cov` will most likely accept a path.
