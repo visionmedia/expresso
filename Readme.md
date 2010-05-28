@@ -1,7 +1,17 @@
 
 coming soon...
 
-## Examples
+## Installation
+
+To install both expresso _and_ node-jscoverage run:
+
+    $ make install
+
+To install expresso alone (no build required) run:
+
+    $ make install-expresso
+
+## Usage
 
 To run a single test suite (file) run:
 
@@ -27,7 +37,7 @@ running tests, you may use the `-I` or `--include` flag.
     $ expresso --include lib test/*
 
 The previous example is typically what I would recommend, since expresso
-supports test coverage via [node-jscoverage](http://github.com/visionmedia/expresso),
+supports test coverage via [node-jscoverage](http://github.com/visionmedia/expresso) (bundled with expresso),
 so you will need to expose an instrumented version of you library.
 
 To instrument your library, simply run [node-jscoverage](http://github.com/visionmedia/expresso),
