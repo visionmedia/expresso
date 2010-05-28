@@ -5,7 +5,6 @@
 
 ## Features
 
-  - serial execution to report multiple failures
   - intuitive async support
   - intuitive test runner executable
   - test coverage support and reporting
@@ -32,26 +31,14 @@ To define tests we simply export several functions:
       }
     }
 
-Async tests simply accept a second argument (usually named _done_):
+Async example:
 
-    exports['test async] = function(assert, done){
+    exports['test async] = function(assert){
       setTimeout(function(){
         assert.ok(true);
-        done();
-      }, 200);
-    }
-
-When testing more than a single async routine, we simple _return_
-the number of expected calls to _done_:
-
-    exports['test async] = function(assert, done){
-      setTimeout(function(){
-        assert.ok(true);
-        done();
       }, 200);
       setTimeout(function(){
         assert.ok(true);
-        done();
       }, 200);
       return 2;
     }

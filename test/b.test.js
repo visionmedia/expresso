@@ -5,12 +5,11 @@ var b = require('b'),
 
 while (n--) arr.push(n);
 
-exports['test select()'] = function(assert, done){
+exports['test select()'] = function(assert){
     b.selectAsync(arr, function(val){
         return val > 500;
     }, function(arr){
         assert.equal(4999, arr[0]);
         assert.equal(501, arr[arr.length-1]);
-        done();
     })
 }

@@ -247,23 +247,15 @@ function runSuite(title, tests) {
         if (keys.length) {
             var percent = Math.round(++current / (total + 1) * 100),
                 key = keys.shift(),
-                test = tests[key],
-                async = test.length === 2;
+                test = tests[key];
             sys.print('\x1B[K   %' + percent + ' ' + title + ' ' + key + '\r');
             try {
-                if (async) {
-                    var n = test(assert, function(){
-                        if (!--n) next();
-                    }) || 1;
-                } else {
-                    test(assert);
-                    next();
-                }
+                test(assert);
             } catch (err) {
                 err.test = key; 
                 failures.push(err);
-                next();
             }
+            next();
         } else {
             var duration = ((new Date - start) / 1000).toFixed(3),
                 passes = total - failures.length;
