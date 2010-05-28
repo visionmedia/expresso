@@ -65,7 +65,12 @@ To run several suites we may simply append another:
 
 Globbing is of course possible as well:
 
-    $ expresso test/*.test.js
+    $ expresso test/*
+
+When expresso is called without any files, _test/*_ is the default,
+so the following is equivalent to the command above:
+
+    $ expresso
 
 The test results for the command above will look similar to below,
 displaying the test progress, suite name, passes, failures, and duration:

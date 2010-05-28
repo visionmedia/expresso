@@ -23,7 +23,7 @@ module.exports = {
         });
     },
     
-    'test failures': function(){
+    'test failures': function(assert){
         assert.ok(false);
     },
     
