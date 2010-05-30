@@ -103,6 +103,7 @@ assert.eql = assert.deepEqual;
 // Output pretty uncaught exceptions
 
 process.addListener('uncaughtException', function(err){
+    ++failures;
     var msg = err.toString(),
         msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
     sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
@@ -243,8 +244,7 @@ function coverage(data, val) {
 function run(files, dir) {
     if (files.length) {
         files.forEach(function(file){
-            var title = path.basename(file, '.js')
-            runSuite(title, require(path.join(cwd, dir, file.replace('.js', ''))));
+            runSuite(path.basename(file), require(path.join(cwd, dir, file.replace('.js', ''))));
         });
         reportFailures();
     } else {
@@ -264,7 +264,7 @@ function run(files, dir) {
 function reportFailures() {
     for (var suite in failures) {
         var n = 0;
-        sys.puts('\n   Failures in' + suite);
+        sys.puts('\n   Failures in ' + suite);
         for (var test in failures[suite]) {
             var err = failures[suite][test],
                 msg = err.toString(),
