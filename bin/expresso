@@ -31,6 +31,12 @@ var version = '0.0.1';
 var failures = {};
 
 /**
+ * Failure count.
+ */
+
+var failed = 0;
+
+/**
  * Usage documentation.
  */
 
@@ -109,6 +115,7 @@ process.addListener('exit', function(){
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
     }
+    process.reallyExit(failed);
 });
 
 /**
@@ -244,7 +251,7 @@ function run(files, dir) {
         fs.readdir('test', function(err, files){
             if (err) sys.error('failed to run tests in ./test'), process.exit(1);
             run(files, 'test/');
-        })
+        });
     }
 }
 
@@ -276,18 +283,11 @@ function reportFailures() {
  */
 
 function runSuite(title, tests) {
-    var title = ' \x1B[1m' + title.replace(/\./g, ' ').replace(/ test$/, '') + '\x1B[0m ',
-        keys = Object.keys(tests),
-        total = keys.length,
-        start = new Date,
-        failed = 0,
-        current = 0;
+    var keys = Object.keys(tests);
     (function next(){
         if (keys.length) {
-            var percent = Math.round(++current / (total + 1) * 100),
-                key = keys.shift(),
-                test = tests[key];
-            sys.print('\x1B[K   %' + percent + ' ' + title + ' ' + key + '\r');
+            var key,
+                test = tests[key = keys.shift()];
             try {
                 test(assert);
             } catch (err) {
@@ -296,12 +296,6 @@ function runSuite(title, tests) {
                 failures[title][key] = err;
             }
             next();
-        } else {
-            var duration = ((new Date - start) / 1000).toFixed(3),
-                passed = total - failed;
-            sys.print('\x1B[K   %100' + title + '\x1B[32m' + passed + '\x1B[0m'
-                + ' \x1B[31m' + failed + '\x1B[0m'
-                + ' in ' + duration + ' seconds\n');
         }
     })();
 }
