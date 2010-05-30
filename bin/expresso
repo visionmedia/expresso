@@ -112,7 +112,9 @@ process.addListener('uncaughtException', function(err){
 // Report test coverage when available
 
 process.addListener('exit', function(){
-    sys.puts('');
+    if (!failed) {
+        sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
+    }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
     }
