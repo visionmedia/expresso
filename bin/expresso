@@ -103,7 +103,7 @@ assert.eql = assert.deepEqual;
 // Output pretty uncaught exceptions
 
 process.addListener('uncaughtException', function(err){
-    ++failures;
+    ++failed;
     var msg = err.toString(),
         msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
     sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);

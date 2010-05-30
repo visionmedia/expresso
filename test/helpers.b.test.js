@@ -15,9 +15,9 @@ exports['test select()'] = function(assert){
 }
 
 exports['test exception'] = function(assert){
-    //assert.equal('foo', 'bar');
+    assert.equal('foo', 'bar');
 }
 
 exports['test exception again'] = function(assert){
-    //throw new Error('oh no!');
+    throw new Error('oh no!');
 }

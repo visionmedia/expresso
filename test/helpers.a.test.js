@@ -24,12 +24,12 @@ module.exports = {
     },
     
     'test failures': function(assert){
-        // assert.ok(false);
+        assert.ok(false);
     },
     
     'async failure': function(){
-        //setTimeout(function(){
-        //    throw new Error('failed in timeout');
-        //}, 100);
+        setTimeout(function(){
+            throw new Error('failed in timeout');
+        }, 100);
     }
 }
