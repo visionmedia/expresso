@@ -37,12 +37,18 @@ var failures = {};
 var failed = 0;
 
 /**
+ * Boring output
+ */
+ 
+var boring = false;
+
+/**
  * Usage documentation.
  */
 
 var usage = [
     'usage: expresso [-h|--help] [-v|--version] [-i|-I|--include <path>]',
-    '       [-c|--coverage] [-r|--require <module>] <file ...>'
+    '       [-c|--coverage] [-r|--require <module>] [-b|--boring] <file ...>'
 ].join('\n')
 
 // Parse arguments
@@ -90,6 +96,10 @@ while (args.length) {
                 run(files);
             })
             break;
+        case '-b':
+        case '--boring':
+        	boring = true;
+        	break;
         default:
             files.push(arg);
             break;
@@ -104,16 +114,26 @@ assert.eql = assert.deepEqual;
 
 process.addListener('uncaughtException', function(err){
     ++failed;
-    var msg = err.toString(),
-        msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-    sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
+    if(boring) {
+	    sys.puts('\n   async: ' + err.stack);
+    }
+    else {
+	    var msg = err.toString();
+    	msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+	    sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
+    }
 })
 
 // Report test coverage when available
 
 process.addListener('exit', function(){
     if (!failed) {
-        sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
+    	if(boring) {
+        	sys.puts('   100% passes');
+    	}
+    	else {
+        	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
+        }
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
@@ -164,7 +184,12 @@ function rpad(str, width) {
 
 function reportCoverage(cov) {
     populateCoverage(cov);
-    sys.puts('\n   \x1B[1mTest Coverage\x1B[0m');
+    if(boring) {
+    	sys.puts('\n   Test Coverage');
+    }
+    else {
+    	sys.puts('\n   \x1B[1mTest Coverage\x1B[0m');
+    }
     var sep = '   +--------------------------------+----------+------+------+--------+',
         lastSep = '                                    +----------+------+------+--------+';
     sys.puts(sep);
@@ -271,7 +296,13 @@ function reportFailures() {
             var err = failures[suite][test],
                 msg = err.toString(),
                 msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-            sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
+                
+            if(boring) {
+            	sys.puts('\n   ' + ++n + ') ' + test + ': ' + err.stack);
+            }
+            else {
+            	sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
+            }
         }
     }
 }
