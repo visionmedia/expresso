@@ -22,7 +22,7 @@ var assert = require('assert'),
  * Expresso version.
  */
 
-var version = '0.0.2';
+var version = '0.0.3';
 
 /**
  * Failures hash.
