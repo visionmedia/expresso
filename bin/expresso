@@ -114,10 +114,9 @@ assert.eql = assert.deepEqual;
 
 process.addListener('uncaughtException', function(err){
     ++failed;
-    if(boring) {
+    if (boring) {
 	    sys.puts('\n   async: ' + err.stack);
-    }
-    else {
+    } else {
 	    var msg = err.toString();
     	msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
 	    sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
@@ -128,10 +127,9 @@ process.addListener('uncaughtException', function(err){
 
 process.addListener('exit', function(){
     if (!failed) {
-    	if(boring) {
+    	if (boring) {
         	sys.puts('   100% passes');
-    	}
-    	else {
+    	} else {
         	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
         }
     }
@@ -184,10 +182,9 @@ function rpad(str, width) {
 
 function reportCoverage(cov) {
     populateCoverage(cov);
-    if(boring) {
+    if (boring) {
     	sys.puts('\n   Test Coverage');
-    }
-    else {
+    } else {
     	sys.puts('\n   \x1B[1mTest Coverage\x1B[0m');
     }
     var sep = '   +------------------------------------------+----------+------+------+--------+',
@@ -297,10 +294,9 @@ function reportFailures() {
                 msg = err.toString(),
                 msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
                 
-            if(boring) {
+            if (boring) {
             	sys.puts('\n   ' + ++n + ') ' + test + ': ' + err.stack);
-            }
-            else {
+            } else {
             	sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
             }
         }
