@@ -190,15 +190,15 @@ function reportCoverage(cov) {
     else {
     	sys.puts('\n   \x1B[1mTest Coverage\x1B[0m');
     }
-    var sep = '   +--------------------------------+----------+------+------+--------+',
-        lastSep = '                                    +----------+------+------+--------+';
+    var sep = '   +------------------------------------------+----------+------+------+--------+',
+        lastSep = '                                              +----------+------+------+--------+';
     sys.puts(sep);
-    sys.puts('   | filename                       | coverage | LOC  | SLOC | missed |');
+    sys.puts('   | filename                                 | coverage | LOC  | SLOC | missed |');
     sys.puts(sep);
     for (var name in cov) {
         var file = cov[name];
         if (file instanceof Array) {
-            sys.print('   | ' + rpad(name, 30));
+            sys.print('   | ' + rpad(name, 40));
             sys.print(' | ' + lpad(file.coverage.toFixed(2), 8));
             sys.print(' | ' + lpad(file.LOC, 4));
             sys.print(' | ' + lpad(file.SLOC, 4));
@@ -207,7 +207,7 @@ function reportCoverage(cov) {
         }
     }
     sys.puts(sep);
-    sys.print('     ' + rpad('', 30));
+    sys.print('     ' + rpad('', 40));
     sys.print(' | ' + lpad(cov.coverage.toFixed(2), 8));
     sys.print(' | ' + lpad(cov.LOC, 4));
     sys.print(' | ' + lpad(cov.SLOC, 4));
