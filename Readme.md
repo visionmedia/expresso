@@ -50,7 +50,6 @@ Async example:
       setTimeout(function(){
         assert.ok(true);
       }, 200);
-      return 2;
     }
 
 ## Executable Usage
