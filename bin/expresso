@@ -112,20 +112,28 @@ assert.eql = assert.deepEqual;
 
 // Output pretty uncaught exceptions
 
-process.addListener('uncaughtException', function(err){
+function handleAsyncError(outputPrefix, err){
     ++failed;
     if (boring) {
-	    sys.puts('\n   async: ' + err.stack);
+	sys.puts('\n   ' + outputPrefix + ': ' + err.stack);
     } else {
-	    var msg = err.toString();
+	var msg = err.toString();
     	msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-	    sys.puts('\n   \x1B[1masync\x1B[0m: ' + msg);
+	sys.puts('\n   \x1B[1m' + outputPrefix + '\x1B[0m: ' + msg);
     }
+}
+
+process.addListener('uncaughtException', function(err){
+    handleAsyncError('async', err);
 })
 
 // Report test coverage when available
-
 process.addListener('exit', function(){
+    try {
+	process.emit('beforeExit');
+    } catch (err) {
+	handleAsyncError('beforeExit', err);
+    }
     if (!failed) {
     	if (boring) {
         	sys.puts('   100% passes');
@@ -136,7 +144,7 @@ process.addListener('exit', function(){
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
     }
-    process.reallyExit(failed);
+    process.reallyExit(failed);    
 });
 
 /**
@@ -270,7 +278,7 @@ function run(files, dir) {
         files.forEach(function(file){
             runSuite(path.basename(file), require(path.join(cwd, dir, file.replace('.js', ''))));
         });
-        reportFailures();
+	reportFailures();
     } else {
         fs.readdir('test', function(err, files){
             if (err) sys.error('failed to run tests in ./test'), process.exit(1);
