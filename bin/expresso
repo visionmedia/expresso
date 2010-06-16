@@ -293,6 +293,9 @@ function reportFailures() {
             var err = failures[suite][test],
                 msg = err.toString(),
                 msg = err.stack.replace(msg, colorize('[red]{' + err + '}'));
+            if (test.indexOf('uncaught') === 0) {
+                test = '';
+            }
             print('\n   ' + ++n + ') [bold]{' + test + '}: ' + msg + '\n');
         }
     }
