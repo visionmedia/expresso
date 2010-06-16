@@ -110,42 +110,23 @@ while (args.length) {
 
 assert.eql = assert.deepEqual;
 
-// Output pretty uncaught exceptions
+/**
+ * Output formatted uncaught exceptions
+ *
+ * @param {String} prefix
+ * @param {Error} err
+ */
 
-function handleAsyncError(outputPrefix, err){
+function handleAsyncError(prefix, err){
     ++failed;
     if (boring) {
-	sys.puts('\n   ' + outputPrefix + ': ' + err.stack);
+	    sys.puts('\n   ' + prefix + ': ' + err.stack);
     } else {
-	var msg = err.toString();
-    	msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-	sys.puts('\n   \x1B[1m' + outputPrefix + '\x1B[0m: ' + msg);
+	    var msg = err.toString();
+    	    msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
+	    sys.puts('\n   \x1B[1m' + prefix + '\x1B[0m: ' + msg);
     }
 }
-
-process.addListener('uncaughtException', function(err){
-    handleAsyncError('async', err);
-})
-
-// Report test coverage when available
-process.addListener('exit', function(){
-    try {
-	process.emit('beforeExit');
-    } catch (err) {
-	handleAsyncError('beforeExit', err);
-    }
-    if (!failed) {
-    	if (boring) {
-        	sys.puts('   100% passes');
-    	} else {
-        	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
-        }
-    }
-    if (typeof _$jscoverage === 'object') {
-        reportCoverage(_$jscoverage);
-    }
-    process.reallyExit(failed);    
-});
 
 /**
  * Pad the given string to the maximum width provided.
@@ -248,7 +229,7 @@ function populateCoverage(cov) {
         }
     }
     cov.coverage = (cov.totalHits / cov.SLOC) * 100;
-};
+}
 
 /**
  * Total coverage for the given file data.
@@ -264,7 +245,7 @@ function coverage(data, val) {
         if (data[i] !== undefined && data[i] == val) ++n;
     }
     return n;  
-};
+}
 
 /**
  * Run all test files.
@@ -301,7 +282,6 @@ function reportFailures() {
             var err = failures[suite][test],
                 msg = err.toString(),
                 msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-                
             if (boring) {
             	sys.puts('\n   ' + ++n + ') ' + test + ': ' + err.stack);
             } else {
@@ -326,7 +306,15 @@ function runSuite(title, tests) {
             var key,
                 test = tests[key = keys.shift()];
             try {
-                test(assert);
+                test(assert, function(fn){
+                    process.addListener('beforeExit', function(){
+                        try {
+                            fn();
+                        } catch (err) {
+                            handleAsyncError(key, err);
+                        }
+                    });
+                });
             } catch (err) {
                 ++failed;
                 failures[title] = failures[title] || {};
@@ -336,6 +324,31 @@ function runSuite(title, tests) {
         }
     })();
 }
+
+// Prefix uncaughtException's with "async"
+
+process.addListener('uncaughtException', function(err){
+    handleAsyncError('async', err);
+});
+
+// Report test coverage when available
+// and emit "beforeExit" event to perform
+// final assertions
+
+process.addListener('exit', function(){
+    process.emit('beforeExit');
+    if (!failed) {
+    	if (boring) {
+        	sys.puts('   100% passes');
+    	} else {
+        	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
+        }
+    }
+    if (typeof _$jscoverage === 'object') {
+        reportCoverage(_$jscoverage);
+    }
+    process.reallyExit(failed);    
+});
 
 // Run test files
 

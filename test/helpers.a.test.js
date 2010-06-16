@@ -13,13 +13,20 @@ module.exports = {
         // run `make test-cov` to see the coverage
     },
     
-    'test lowerAsync()': function(assert){
+    'test lowerAsync()': function(assert, exit){
+        n = 0;
         a.lowerAsync('FOO', function(str){
-           assert.equal('foo', str);
+            ++n;
+            assert.equal('foo', str);
         });
         
         a.lowerAsync({}, function(str){
-           assert.equal('', str);
+            ++n;
+            assert.equal('', str);
+        });
+        
+        exit(function(){
+            assert.equal(1, n);
         });
     },
     
