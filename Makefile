@@ -16,7 +16,8 @@ install-expresso:
 	install $(BIN) $(PREFIX)/bin
 
 $(JSCOV):
-	@cd deps/jscoverage && ./configure && make && mv jscoverage node-jscoverage
+	git submodule update --init
+	cd deps/jscoverage && ./configure && make && mv jscoverage node-jscoverage
 
 clean:
 	@cd deps/jscoverage && git clean -fd

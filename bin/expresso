@@ -106,6 +106,33 @@ while (args.length) {
     }
 }
 
+/**
+ * Colorized sys.print().
+ *
+ * @param {String} str
+ */
+
+function print(str){
+    sys.print(colorize(str));
+}
+
+/**
+ * Colorize the given string using ansi-escape sequences.
+ * Disabled when --boring is set.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+function colorize(str){
+    var colors = { bold: 1, red: 31, green: 32 };
+    return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str){
+        return boring
+            ? str
+            : '\x1B[' + colors[color] + 'm' + str + '\x1B[0m';
+    });
+}
+
 // Alias deepEqual as eql for complex equality
 
 assert.eql = assert.deepEqual;
@@ -153,11 +180,7 @@ function rpad(str, width) {
 
 function reportCoverage(cov) {
     populateCoverage(cov);
-    if (boring) {
-    	sys.puts('\n   Test Coverage');
-    } else {
-    	sys.puts('\n   \x1B[1mTest Coverage\x1B[0m');
-    }
+    print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
         lastSep = '                                              +----------+------+------+--------+';
     sys.puts(sep);
@@ -258,16 +281,12 @@ function run(files, dir) {
 function reportFailures() {
     for (var suite in failures) {
         var n = 0;
-        sys.puts('\n   --- \x1B[1m' + suite + '\x1B[0m ' + Array(55).join('-'));
+        print('\n   --- [bold]{' + suite + '} ' + Array(55).join('-') + '\n');
         for (var test in failures[suite]) {
             var err = failures[suite][test],
                 msg = err.toString(),
-                msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-            if (boring) {
-            	sys.puts('\n   ' + ++n + ') ' + test + ': ' + err.stack);
-            } else {
-            	sys.puts('\n   ' + ++n + ') \x1B[1m' + test + '\x1B[0m: ' + msg);
-            }
+                msg = err.stack.replace(msg, colorize('[red]{' + err + '}'));
+            print('\n   ' + ++n + ') [bold]{' + test + '}: ' + msg + '\n');
         }
     }
 }
@@ -324,14 +343,10 @@ process.addListener('uncaughtException', function(err){
 process.addListener('exit', function(){
     process.emit('beforeExit');
     reportFailures();
-    if (!failed) {
-    	if (boring) {
-        	sys.puts('   100% passes');
-    	} else {
-        	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
-        }
+    if (failed) {
+        print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
     } else {
-        sys.puts('\n   \x1B[1mFailures\x1B[0m: \x1B[31m' + failed + ' \x1B[0m\n');
+    	sys.puts('   [green]{100%} [bold]{ok}');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
