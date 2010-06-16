@@ -269,7 +269,10 @@ function coverage(data, val) {
 function run(files, dir) {
     if (files.length) {
         files.forEach(function(file){
-            runSuite(path.basename(file), require(path.join(cwd, dir, file.replace('.js', ''))));
+            var title = path.basename(file),
+                file = path.join(cwd, dir, file),
+                mod = require(file.replace('.js', ''));
+            runSuite(title, mod);
         });
     } else {
         fs.readdir('test', function(err, files){
