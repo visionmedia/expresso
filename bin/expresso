@@ -273,7 +273,11 @@ function run(files, dir) {
         });
     } else {
         fs.readdir('test', function(err, files){
-            if (err) sys.error('failed to run tests in ./test'), process.exit(1);
+            if (err) {
+                print('\n   failed to load tests in [bold]{./test}\n');
+                ++failed;
+                process.exit(1);
+            }
             run(files, 'test/');
         });
     }
