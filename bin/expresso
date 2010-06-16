@@ -46,10 +46,17 @@ var boring = false;
  * Usage documentation.
  */
 
-var usage = [
-    'usage: expresso [-h|--help] [-v|--version] [-i|-I|--include <path>]',
-    '       [-c|--coverage] [-r|--require <module>] [-b|--boring] <file ...>'
-].join('\n')
+var usage = ''
+    + '[bold]{Usage}: expresso [options] <file ...>'
+    + '\n'
+    + '\n[bold]{Options}:'
+    + '\n  -c, --coverage       Generate and report test coverage'
+    + '\n  -r, --require PATH   Require the given module path'
+    + '\n  -I, --include PATH   Unshift the given path to require.paths'
+    + '\n  -b, --boring         Suppress ansi-escape colors'
+    + '\n  -v, --version        Output version number'
+    + '\n  -h, --help           Display help information'
+    + '\n';
 
 // Parse arguments
 
@@ -61,7 +68,7 @@ while (args.length) {
     switch (arg) {
         case '-h':
         case '--help':
-            sys.puts(usage);
+            print(usage + '\n');
             process.exit(1);
             break;
         case '-v':
