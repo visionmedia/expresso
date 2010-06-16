@@ -111,24 +111,6 @@ while (args.length) {
 assert.eql = assert.deepEqual;
 
 /**
- * Output formatted uncaught exceptions
- *
- * @param {String} prefix
- * @param {Error} err
- */
-
-function handleAsyncError(prefix, err){
-    ++failed;
-    if (boring) {
-	    sys.puts('\n   ' + prefix + ': ' + err.stack);
-    } else {
-	    var msg = err.toString();
-    	    msg = err.stack.replace(msg, '\x1B[31m' + msg + '\x1B[0m');
-	    sys.puts('\n   \x1B[1m' + prefix + '\x1B[0m: ' + msg);
-    }
-}
-
-/**
  * Pad the given string to the maximum width provided.
  *
  * @param  {String} str
@@ -259,7 +241,6 @@ function run(files, dir) {
         files.forEach(function(file){
             runSuite(path.basename(file), require(path.join(cwd, dir, file.replace('.js', ''))));
         });
-	reportFailures();
     } else {
         fs.readdir('test', function(err, files){
             if (err) sys.error('failed to run tests in ./test'), process.exit(1);
@@ -277,7 +258,7 @@ function run(files, dir) {
 function reportFailures() {
     for (var suite in failures) {
         var n = 0;
-        sys.puts('\n   Failures in ' + suite);
+        sys.puts('\n   --- \x1B[1m' + suite + '\x1B[0m ' + Array(55).join('-'));
         for (var test in failures[suite]) {
             var err = failures[suite][test],
                 msg = err.toString(),
@@ -311,7 +292,9 @@ function runSuite(title, tests) {
                         try {
                             fn();
                         } catch (err) {
-                            handleAsyncError(key, err);
+                            ++failed;
+                            failures[title] = failures[title] || {};
+                            failures[title][key] = err;
                         }
                     });
                 });
@@ -327,8 +310,11 @@ function runSuite(title, tests) {
 
 // Prefix uncaughtException's with "uncaught"
 
+var uncaught = 0;
 process.addListener('uncaughtException', function(err){
-    handleAsyncError('uncaught', err);
+    ++failed;
+    failures['uncaught'] = failures['uncaught'] || {};
+    failures['uncaught']['uncaught ' + ++uncaught] = err;
 });
 
 // Report test coverage when available
@@ -337,12 +323,15 @@ process.addListener('uncaughtException', function(err){
 
 process.addListener('exit', function(){
     process.emit('beforeExit');
+    reportFailures();
     if (!failed) {
     	if (boring) {
         	sys.puts('   100% passes');
     	} else {
         	sys.puts('   \x1B[32m100%\x1B[0m \x1B[1mpasses\x1B[0m');
         }
+    } else {
+        sys.puts('\n   \x1B[1mFailures\x1B[0m: \x1B[31m' + failed + ' \x1B[0m\n');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
