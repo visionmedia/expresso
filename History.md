@@ -1,4 +1,11 @@
 
+0.1.0 / 2010-06-15
+==================
+
+  * Added better usage docs via --help
+  * Added better conditional color support
+  * Added pre exit assertion support
+
 0.0.3 / 2010-06-02
 ==================
 
