@@ -36,20 +36,26 @@ Install via [kiwi](http://github.com/visionmedia/kiwi):
 To define tests we simply export several functions:
 
     module.exports = {
-      'test String#length': function(assert){
-        assert.equal(6, 'foobar');
-      }
+      	'test String#length': function(assert){
+        	assert.equal(6, 'foobar');
+      	}
     }
 
 Async example:
 
-    exports['test async] = function(assert){
-      setTimeout(function(){
-        assert.ok(true);
-      }, 200);
-      setTimeout(function(){
-        assert.ok(true);
-      }, 200);
+    exports['test async] = function(assert, beforeExit){
+		var n = 0;
+      	setTimeout(function(){
+        	++n;
+        	assert.ok(true);
+      	}, 200);
+      	setTimeout(function(){
+        	++n;
+        	assert.ok(true);
+      	}, 200);
+		beforeExit(function(){
+			assert.equal(2, n, 'Ensure both timeouts are called');
+		});
     }
 
 ## Executable Usage
