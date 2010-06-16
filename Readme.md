@@ -31,6 +31,10 @@ Install via [kiwi](http://github.com/visionmedia/kiwi):
 
     $ kiwi install expresso
 
+Install via npm:
+
+	$ npm install expresso
+
 ## Examples
 
 To define tests we simply export several functions:
