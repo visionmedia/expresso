@@ -9,17 +9,19 @@ test: $(BIN)
 test-cov: $(BIN)
 	@./$(BIN) -I lib --cov test/*.test.js
 
-install: $(JSCOV) install-expresso
+install: install-jscov install-expresso
+	git submodule update --init
+
+install-jscov: $(JSCOV)
 	install $(JSCOV) $(PREFIX)/bin
 
 install-expresso:
 	install $(BIN) $(PREFIX)/bin
 
 $(JSCOV):
-	git submodule update --init
 	cd deps/jscoverage && ./configure && make && mv jscoverage node-jscoverage
 
 clean:
 	@cd deps/jscoverage && git clean -fd
 
-.PHONY: test test-cov install install-expresso clean
+.PHONY: test test-cov install install-expresso install-jscov clean
