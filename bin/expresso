@@ -353,7 +353,14 @@ process.addListener('exit', function(){
     if (failed) {
         print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
     } else {
-    	sys.puts('   [green]{100%} [bold]{ok}');
+        var quote = [
+            's`all good',
+            'eyyyy-ok',
+            'wahoo, your shit is not broken!',
+            'TATFT',
+            ':)'
+        ][Math.random() * 5 | 0];
+    	print('   [green]{100%} [bold]{' + quote + '}\n');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
