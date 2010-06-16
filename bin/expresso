@@ -325,10 +325,10 @@ function runSuite(title, tests) {
     })();
 }
 
-// Prefix uncaughtException's with "async"
+// Prefix uncaughtException's with "uncaught"
 
 process.addListener('uncaughtException', function(err){
-    handleAsyncError('async', err);
+    handleAsyncError('uncaught', err);
 });
 
 // Report test coverage when available
