@@ -1,4 +1,11 @@
 
+0.2.0 / 2010-06-21
+==================
+
+  * Added `make uninstall`
+  * Added better readdir() failure message
+  * Fixed `make install` for kiwi
+
 0.1.0 / 2010-06-15
 ==================
 

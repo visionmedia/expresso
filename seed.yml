@@ -2,5 +2,5 @@
   name: Expresso
   description: TDD framework by the creator of JSpec
   build: make install
-  version: 0.1.0
+  version: 0.2.0
   
