@@ -15,7 +15,7 @@ exports['test select()'] = function(assert){
 }
 
 exports['test exception'] = function(assert){
-    assert.equal('foo', 'bar');
+    assert.deepEqual({ foo: 'bar', baz: 'raz' }, { foo: 'bar' });
 }
 
 exports['test exception again'] = function(assert){
