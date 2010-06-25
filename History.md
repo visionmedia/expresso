@@ -1,4 +1,9 @@
 
+0.2.1 / 2010-06-25
+==================
+
+  * Fixed issue with reporting object assertions
+
 0.2.0 / 2010-06-21
 ==================
 
