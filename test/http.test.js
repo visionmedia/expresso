@@ -45,5 +45,11 @@ module.exports = {
             body: '/foo bar baz',
             status: 200
         });
+        
+        assert.response(server, {
+            url: '/foo'
+        }, function(res){
+            assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
+        });
     }
 };

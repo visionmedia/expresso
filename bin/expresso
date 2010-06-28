@@ -166,7 +166,7 @@ assert.eql = assert.deepEqual;
  *
  * @param {Server} server
  * @param {Object} req
- * @param {Object} res
+ * @param {Object|Function} res
  * @param {String} msg
  * @api public
  */
@@ -192,6 +192,12 @@ assert.response = function(server, req, res, msg){
         response.addListener('data', function(chunk){ response.body += chunk; });
         response.addListener('end', function(){
             --server.__pending || server.close();
+
+            // Assertion callback
+            if (typeof res === 'function') {
+                return res(response);
+            }
+
             // Assert response body
             if (res.body !== undefined) {
                 assert.equal(
