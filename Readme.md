@@ -153,3 +153,10 @@ assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
         body: '/foo bar baz',
         status: 200
     }, 'Test POST');
+
+
+    assert.response(server, {
+        url: '/'
+    }, function(res){
+        assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
+    });
