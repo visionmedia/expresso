@@ -44,6 +44,12 @@ var failed = 0;
 var boring = false;
 
 /**
+ * Server port.
+ */
+
+var port = 5555;
+
+/**
  * Usage documentation.
  */
 
@@ -54,6 +60,7 @@ var usage = ''
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
+    + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -b, --boring         Suppress ansi-escape colors'
     + '\n  -v, --version        Output version number'
     + '\n  -h, --help           Display help information'
@@ -84,6 +91,14 @@ while (args.length) {
                 require.paths.unshift(arg);
             } else {
                 throw new Error('--include requires a path');
+            }
+            break;
+        case '-p':
+        case '--port':
+            if (arg = args.shift()) {
+                port = parseInt(arg, 10);
+            } else {
+                throw new Error('--port requires a number');
             }
             break;
         case '-r':
@@ -155,7 +170,7 @@ assert.eql = assert.deepEqual;
  * @param {String} msg
  * @api public
  */
-var port = 5555; // TODO: flag
+
 assert.response = function(server, req, res, msg){
     msg = msg || assert.testTitle;
     msg += '. ';
