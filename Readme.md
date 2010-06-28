@@ -15,6 +15,8 @@
   - intuitive test runner executable
   - test coverage support and reporting
   - uses the _assert_ module
+  - `assert.eql()` alias of `assert.deepEqual()`
+  - `assert.response()` http response utility
   - light-weight
 
 ## Installation
@@ -122,3 +124,32 @@ and the other will run tests normally:
 
 Currently coverage is bound to the _lib_ directory, however in the
 future `--cov` will most likely accept a path.
+
+## HTTP Server Response Assertions
+
+Expresso _0.3.0_ adds the `assert.response()` which accepts a
+`Server` instance, followed by the `request` options, `response`
+assertions, and final optional assertion `msg`. 
+
+The `Server` passed should __NOT__ be bound to a port, `assert.response()` will
+assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
+
+    assert.response(server, {
+        url: '/',
+        method: 'GET'
+    },{
+        body: '{"name":"tj"}',
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json; charset=utf8'
+        }
+    });
+    
+    assert.response(server, {
+        url: '/foo',
+        method: 'POST',
+        data: 'bar baz'
+    },{
+        body: '/foo bar baz',
+        status: 200
+    }, 'Test POST');
