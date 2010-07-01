@@ -130,13 +130,13 @@ while (args.length) {
 }
 
 /**
- * Colorized sys.print().
+ * Colorized sys.error().
  *
  * @param {String} str
  */
 
 function print(str){
-    sys.print(colorize(str));
+    sys.error(colorize(str));
 }
 
 /**
@@ -468,7 +468,7 @@ process.addListener('exit', function(){
             'TATFT',
             ':)'
         ][Math.random() * 5 | 0];
-    	print('   [green]{100%} [bold]{' + quote + '}\n');
+    	print('\n   [green]{100%} [bold]{' + quote + '}\n');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
