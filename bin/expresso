@@ -395,12 +395,12 @@ function reportFailures() {
         print('\n   --- [bold]{' + suite + '} ' + Array(55).join('-') + '\n');
         for (var test in failures[suite]) {
             var err = failures[suite][test],
-                msg = err.toString(),
-                msg = err.stack.replace(msg, err);
+                name = err.name,
+                stack = err.stack.replace(err.name, '');
             if (test.indexOf('uncaught') === 0) {
                 test = '';
             }
-            print('\n   ' + ++n + ') [red]{' + test + '}: ' + msg + '\n');
+            print('\n   ' + ++n + ') [bold]{' + test + '}: [red]{' + name + '}' + stack + '\n');
         }
     }
 }
