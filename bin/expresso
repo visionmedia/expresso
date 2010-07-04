@@ -38,6 +38,12 @@ var failures = {};
 var failed = 0;
 
 /**
+ * Only tests
+ */
+ 
+var only = [];
+
+/**
  * Boring output
  */
  
@@ -59,6 +65,7 @@ var usage = ''
     + '\n[bold]{Options}:'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -r, --require PATH   Require the given module path'
+    + '\n  -o, --only TEST_NAME Execute only one test instead of the whole suite'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -b, --boring         Suppress ansi-escape colors'
@@ -91,6 +98,14 @@ while (args.length) {
                 require.paths.unshift(arg);
             } else {
                 throw new Error('--include requires a path');
+            }
+            break;
+        case '-o':
+        case '--only':
+            if (arg = args.shift()) {
+                only = arg.split(/ *, */);
+            } else {
+                throw new Error('--only requires comma-separated test names');
             }
             break;
         case '-p':
@@ -414,7 +429,7 @@ function reportFailures() {
  */
 
 function runSuite(title, tests) {
-    var keys = Object.keys(tests);
+    var keys = only.length==0 ? Object.keys(tests) : only;
     (function next(){
         if (keys.length) {
             var key,
