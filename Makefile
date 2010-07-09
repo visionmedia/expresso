@@ -4,7 +4,7 @@ PREFIX = /usr/local
 JSCOV = deps/jscoverage/node-jscoverage
 
 test: $(BIN)
-	@./$(BIN) test/*.test.js
+	@./$(BIN) -I test/lib test/*.test.js
 
 install: install-jscov install-expresso
 
