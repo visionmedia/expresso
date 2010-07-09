@@ -4,7 +4,10 @@ PREFIX = /usr/local
 JSCOV = deps/jscoverage/node-jscoverage
 
 test: $(BIN)
-	@./$(BIN) -I test/lib test/*.test.js
+	@./$(BIN) -I lib $(TEST_FLAGS) test/*.test.js
+
+test-cov:
+	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
 
 install: install-jscov install-expresso
 
@@ -24,4 +27,4 @@ $(JSCOV):
 clean:
 	@cd deps/jscoverage && git clean -fd
 
-.PHONY: test install uninstall install-expresso install-jscov clean
+.PHONY: test test-cov install uninstall install-expresso install-jscov clean
