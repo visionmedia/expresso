@@ -1,4 +1,11 @@
 
+0.4.0 / 2010-07-09
+==================
+
+  * Added reporting source coverage (respects --boring for color haters)
+  * Added callback to assert.response(). Closes #12
+  * Fixed; putting exceptions to stderr. Closes #13
+
 0.3.1 / 2010-06-28
 ==================
 
