@@ -284,6 +284,7 @@ function rpad(str, width) {
 
 function reportCoverage(cov) {
     populateCoverage(cov);
+    // Stats
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
         lastSep = '                                              +----------+------+------+--------+';
@@ -309,6 +310,15 @@ function reportCoverage(cov) {
     sys.print(' | ' + lpad(cov.totalMisses, 6));
     sys.print(' |\n');
     sys.puts(lastSep);
+    // Source
+    for (var name in cov) {
+        if (name.match(/\.js$/)) {
+            var file = cov[name];
+            print('\n   [bold]{' + name + '}:\n');
+            print(file.source);
+            sys.print('\n');
+        }
+    }
 }
 
 /**
@@ -328,6 +338,7 @@ function populateCoverage(cov) {
     for (var name in cov) {
         var file = cov[name];
         if (file instanceof Array) {
+            // Stats
             ++cov.totalFiles;
             cov.totalHits += file.totalHits = coverage(file, true);
             cov.totalMisses += file.totalMisses = coverage(file, false);
@@ -335,6 +346,13 @@ function populateCoverage(cov) {
             cov.SLOC += file.SLOC = file.totalLines;
             cov.LOC += file.LOC = file.source.length;
             file.coverage = (file.totalHits / file.totalLines) * 100;
+            // Source
+            var width = file.source.length.toString().length;
+            file.source = file.source.map(function(line, i){
+                ++i;
+                var hits = file[i] === 0 ? 0 : (file[i] || ' ');
+                return '\n     ' + lpad(i, width) + ' | ' + hits + ' | ' + line;
+            }).join('');
         }
     }
     cov.coverage = (cov.totalHits / cov.SLOC) * 100;
