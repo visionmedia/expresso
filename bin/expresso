@@ -455,26 +455,30 @@ process.addListener('uncaughtException', function(err){
 // and emit "beforeExit" event to perform
 // final assertions
 
-process.addListener('exit', function(){
-    process.emit('beforeExit');
-    reportFailures();
-    if (failed) {
-        print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
-    } else {
-        var quote = [
-            's`all good',
-            'eyyyy-ok',
-            'wahoo, your shit is not broken!',
-            'TATFT',
-            ':)'
-        ][Math.random() * 5 | 0];
-    	print('\n   [green]{100%} [bold]{' + quote + '}\n');
+var orig = process.emit;
+process.emit = function(event){
+    if (event === 'exit') {
+        process.emit('beforeExit');
+        reportFailures();
+        if (failed) {
+            print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
+        } else {
+            var quote = [
+                's`all good',
+                'eyyyy-ok',
+                'wahoo, your shit is not broken!',
+                'TATFT',
+                ':)'
+            ][Math.random() * 5 | 0];
+        	print('\n   [green]{100%} [bold]{' + quote + '}\n');
+        }
+        if (typeof _$jscoverage === 'object') {
+            reportCoverage(_$jscoverage);
+        }
+        process.reallyExit(failed);
     }
-    if (typeof _$jscoverage === 'object') {
-        reportCoverage(_$jscoverage);
-    }
-    process.reallyExit(failed);    
-});
+    orig.apply(this, arguments);
+};
 
 // Run test files
 
