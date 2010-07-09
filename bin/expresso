@@ -124,7 +124,9 @@ while (args.length) {
         	boring = true;
         	break;
         default:
-            files.push(arg);
+            if (/\.js$/.test(arg)) {
+                files.push(arg);
+            }
             break;
     }
 }
