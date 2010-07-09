@@ -187,3 +187,7 @@ assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
     }, function(res){
         assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
     });
+
+Dropbox fails lots but here is an image with the colored output :)
+
+![node coverage](http://dl.dropbox.com/u/6396913/cov.png)
