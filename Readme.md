@@ -114,6 +114,33 @@ The output will look similar to below, depending on your test coverage of course
                                      |    93.33 |   38 |   15 |      1 |
                                      +----------+------+------+--------+
 
+    bar.js:
+    
+      1 |   | 
+      2 | 1 | exports.bar = function(msg){
+      3 | 1 |     return msg || 'bar';
+      4 |   | };
+    
+    
+    foo.js:
+    
+       1 |   | 
+       2 | 1 | exports.foo = function(msg){
+       3 | 2 |     if (msg) {
+       4 | 0 |         return msg;
+       5 |   |     } else {
+       6 | 2 |         return generateFoo();
+       7 |   |     }
+       8 |   | };
+       9 |   | 
+      10 | 1 | function generateFoo() {
+      11 | 2 |     return 'foo';
+      12 |   | }
+      13 |   | 
+      14 | 1 | function Foo(msg){
+      15 | 0 |     this.msg = msg || 'foo';
+      16 |   | }
+
 To make this process easier expresso has the `-c` or `--cov` which essentiall
 does the same as the two commands above. The following two commands will
 run the same tests, however one will auto-instrument, and unshift _lib-cov_,
