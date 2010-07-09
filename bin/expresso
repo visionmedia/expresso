@@ -113,7 +113,6 @@ while (args.length) {
         case '--cov':
         case '--coverage':
             defer = true;
-            require('sys').puts(require('sys').inspect(args));
             childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
                 if (err) throw err;
                 require.paths.unshift('lib-cov');
