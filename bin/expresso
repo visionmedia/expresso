@@ -351,6 +351,14 @@ function populateCoverage(cov) {
             file.source = file.source.map(function(line, i){
                 ++i;
                 var hits = file[i] === 0 ? 0 : (file[i] || ' ');
+                if (!boring) {
+                    if (hits === 0) {
+                        hits = '\x1b[31m' + hits + '\x1b[0m';
+                        line = '\x1b[41m' + line + '\x1b[0m';
+                    } else {
+                        hits = '\x1b[32m' + hits + '\x1b[0m';
+                    }
+                }
                 return '\n     ' + lpad(i, width) + ' | ' + hits + ' | ' + line;
             }).join('');
         }
