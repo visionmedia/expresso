@@ -4,7 +4,7 @@ PREFIX = /usr/local
 JSCOV = deps/jscoverage/node-jscoverage
 
 test: $(BIN)
-	@./$(BIN) -I lib $(TEST_FLAGS) test/*.test.js
+	@./$(BIN) -I lib --growl $(TEST_FLAGS) test/*.test.js
 
 test-cov:
 	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
