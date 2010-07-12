@@ -38,13 +38,13 @@ var failures = {};
 var failed = 0;
 
 /**
- * Only tests
+ * Whitelist of tests to run.
  */
  
 var only = [];
 
 /**
- * Boring output
+ * Boring output.
  */
  
 var boring = false;
@@ -72,7 +72,7 @@ var usage = ''
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -r, --require PATH   Require the given module path'
-    + '\n  -o, --only TEST_NAME Execute only one test instead of the whole suite'
+    + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -b, --boring         Suppress ansi-escape colors'
@@ -110,7 +110,7 @@ while (args.length) {
         case '-o':
         case '--only':
             if (arg = args.shift()) {
-                only = arg.split(/ *, */);
+                only = only.concat(arg.split(/ *, */));
             } else {
                 throw new Error('--only requires comma-separated test names');
             }
@@ -468,28 +468,32 @@ function reportFailures() {
  */
 
 function runSuite(title, tests) {
-    var keys = only.length==0 ? Object.keys(tests) : only;
+    var keys = only.length
+        ? only.slice(0)
+        : Object.keys(tests);
     (function next(){
         if (keys.length) {
             var key,
                 test = tests[key = keys.shift()];
-            try {
-                assert.testTitle = key;
-                test(assert, function(fn){
-                    process.addListener('beforeExit', function(){
-                        try {
-                            fn();
-                        } catch (err) {
-                            ++failed;
-                            failures[title] = failures[title] || {};
-                            failures[title][key] = err;
-                        }
+            if (test) {
+                try {
+                    assert.testTitle = key;
+                    test(assert, function(fn){
+                        process.addListener('beforeExit', function(){
+                            try {
+                                fn();
+                            } catch (err) {
+                                ++failed;
+                                failures[title] = failures[title] || {};
+                                failures[title][key] = err;
+                            }
+                        });
                     });
-                });
-            } catch (err) {
-                ++failed;
-                failures[title] = failures[title] || {};
-                failures[title][key] = err;
+                } catch (err) {
+                    ++failed;
+                    failures[title] = failures[title] || {};
+                    failures[title][key] = err;
+                }
             }
             next();
         }
