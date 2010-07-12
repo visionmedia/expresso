@@ -44,6 +44,12 @@ var failed = 0;
 var boring = false;
 
 /**
+ * Growl notifications.
+ */
+
+var growl = false;
+
+/**
  * Server port.
  */
 
@@ -57,6 +63,7 @@ var usage = ''
     + '[bold]{Usage}: expresso [options] <file ...>'
     + '\n'
     + '\n[bold]{Options}:'
+    + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
@@ -123,6 +130,10 @@ while (args.length) {
         case '--boring':
         	boring = true;
         	break;
+        case '--g':
+        case '--growl':
+            growl = true;
+            break;
         default:
             if (/\.js$/.test(arg)) {
                 files.push(arg);
@@ -470,6 +481,18 @@ function runSuite(title, tests) {
     })();
 }
 
+/**
+ * Growl notify the given `msg`.
+ *
+ * @param {String} msg
+ */
+
+function notify(msg) {
+    if (growl) {
+        childProcess.exec('growlnotify -name Expresso -m "' + msg + '"');
+    }
+}
+
 // Prefix uncaughtException's with "uncaught"
 
 var uncaught = 0;
@@ -490,6 +513,7 @@ process.emit = function(event){
         reportFailures();
         if (failed) {
             print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
+            notify('Failures: ' + failed);
         } else {
             var quote = [
                 's`all good',
@@ -499,6 +523,7 @@ process.emit = function(event){
                 ':)'
             ][Math.random() * 5 | 0];
         	print('\n   [green]{100%} [bold]{' + quote + '}\n');
+        	notify('100% ' + quote);
         }
         if (typeof _$jscoverage === 'object') {
             reportCoverage(_$jscoverage);
