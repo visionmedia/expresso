@@ -74,6 +74,14 @@ To run several suites we may simply append another:
 
     $ expresso test/a.test.js test/b.test.js
 
+We can also pass a whitelist of tests to run within all suites:
+
+    $ expresso --only "foo()" --only "bar()"
+
+Or several with one call:
+
+    $ expresso --only "foo(), bar()"
+
 Globbing is of course possible as well:
 
     $ expresso test/*
