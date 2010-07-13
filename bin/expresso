@@ -189,6 +189,18 @@ function colorize(str){
 assert.eql = assert.deepEqual;
 
 /**
+ * Assert that `val` is null.
+ *
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.isNull = function(val, msg) {
+    assert.strictEqual(null, val, msg);
+};
+
+/**
  * Assert that `substr` is within `str`.
  *
  * @param {String} str
