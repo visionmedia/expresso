@@ -189,6 +189,20 @@ function colorize(str){
 assert.eql = assert.deepEqual;
 
 /**
+ * Assert that `substr` is within `str`.
+ *
+ * @param {String} str
+ * @param {String} substr
+ * @param {String} msg
+ * @api public
+ */
+
+assert.includes = function(str, substr, msg) {
+    msg = msg || sys.inspect(str) + ' does not include ' + sys.inspect(substr);
+    assert.ok(str.indexOf(substr) >= 0, msg);
+};
+
+/**
  * Assert response from `server` with
  * the given `req` object and `res` assertions object.
  *
