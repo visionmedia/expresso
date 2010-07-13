@@ -17,5 +17,12 @@ module.exports = {
         assert.throws(function(){
             assert.isNull(false);
         });
+    },
+    
+    'assert.isUndefined()': function(assert){
+        assert.isUndefined(undefined);
+        assert.throws(function(){
+            assert.isUndefined(null);
+        });
     }
 };
