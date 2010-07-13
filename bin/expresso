@@ -422,7 +422,7 @@ function run(files, dir) {
         files.forEach(function(file){
             var title = path.basename(file),
                 file = path.join(cwd, dir, file),
-                mod = require(file.replace('.js', ''));
+                mod = require(file.replace(/\.js$/, ''));
             runSuite(title, mod);
         });
     } else {
