@@ -31,5 +31,13 @@ module.exports = {
         assert.throws(function(){
             assert.match('something', /rawr/);
         });
+    },
+    
+    'assert.length()': function(assert){
+        assert.length(4, 'test');
+        assert.length(4, [1,2,3,4]);
+        assert.throws(function(){
+            assert.length(4, [1,2,3])
+        });
     }
 };

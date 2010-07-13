@@ -241,6 +241,20 @@ assert.includes = function(str, substr, msg) {
 };
 
 /**
+ * Assert length of `val` is `n`.
+ *
+ * @param {Number} n
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.length = function(n, val, msg) {
+    msg = msg || sys.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
+    assert.equal(n, val.length, msg);
+};
+
+/**
  * Assert response from `server` with
  * the given `req` object and `res` assertions object.
  *
