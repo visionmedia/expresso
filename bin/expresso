@@ -213,6 +213,20 @@ assert.isUndefined = function(val, msg) {
 };
 
 /**
+ * Assert that `str` matches `regexp`.
+ *
+ * @param {String} str
+ * @param {RegExp} regexp
+ * @param {String} msg
+ * @api public
+ */
+
+assert.match = function(str, regexp, msg) {
+    msg = msg || sys.inspect(str) + ' does not match ' + sys.inspect(regexp);
+    assert.ok(regexp.test(str), msg);
+};
+
+/**
  * Assert that `substr` is within `str`.
  *
  * @param {String} str

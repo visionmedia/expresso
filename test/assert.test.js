@@ -24,5 +24,12 @@ module.exports = {
         assert.throws(function(){
             assert.isUndefined(null);
         });
+    },
+    
+    'assert.match()': function(assert){
+        assert.match('foobar', /foo(bar)?/);
+        assert.throws(function(){
+            assert.match('something', /rawr/);
+        });
     }
 };
