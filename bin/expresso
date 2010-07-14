@@ -201,6 +201,18 @@ assert.isNull = function(val, msg) {
 };
 
 /**
+ * Assert that `val` is not null.
+ *
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.isNotNull = function(val, msg) {
+    assert.notStrictEqual(null, val, msg);
+};
+
+/**
  * Assert that `val` is undefined.
  *
  * @param {Mixed} val
@@ -210,6 +222,42 @@ assert.isNull = function(val, msg) {
 
 assert.isUndefined = function(val, msg) {
     assert.strictEqual(undefined, val, msg);
+};
+
+/**
+ * Assert that `val` is not undefined.
+ *
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.isNotUndefined = function(val, msg) {
+    assert.notStrictEqual(undefined, val, msg);
+};
+
+/**
+ * Assert that `val` is undefined or null.
+ *
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.isUndefinedOrNull = function(val, msg) {
+    assert.equal(undefined, val, msg);
+};
+
+/**
+ * Assert that `val` is not undefined nor null.
+ *
+ * @param {Mixed} val
+ * @param {String} msg
+ * @api public
+ */
+
+assert.isNotUndefinedNorNull = function(val, msg) {
+    assert.notEqual(undefined, val, msg);
 };
 
 /**
