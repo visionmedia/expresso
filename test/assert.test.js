@@ -47,24 +47,6 @@ module.exports = {
         });
     },
     
-    'assert.isUndefinedOrNull()': function(assert){
-        assert.isUndefinedOrNull(null);
-        assert.isUndefinedOrNull(undefined);
-        assert.throws(function(){
-            assert.isUndefinedOrNull(false);
-        });
-    },
-    
-    'assert.isNotUndefinedNorNull()': function(assert){
-        assert.isNotUndefinedNorNull(false);
-        assert.throws(function(){
-            assert.isNotUndefinedNorNull(null);
-        });
-        assert.throws(function(){
-            assert.isNotUndefinedNorNull(undefined);
-        });
-    },
-    
     'assert.match()': function(assert){
         assert.match('foobar', /foo(bar)?/);
         assert.throws(function(){
