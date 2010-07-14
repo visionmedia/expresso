@@ -17,6 +17,13 @@
   - uses the _assert_ module
   - `assert.eql()` alias of `assert.deepEqual()`
   - `assert.response()` http response utility
+  - `assert.includes()`
+  - `assert.isNull()`
+  - `assert.isUndefined()`
+  - `assert.isNotNull()`
+  - `assert.isNotUndefined()`
+  - `assert.match()`
+  - `assert.length()`
   - light-weight
 
 ## Installation
