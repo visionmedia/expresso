@@ -653,7 +653,7 @@ process.emit = function(event){
             var quote = [
                 's`all good',
                 'eyyyy-ok',
-                'wahoo, your shit is not broken!',
+                'wahoo, your stuff is not broken!',
                 'TATFT',
                 ':)'
             ][Math.random() * 5 | 0];
