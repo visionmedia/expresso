@@ -196,6 +196,16 @@ assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
         status: 200
     }, 'Test POST');
 
+    assert.response(server, {
+        url: '/foo',
+        method: 'POST',
+        data: 'bar baz'
+    },{
+        body: '/foo bar baz',
+        status: 200
+    }, function(res){
+		// All done, do some more tests if needed
+	});
 
     assert.response(server, {
         url: '/'

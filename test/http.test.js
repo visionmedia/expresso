@@ -26,6 +26,8 @@ var server = http.createServer(function(req, res){
 
 module.exports = {
     'test assert.response()': function(assert, beforeExit){
+        var called = 0;
+
         assert.response(server, {
             url: '/',
             method: 'GET'
@@ -44,18 +46,20 @@ module.exports = {
         },{
             body: '/foo bar baz',
             status: 200
+        }, function(res){
+            ++called;
+            assert.ok(res);
         });
         
-        var called;
         assert.response(server, {
             url: '/foo'
         }, function(res){
-            called = true;
+            ++called;
             assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
         });
         
         beforeExit(function(){
-            assert.ok(called);
+            assert.equal(2, called);
         });
     }
 };

@@ -290,14 +290,28 @@ assert.length = function(n, val, msg) {
  */
 
 assert.response = function(server, req, res, msg){
+    // Callback as third or fourth arg
+    var callback = typeof res === 'function'
+        ? res
+        : typeof msg === 'function'
+            ? msg
+            : function(){};
+
+    // Default messate to test title
     msg = msg || assert.testTitle;
     msg += '. ';
+
+    // Pending responses
     server.__pending = server.__pending || 0;
     server.__pending++;
+
+    // Create client
     if (!server.fd) {
         server.listen(server.__port = port++);
         server.client = http.createClient(server.__port);
     }
+
+    // Issue request
     var client = server.client,
         method = req.method || 'GET',
         status = res.status || res.statusCode,
@@ -311,11 +325,6 @@ assert.response = function(server, req, res, msg){
         response.addListener('end', function(){
             --server.__pending || server.close();
 
-            // Assertion callback
-            if (typeof res === 'function') {
-                return res(response);
-            }
-
             // Assert response body
             if (res.body !== undefined) {
                 assert.equal(
@@ -326,7 +335,7 @@ assert.response = function(server, req, res, msg){
                         + '    Got: ' + sys.inspect(response.body)
                 );
             }
-            
+
             // Assert response status
             if (typeof status === 'number') {
                 assert.equal(
@@ -354,6 +363,9 @@ assert.response = function(server, req, res, msg){
                     );
                 }
             }
+
+            // Callback
+            callback(response);
         });
     });
     request.end();
