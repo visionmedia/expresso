@@ -312,11 +312,24 @@ assert.response = function(server, req, res, msg){
     }
 
     // Issue request
-    var client = server.client,
+    var timer,
+        client = server.client,
         method = req.method || 'GET',
         status = res.status || res.statusCode,
-        data = req.data || req.body;
+        data = req.data || req.body,
+        timeout = req.timeout || 0;
+
     var request = client.request(method, req.url, req.headers);
+
+    // Timeout
+    if (timeout) {
+        timer = setTimeout(function(){
+            --server.__pending || server.close();
+            delete req.timeout;
+            assert.fail(msg + 'Request timed out after ' + timeout + 'ms.');
+        }, timeout);
+    }
+
     if (data) request.write(data);
     request.addListener('response', function(response){
         response.body = '';
@@ -324,6 +337,7 @@ assert.response = function(server, req, res, msg){
         response.addListener('data', function(chunk){ response.body += chunk; });
         response.addListener('end', function(){
             --server.__pending || server.close();
+            if (timer) clearTimeout(timer);
 
             // Assert response body
             if (res.body !== undefined) {

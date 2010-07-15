@@ -177,6 +177,12 @@ The `Server` passed should __NOT__ be bound to a port, `assert.response()` will
 assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
 
     assert.response(server, {
+	  	url: '/', timeout: 500
+    }, {
+		body: 'foobar'
+    });
+
+    assert.response(server, {
         url: '/',
         method: 'GET'
     },{
