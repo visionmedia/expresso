@@ -1,4 +1,19 @@
 
+0.5.0 / 2010-07-16
+==================
+
+  * Added support for async exports
+  * Added timeout support to `assert.response()`. Closes #3
+  * Added 4th arg callback support to `assert.response()`
+  * Added `assert.length()`
+  * Added `assert.match()`
+  * Added `assert.isUndefined()`
+  * Added `assert.isNull()`
+  * Added `assert.includes()`
+  * Added growlnotify support via -g, --growl
+  * Added -o, --only TESTS. Ex: --only "test foo()" --only "test foo(), test bar()"
+  * Removed profanity
+
 0.4.0 / 2010-07-09
 ==================
 
