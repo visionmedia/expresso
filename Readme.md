@@ -219,6 +219,17 @@ assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
         assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
     });
 
+## Async Exports
+
+Sometimes it is useful to postpone running of tests until a callback or event has fired,
+currently the `exports.foo = function(){};` syntax is supported for this:
+    
+	setTimeout(function(){
+	    exports['test async exports'] = function(assert){
+	        assert.ok('wahoo');
+	    };
+	}, 100);
+
 Dropbox fails lots but here is an image with the colored output :)
 
 ![node coverage](http://dl.dropbox.com/u/6396913/cov.png)
