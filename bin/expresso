@@ -539,7 +539,14 @@ function run(files, dir) {
             var title = path.basename(file),
                 file = path.join(cwd, dir, file),
                 mod = require(file.replace(/\.js$/, ''));
-            runSuite(title, mod);
+            (function check(){
+               var len = Object.keys(mod).length;
+               if (len) {
+                   runSuite(title, mod);
+               } else {
+                   setTimeout(check, 50);
+               }
+            })();
         });
     } else {
         fs.readdir('test', function(err, files){
