@@ -536,17 +536,19 @@ function coverage(data, val) {
 function run(files, dir) {
     if (files.length) {
         files.forEach(function(file){
-            var title = path.basename(file),
-                file = path.join(cwd, dir, file),
-                mod = require(file.replace(/\.js$/, ''));
-            (function check(){
-               var len = Object.keys(mod).length;
-               if (len) {
-                   runSuite(title, mod);
-               } else {
-                   setTimeout(check, 20);
-               }
-            })();
+            if (file.match(/\.js$/)) {
+                var title = path.basename(file),
+                    file = path.join(cwd, dir, file),
+                    mod = require(file.replace(/\.js$/, ''));
+                (function check(){
+                   var len = Object.keys(mod).length;
+                   if (len) {
+                       runSuite(title, mod);
+                   } else {
+                       setTimeout(check, 20);
+                   }
+                })();
+            }
         });
     } else {
         fs.readdir('test', function(err, files){
