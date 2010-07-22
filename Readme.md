@@ -100,10 +100,10 @@ running tests, you may use the `-I` or `--include` flag.
     $ expresso --include lib test/*
 
 The previous example is typically what I would recommend, since expresso
-supports test coverage via [node-jscoverage](http://github.com/visionmedia/expresso) (bundled with expresso),
+supports test coverage via [node-jscoverage](http://github.com/visionmedia/node-jscoverage) (bundled with expresso),
 so you will need to expose an instrumented version of you library.
 
-To instrument your library, simply run [node-jscoverage](http://github.com/visionmedia/expresso),
+To instrument your library, simply run [node-jscoverage](http://github.com/visionmedia/node-jscoverage),
 passing the _src_ and _dest_ directories:
 
     $ node-jscoverage lib lib-cov
