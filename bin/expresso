@@ -26,16 +26,10 @@ var assert = require('assert'),
 var version = '0.5.0';
 
 /**
- * Failures hash.
- */
-
-var failures = {};
-
-/**
  * Failure count.
  */
 
-var failed = 0;
+var failures = 0;
 
 /**
  * Whitelist of tests to run.
@@ -553,8 +547,8 @@ function run(files, dir) {
     } else {
         fs.readdir('test', function(err, files){
             if (err) {
-                print('\n   failed to load tests in [bold]{./test}\n');
-                ++failed;
+                print('\n   failures to load tests in [bold]{./test}\n');
+                ++failures;
                 process.exit(1);
             }
             run(files, 'test/');
@@ -563,25 +557,22 @@ function run(files, dir) {
 }
 
 /**
- * Report global failures.
+ * Report `err` for the given `test` and `suite`.
  *
+ * @param {String} suite
+ * @param {String} test
+ * @param {Error} err
  * @api private
  */
 
-function reportFailures() {
-    for (var suite in failures) {
-        var n = 0;
-        print('\n   --- [bold]{' + suite + '} ' + Array(55).join('-') + '\n');
-        for (var test in failures[suite]) {
-            var err = failures[suite][test],
-                name = err.name,
-                stack = err.stack.replace(err.name, '');
-            if (test.indexOf('uncaught') === 0) {
-                test = '';
-            }
-            print('\n   ' + ++n + ') [bold]{' + test + '}: [red]{' + name + '}' + stack + '\n');
-        }
-    }
+function error(suite, test, err) {
+    ++failures;
+    var name = err.name,
+        stack = err.stack.replace(err.name, ''),
+        label = test === 'uncaught'
+            ? test
+            : suite + ' ' + test;
+    print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
 }
 
 /**
@@ -608,16 +599,12 @@ function runSuite(title, tests) {
                             try {
                                 fn();
                             } catch (err) {
-                                ++failed;
-                                failures[title] = failures[title] || {};
-                                failures[title][key] = err;
+                                error(title, key, err);
                             }
                         });
                     });
                 } catch (err) {
-                    ++failed;
-                    failures[title] = failures[title] || {};
-                    failures[title][key] = err;
+                    error(title, key, err);
                 }
             }
             next();
@@ -637,13 +624,10 @@ function notify(msg) {
     }
 }
 
-// Prefix uncaughtException's with "uncaught"
+// Report uncaught exceptions
 
-var uncaught = 0;
 process.addListener('uncaughtException', function(err){
-    ++failed;
-    failures['uncaught'] = failures['uncaught'] || {};
-    failures['uncaught']['uncaught ' + ++uncaught] = err;
+    error('uncaught', 'uncaught', err);
 });
 
 // Report test coverage when available
@@ -654,10 +638,9 @@ var orig = process.emit;
 process.emit = function(event){
     if (event === 'exit') {
         process.emit('beforeExit');
-        reportFailures();
-        if (failed) {
-            print('\n   [bold]{Failures}: [red]{' + failed + '}\n\n');
-            notify('Failures: ' + failed);
+        if (failures) {
+            print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
+            notify('Failures: ' + failures);
         } else {
             var quote = [
                 's`all good',
@@ -672,7 +655,7 @@ process.emit = function(event){
         if (typeof _$jscoverage === 'object') {
             reportCoverage(_$jscoverage);
         }
-        process.reallyExit(failed);
+        process.reallyExit(failures);
     }
     orig.apply(this, arguments);
 };
