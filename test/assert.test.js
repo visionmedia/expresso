@@ -9,6 +9,17 @@ module.exports = {
         assert.throws(function(){
            assert.include('some random string', 'foobar'); 
         });
+
+        assert.includes(['foo', 'bar'], 'bar');
+        assert.includes(['foo', 'bar'], 'foo');
+        assert.includes([1,2,3], 3);
+        assert.throws(function(){
+            assert.includes(['foo', 'bar'], 'baz');
+        });
+        
+        assert.throws(function(){
+            assert.includes({ wrong: 'type' }, 'baz');
+        });
     },
     
     'assert.isNull()': function(assert){
