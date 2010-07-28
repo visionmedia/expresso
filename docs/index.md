@@ -94,6 +94,81 @@ and _Strings_s.
     assert.includes('foobar', 'foo');
     assert.includes('foobar', 'bar');
 
+### assert.response(server, req, res|fn[, msg|fn])
+
+Performs assertions on the given _server_, which should _not_ call
+listen(), as this is handled internally by expresso and the server 
+is killed after all responses have completed. This method works with
+any _http.Server_ instance, so _Connect_ and _Express_ servers will work
+as well.
+
+The _req_ object may contain:
+
+  - _url_ request url
+  - _timeout_ timeout in milliseconds
+  - _method_ HTTP method
+  - _data_ request body
+  - _headers_ headers object
+
+The _res_ object may be a callback function which
+receives the response for assertions, or an object
+which is then used to perform several assertions
+on the response with the following properties:
+
+  - _body_ assert response body
+  - _status_ assert response status code
+  - _header_ assert that all given headers match (unspecified are ignored)
+
+When providing _res_ you may then also pass a callback function
+as the fourth argument for additional assertions.
+
+Below are some examples:
+
+    assert.response(server, {
+	  	url: '/', timeout: 500
+    }, {
+		body: 'foobar'
+    });
+
+    assert.response(server, {
+        url: '/',
+        method: 'GET'
+    },{
+        body: '{"name":"tj"}',
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json; charset=utf8',
+			'X-Foo': 'bar'
+        }
+    });
+    
+    assert.response(server, {
+        url: '/foo',
+        method: 'POST',
+        data: 'bar baz'
+    },{
+        body: '/foo bar baz',
+        status: 200
+    }, 'Test POST');
+
+    assert.response(server, {
+        url: '/foo',
+        method: 'POST',
+        data: 'bar baz'
+    },{
+        body: '/foo bar baz',
+        status: 200
+    }, function(res){
+		// All done, do some more tests if needed
+	});
+
+    assert.response(server, {
+        url: '/'
+    }, function(res){
+        assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
+    });
+
+
 ## expresso(1)
 
 To run a single test suite (file) run:

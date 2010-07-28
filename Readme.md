@@ -70,55 +70,7 @@ Async example:
 
 ## HTTP Server Response Assertions
 
-Expresso _0.3.0_ adds the `assert.response()` which accepts a
-`Server` instance, followed by the `request` options, `response`
-assertions, and final optional assertion `msg`. 
-
-The `Server` passed should __NOT__ be bound to a port, `assert.response()` will
-assign a dummy port ranging from `--port NUM` and up (defaults to 5000).
-
-    assert.response(server, {
-	  	url: '/', timeout: 500
-    }, {
-		body: 'foobar'
-    });
-
-    assert.response(server, {
-        url: '/',
-        method: 'GET'
-    },{
-        body: '{"name":"tj"}',
-        status: 200,
-        headers: {
-            'Content-Type': 'application/json; charset=utf8'
-        }
-    });
-    
-    assert.response(server, {
-        url: '/foo',
-        method: 'POST',
-        data: 'bar baz'
-    },{
-        body: '/foo bar baz',
-        status: 200
-    }, 'Test POST');
-
-    assert.response(server, {
-        url: '/foo',
-        method: 'POST',
-        data: 'bar baz'
-    },{
-        body: '/foo bar baz',
-        status: 200
-    }, function(res){
-		// All done, do some more tests if needed
-	});
-
-    assert.response(server, {
-        url: '/'
-    }, function(res){
-        assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
-    });
+Expresso _0.3.0_ adds the
 
 ## Async Exports
 
