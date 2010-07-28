@@ -48,6 +48,52 @@ the command below, which will first compile node-jscoverage:</p>
 
 <h2 id="Assert-Utilities">Assert Utilities</h2>
 
+<h3 id="assert-isNull-val-msg-">assert.isNull(val[, msg])</h3>
+
+<p>Asserts that the given <em>val</em> is <em>null</em>.</p>
+
+<pre><code>assert.isNull(null);
+</code></pre>
+
+<h3 id="assert-isNotNull-val-msg-">assert.isNotNull(val[, msg])</h3>
+
+<p>Asserts that the given <em>val</em> is not <em>null</em>.</p>
+
+<pre><code>assert.isNotNull(undefined);
+assert.isNotNull(false);
+</code></pre>
+
+<h3 id="assert-isUndefined-val-msg-">assert.isUndefined(val[, msg])</h3>
+
+<p>Asserts that the given <em>val</em> is <em>undefined</em>.</p>
+
+<pre><code>assert.isUndefined(undefined);
+</code></pre>
+
+<h3 id="assert-isNotUndefined-val-msg-">assert.isNotUndefined(val[, msg])</h3>
+
+<p>Asserts that the given <em>val</em> is not <em>undefined</em>.</p>
+
+<pre><code>assert.isNotUndefined(null);
+assert.isNotUndefined(false);
+</code></pre>
+
+<h3 id="assert-match-str-regexp-msg-">assert.match(str, regexp[, msg])</h3>
+
+<p>Asserts that the given <em>str</em> matches <em>regexp</em>.</p>
+
+<pre><code>assert.match('foobar', /^foo(bar)?/);
+assert.match('foo', /^foo(bar)?/);
+</code></pre>
+
+<h3 id="assert-length-val-n-msg-">assert.length(val, n[, msg])</h3>
+
+<p>Assert that the given <em>val</em> has a length of <em>n</em>.</p>
+
+<pre><code>assert.length([1,2,3], 3);
+assert.length('foo', 3);
+</code></pre>
+
 <h3 id="assert-eql-a-b-msg-">assert.eql(a, b[, msg])</h3>
 
 <p>Assert that object <em>b</em> is equal to object <em>a</em>. This is an
@@ -57,6 +103,16 @@ comparisons, opposed to <em>assert.equal()</em> which uses <em>==</em>.</p>
 <pre><code>assert.eql('foo', 'foo');
 assert.eql([1,2], [1,2]);
 assert.eql({ foo: 'bar' }, { foo: 'bar' });
+</code></pre>
+
+<h3 id="assert-includes-val-obj-msg-">assert.includes(val, obj[, msg])</h3>
+
+<p>Assert that <em>obj</em> is within <em>val</em>. This method supports <em>Array_s
+and </em>Strings_s.</p>
+
+<pre><code>assert.includes([1,2,3], 3);
+assert.includes('foobar', 'foo');
+assert.includes('foobar', 'bar');
 </code></pre>
 
 <h2 id="expresso-1-">expresso(1)</h2>

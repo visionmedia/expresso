@@ -35,6 +35,46 @@ Install via npm:
 
 ## Assert Utilities
 
+### assert.isNull(val[, msg])
+
+Asserts that the given _val_ is _null_.
+
+    assert.isNull(null);
+
+### assert.isNotNull(val[, msg])
+
+Asserts that the given _val_ is not _null_.
+
+    assert.isNotNull(undefined);
+    assert.isNotNull(false);
+
+### assert.isUndefined(val[, msg])
+
+Asserts that the given _val_ is _undefined_.
+
+    assert.isUndefined(undefined);
+
+### assert.isNotUndefined(val[, msg])
+
+Asserts that the given _val_ is not _undefined_.
+
+    assert.isNotUndefined(null);
+    assert.isNotUndefined(false);
+
+### assert.match(str, regexp[, msg])
+
+Asserts that the given _str_ matches _regexp_.
+
+    assert.match('foobar', /^foo(bar)?/);
+    assert.match('foo', /^foo(bar)?/);
+
+### assert.length(val, n[, msg])
+
+Assert that the given _val_ has a length of _n_.
+
+    assert.length([1,2,3], 3);
+    assert.length('foo', 3);
+
 ### assert.eql(a, b[, msg])
 
 Assert that object _b_ is equal to object _a_. This is an
@@ -45,9 +85,14 @@ comparisons, opposed to _assert.equal()_ which uses _==_.
     assert.eql([1,2], [1,2]);
     assert.eql({ foo: 'bar' }, { foo: 'bar' });
 
-### assert.includes(a, b[, msg])
+### assert.includes(val, obj[, msg])
 
-Checks if
+Assert that _obj_ is within _val_. This method supports _Array_s
+and _Strings_s.
+
+    assert.includes([1,2,3], 3);
+    assert.includes('foobar', 'foo');
+    assert.includes('foobar', 'bar');
 
 ## expresso(1)
 
