@@ -33,6 +33,51 @@ Install via npm:
 
 	$ npm install expresso
 
+## Examples
+
+## Examples
+
+To define tests we simply export several functions:
+
+	exports['test String#length'] = function(assert){
+		assert.equal(6, 'foobar'.length);
+	};
+
+Alternatively for large numbers of tests you may want to
+export your own object containing the tests, however this
+is essentially the as above:
+
+    module.exports = {
+      	'test String#length': function(assert){
+        	assert.equal(6, 'foobar'.length);
+      	}
+    };
+
+If you prefer not to use quoted keys:
+
+	exports.testsStringLength = function(assert){
+		assert.equal(6, 'foobar'.length);
+	};
+
+The second argument passed to each callback is _beforeExit_,
+which is typically used to assert that callbacks have been
+invoked.
+
+    exports.testAsync = function(assert, beforeExit){
+		var n = 0;
+      	setTimeout(function(){
+        	++n;
+        	assert.ok(true);
+      	}, 200);
+      	setTimeout(function(){
+        	++n;
+        	assert.ok(true);
+      	}, 200);
+		beforeExit(function(){
+			assert.equal(2, n, 'Ensure both timeouts are called');
+		});
+    };
+
 ## Assert Utilities
 
 ### assert.isNull(val[, msg])
@@ -217,44 +262,9 @@ instrumented with coverage statements:
 
 The output will look similar to below, depending on your test coverage of course :)
 
-    Test Coverage
-    +--------------------------------+----------+------+------+--------+
-    | filename                       | coverage | LOC  | SLOC | missed |
-    +--------------------------------+----------+------+------+--------+
-    | a.js                           |    90.00 |   26 |   10 |      1 |
-    | b.js                           |   100.00 |   12 |    5 |      0 |
-    +--------------------------------+----------+------+------+--------+
-                                     |    93.33 |   38 |   15 |      1 |
-                                     +----------+------+------+--------+
+![node coverage](http://dl.dropbox.com/u/6396913/cov.png)
 
-    bar.js:
-    
-      1 |   | 
-      2 | 1 | exports.bar = function(msg){
-      3 | 1 |     return msg || 'bar';
-      4 |   | };
-    
-    
-    foo.js:
-    
-       1 |   | 
-       2 | 1 | exports.foo = function(msg){
-       3 | 2 |     if (msg) {
-       4 | 0 |         return msg;
-       5 |   |     } else {
-       6 | 2 |         return generateFoo();
-       7 |   |     }
-       8 |   | };
-       9 |   | 
-      10 | 1 | function generateFoo() {
-      11 | 2 |     return 'foo';
-      12 |   | }
-      13 |   | 
-      14 | 1 | function Foo(msg){
-      15 | 0 |     this.msg = msg || 'foo';
-      16 |   | }
-
-To make this process easier expresso has the `-c` or `--cov` which essentiall
+To make this process easier expresso has the _-c_ or _--cov_ which essentially
 does the same as the two commands above. The following two commands will
 run the same tests, however one will auto-instrument, and unshift _lib-cov_,
 and the other will run tests normally:
@@ -264,3 +274,13 @@ and the other will run tests normally:
 
 Currently coverage is bound to the _lib_ directory, however in the
 future `--cov` will most likely accept a path.
+
+## Async Exports
+
+Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the _exports.foo = function(){};_ syntax is supported for this:
+    
+	setTimeout(function(){
+	    exports['test async exports'] = function(assert){
+	        assert.ok('wahoo');
+	    };
+	}, 100);

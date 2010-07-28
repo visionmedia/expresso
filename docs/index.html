@@ -46,6 +46,55 @@ the command below, which will first compile node-jscoverage:</p>
 <pre><code>$ npm install expresso
 </code></pre>
 
+<h2 id="Examples">Examples</h2>
+
+<h2 id="Examples">Examples</h2>
+
+<p>To define tests we simply export several functions:</p>
+
+<pre><code>exports['test String#length'] = function(assert){
+    assert.equal(6, 'foobar'.length);
+};
+</code></pre>
+
+<p>Alternatively for large numbers of tests you may want to
+export your own object containing the tests, however this
+is essentially the as above:</p>
+
+<pre><code>module.exports = {
+    'test String#length': function(assert){
+        assert.equal(6, 'foobar'.length);
+    }
+};
+</code></pre>
+
+<p>If you prefer not to use quoted keys:</p>
+
+<pre><code>exports.testsStringLength = function(assert){
+    assert.equal(6, 'foobar'.length);
+};
+</code></pre>
+
+<p>The second argument passed to each callback is <em>beforeExit</em>,
+which is typically used to assert that callbacks have been
+invoked.</p>
+
+<pre><code>exports.testAsync = function(assert, beforeExit){
+    var n = 0;
+    setTimeout(function(){
+        ++n;
+        assert.ok(true);
+    }, 200);
+    setTimeout(function(){
+        ++n;
+        assert.ok(true);
+    }, 200);
+    beforeExit(function(){
+        assert.equal(2, n, 'Ensure both timeouts are called');
+    });
+};
+</code></pre>
+
 <h2 id="Assert-Utilities">Assert Utilities</h2>
 
 <h3 id="assert-isNull-val-msg-">assert.isNull(val[, msg])</h3>
@@ -253,45 +302,9 @@ instrumented with coverage statements:</p>
 
 <p>The output will look similar to below, depending on your test coverage of course :)</p>
 
-<pre><code>Test Coverage
-+--------------------------------+----------+------+------+--------+
-| filename                       | coverage | LOC  | SLOC | missed |
-+--------------------------------+----------+------+------+--------+
-| a.js                           |    90.00 |   26 |   10 |      1 |
-| b.js                           |   100.00 |   12 |    5 |      0 |
-+--------------------------------+----------+------+------+--------+
-                                 |    93.33 |   38 |   15 |      1 |
-                                 +----------+------+------+--------+
+<p><img src="http://dl.dropbox.com/u/6396913/cov.png" alt="node coverage" /></p>
 
-bar.js:
-
-  1 |   | 
-  2 | 1 | exports.bar = function(msg){
-  3 | 1 |     return msg || 'bar';
-  4 |   | };
-
-
-foo.js:
-
-   1 |   | 
-   2 | 1 | exports.foo = function(msg){
-   3 | 2 |     if (msg) {
-   4 | 0 |         return msg;
-   5 |   |     } else {
-   6 | 2 |         return generateFoo();
-   7 |   |     }
-   8 |   | };
-   9 |   | 
-  10 | 1 | function generateFoo() {
-  11 | 2 |     return 'foo';
-  12 |   | }
-  13 |   | 
-  14 | 1 | function Foo(msg){
-  15 | 0 |     this.msg = msg || 'foo';
-  16 |   | }
-</code></pre>
-
-<p>To make this process easier expresso has the <code>-c</code> or <code>--cov</code> which essentiall
+<p>To make this process easier expresso has the <em>-c</em> or <em>--cov</em> which essentially
 does the same as the two commands above. The following two commands will
 run the same tests, however one will auto-instrument, and unshift <em>lib-cov</em>,
 and the other will run tests normally:</p>
@@ -302,6 +315,17 @@ $ expresso -I lib --cov test/*
 
 <p>Currently coverage is bound to the <em>lib</em> directory, however in the
 future <code>--cov</code> will most likely accept a path.</p>
+
+<h2 id="Async-Exports">Async Exports</h2>
+
+<p>Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the <em>exports.foo = function(){};</em> syntax is supported for this:</p>
+
+<pre><code>setTimeout(function(){
+    exports['test async exports'] = function(assert){
+        assert.ok('wahoo');
+    };
+}, 100);
+</code></pre>
 
 </div>
 		</div>
