@@ -431,7 +431,7 @@ function reportCoverage(cov) {
     sys.puts(sep);
     for (var name in cov) {
         var file = cov[name];
-        if (file instanceof Array) {
+        if (Array.isArray(file)) {
             sys.print('   | ' + rpad(name, 40));
             sys.print(' | ' + lpad(file.coverage.toFixed(2), 8));
             sys.print(' | ' + lpad(file.LOC, 4));
@@ -475,7 +475,7 @@ function populateCoverage(cov) {
     cov.coverage = 0;
     for (var name in cov) {
         var file = cov[name];
-        if (file instanceof Array) {
+        if (Array.isArray(file)) {
             // Stats
             ++cov.totalFiles;
             cov.totalHits += file.totalHits = coverage(file, true);
