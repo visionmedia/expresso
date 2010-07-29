@@ -56,6 +56,12 @@ var growl = false;
 var port = 5555;
 
 /**
+ * Watch mode.
+ */
+
+var watch = false;
+
+/**
  * Usage documentation.
  */
 
@@ -63,6 +69,7 @@ var usage = ''
     + '[bold]{Usage}: expresso [options] <file ...>'
     + '\n'
     + '\n[bold]{Options}:'
+    + '\n  -w, --watch          Watch for modifications and re-execute tests'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -r, --require PATH   Require the given module path'
@@ -139,6 +146,10 @@ while (args.length) {
         case '--boring':
         	boring = true;
         	break;
+        case '-w':
+        case '--watch':
+            watch = true;
+            break;
         case '--g':
         case '--growl':
             growl = true;
@@ -533,6 +544,10 @@ function coverage(data, val) {
  */
 
 function run(files, dir) {
+    runFiles(files, dir);
+}
+
+function runFiles(files, dir) {
     if (files.length) {
         files.forEach(function(file){
             if (file.match(/\.js$/)) {
