@@ -537,43 +537,48 @@ function coverage(data, val) {
 }
 
 /**
- * Run all test files.
+ * Run the given test `files`, or try _test/*_.
  *
  * @param  {Array} files
- * @api public
  */
 
-function run(files, dir) {
-    runFiles(files, dir);
-}
-
-function runFiles(files, dir) {
-    if (files.length) {
-        files.forEach(function(file){
-            if (file.match(/\.js$/)) {
-                var title = path.basename(file),
-                    file = path.join(cwd, dir, file),
-                    mod = require(file.replace(/\.js$/, ''));
-                (function check(){
-                   var len = Object.keys(mod).length;
-                   if (len) {
-                       runSuite(title, mod);
-                   } else {
-                       setTimeout(check, 20);
-                   }
-                })();
-            }
-        });
-    } else {
-        fs.readdir('test', function(err, files){
-            if (err) {
-                print('\n   failures to load tests in [bold]{./test}\n');
-                ++failures;
-                process.exit(1);
-            }
-            run(files, 'test/');
-        });
+function run(files) {
+    if (!files.length) {
+        try {
+            files = fs.readdirSync('test').map(function(file){
+                return 'test/' + file;
+            });
+        } catch (err) {
+            print('\n  failed to load tests in [bold]{./test}\n');
+            ++failures;
+            process.exit(1);
+        }
     }
+    runFiles(files);
+}   
+
+/**
+ * Run the given test `files`.
+ *
+ * @param {Array} files
+ */
+
+function runFiles(files) {
+    files.forEach(function(file){
+        if (file.match(/\.js$/)) {
+            var title = path.basename(file),
+                file = path.join(cwd, file),
+                mod = require(file.replace(/\.js$/, ''));
+            (function check(){
+               var len = Object.keys(mod).length;
+               if (len) {
+                   runSuite(title, mod);
+               } else {
+                   setTimeout(check, 20);
+               }
+            })();
+        }
+    });
 }
 
 /**
