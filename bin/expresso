@@ -245,29 +245,34 @@ assert.match = function(str, regexp, msg) {
 };
 
 /**
- * Assert that `substr` is within `str`.
+ * Assert that `val` is within `obj`.
  *
- * @param {String} str
- * @param {String} substr
+ * Examples:
+ *
+ *    assert.includes('bar', 'foobar');
+ *    assert.includes('foo', ['foo', 'bar']);
+ *
+ * @param {Mixed} val
+ * @param {String|Array} obj
  * @param {String} msg
  * @api public
  */
 
-assert.includes = function(str, substr, msg) {
-    msg = msg || sys.inspect(str) + ' does not include ' + sys.inspect(substr);
-    assert.ok(str.indexOf(substr) >= 0, msg);
+assert.includes = function(val, obj, msg) {
+    msg = msg || sys.inspect(obj) + ' does not include ' + sys.inspect(val);
+    assert.ok(obj.indexOf(val) >= 0, msg);
 };
 
 /**
  * Assert length of `val` is `n`.
  *
- * @param {Number} n
  * @param {Mixed} val
+ * @param {Number} n
  * @param {String} msg
  * @api public
  */
 
-assert.length = function(n, val, msg) {
+assert.length = function(val, n, msg) {
     msg = msg || sys.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
     assert.equal(n, val.length, msg);
 };
