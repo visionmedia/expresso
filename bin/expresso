@@ -565,21 +565,23 @@ function run(files) {
  */
 
 function runFiles(files) {
-    files.forEach(function(file){
-        if (file.match(/\.js$/)) {
-            var title = path.basename(file),
-                file = path.join(cwd, file),
-                mod = require(file.replace(/\.js$/, ''));
-            (function check(){
-               var len = Object.keys(mod).length;
-               if (len) {
-                   runSuite(title, mod);
-               } else {
-                   setTimeout(check, 20);
-               }
-            })();
-        }
-    });
+    files.forEach(runFile);
+}
+
+function runFile(file) {
+    if (file.match(/\.js$/)) {
+        var title = path.basename(file),
+            file = path.join(cwd, file),
+            mod = require(file.replace(/\.js$/, ''));
+        (function check(){
+           var len = Object.keys(mod).length;
+           if (len) {
+               runSuite(title, mod);
+           } else {
+               setTimeout(check, 20);
+           }
+        })();
+    }
 }
 
 function watchFiles(files) {
@@ -591,10 +593,10 @@ function watchFiles(files) {
         sys.print(' ' + c[p++ % c.length] + '\r');
     }, 100);
     files.forEach(function(file){
-        // TODO: change interval
-        fs.watchFile(file, function(curr, prev){
+        fs.watchFile(file, { interval: 100 }, function(curr, prev){
             if (curr.mtime > prev.mtime) {
-                console.log('changed %s', file);
+                sys.puts('running ' + file);
+                runFile(file);
             }
         });
     });
