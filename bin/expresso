@@ -586,12 +586,12 @@ function runFile(file) {
 
 function watchFiles(files) {
     var p = 0,
-        c = ['.   ', '..  ', '... ', ' ...',
-             '  ..', '   .', '   .', '  ..',
-             '... ', '..  ', '.   '],
+        c = ['▫   ', '▫▫  ', '▫▫▫ ', ' ▫▫▫',
+             '  ▫▫', '   ▫', '   ▫', '  ▫▫',
+             '▫▫▫ ', '▫▫  ', '▫   '],
         l = c.length;
     setInterval(function(){
-        sys.print('  ' + c[p++ % l] + '\r');
+        sys.print(colorize('  [green]{' + c[p++ % l] + '} watching\r'));
     }, 100);
     files.forEach(function(file){
         fs.watchFile(file, { interval: 100 }, function(curr, prev){
