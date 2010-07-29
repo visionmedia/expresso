@@ -588,9 +588,10 @@ function watchFiles(files) {
     var p = 0,
         c = ['.   ', '..  ', '... ', ' ...',
              '  ..', '   .', '   .', '  ..',
-             '... ', '..  ', '.   '];
+             '... ', '..  ', '.   '],
+        l = c.length;
     setInterval(function(){
-        sys.print('  ' + c[p++ % c.length] + '\r');
+        sys.print('  ' + c[p++ % l] + '\r');
     }, 100);
     files.forEach(function(file){
         fs.watchFile(file, { interval: 100 }, function(curr, prev){
