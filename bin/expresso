@@ -590,12 +590,12 @@ function watchFiles(files) {
              '  ..', '   .', '   .', '  ..',
              '... ', '..  ', '.   '];
     setInterval(function(){
-        sys.print(' ' + c[p++ % c.length] + '\r');
+        sys.print('  ' + c[p++ % c.length] + '\r');
     }, 100);
     files.forEach(function(file){
         fs.watchFile(file, { interval: 100 }, function(curr, prev){
             if (curr.mtime > prev.mtime) {
-                sys.puts('running ' + file);
+                print('  ◦ running ' + file);
                 runFile(file);
             }
         });
