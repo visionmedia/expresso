@@ -181,7 +181,7 @@ function print(str){
  */
 
 function colorize(str){
-    var colors = { bold: 1, red: 31, green: 32 };
+    var colors = { bold: 1, red: 31, green: 32, yellow: 33 };
     return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str){
         return boring
             ? str
@@ -596,7 +596,7 @@ function watchFiles(files) {
     files.forEach(function(file){
         fs.watchFile(file, { interval: 100 }, function(curr, prev){
             if (curr.mtime > prev.mtime) {
-                print('  ◦ running ' + file);
+                print('  [yellow]{◦} ' + file);
                 runFile(file);
             }
         });
