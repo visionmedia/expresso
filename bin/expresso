@@ -198,7 +198,6 @@ assert.eql = assert.deepEqual;
  *
  * @param {Mixed} val
  * @param {String} msg
- * @api public
  */
 
 assert.isNull = function(val, msg) {
@@ -210,7 +209,6 @@ assert.isNull = function(val, msg) {
  *
  * @param {Mixed} val
  * @param {String} msg
- * @api public
  */
 
 assert.isNotNull = function(val, msg) {
@@ -222,7 +220,6 @@ assert.isNotNull = function(val, msg) {
  *
  * @param {Mixed} val
  * @param {String} msg
- * @api public
  */
 
 assert.isUndefined = function(val, msg) {
@@ -234,7 +231,6 @@ assert.isUndefined = function(val, msg) {
  *
  * @param {Mixed} val
  * @param {String} msg
- * @api public
  */
 
 assert.isNotUndefined = function(val, msg) {
@@ -247,7 +243,6 @@ assert.isNotUndefined = function(val, msg) {
  * @param {String} str
  * @param {RegExp} regexp
  * @param {String} msg
- * @api public
  */
 
 assert.match = function(str, regexp, msg) {
@@ -266,7 +261,6 @@ assert.match = function(str, regexp, msg) {
  * @param {Mixed} val
  * @param {String|Array} obj
  * @param {String} msg
- * @api public
  */
 
 assert.includes = function(val, obj, msg) {
@@ -280,7 +274,6 @@ assert.includes = function(val, obj, msg) {
  * @param {Mixed} val
  * @param {Number} n
  * @param {String} msg
- * @api public
  */
 
 assert.length = function(val, n, msg) {
@@ -296,7 +289,6 @@ assert.length = function(val, n, msg) {
  * @param {Object} req
  * @param {Object|Function} res
  * @param {String} msg
- * @api public
  */
 
 assert.response = function(server, req, res, msg){
@@ -401,7 +393,6 @@ assert.response = function(server, req, res, msg){
  * @param  {String} str
  * @param  {Number} width
  * @return {String}
- * @api private
  */
 
 function lpad(str, width) {
@@ -418,7 +409,6 @@ function lpad(str, width) {
  * @param  {String} str
  * @param  {Number} width
  * @return {String}
- * @api private
  */
 
 function rpad(str, width) {
@@ -433,7 +423,6 @@ function rpad(str, width) {
  * Report test coverage.
  *
  * @param  {Object} cov
- * @api private
  */
 
 function reportCoverage(cov) {
@@ -479,7 +468,6 @@ function reportCoverage(cov) {
  * Populate code coverage data.
  *
  * @param  {Object} cov
- * @api private
  */
 
 function populateCoverage(cov) {
@@ -525,7 +513,6 @@ function populateCoverage(cov) {
  *
  * @param  {Array} data
  * @return {Type}
- * @api private
  */
 
 function coverage(data, val) {
@@ -556,7 +543,13 @@ function run(files) {
     }
     if (watch) watchFiles(files);
     runFiles(files);
-}   
+}
+
+/**
+ * Show the cursor when `show` is true, otherwise hide it.
+ *
+ * @param {Boolean} show
+ */
 
 function cursor(show) {
     if (show) {
@@ -576,6 +569,12 @@ function runFiles(files) {
     files.forEach(runFile);
 }
 
+/**
+ * Run tests for the given `file`.
+ *
+ * @param {String} file
+ */
+
 function runFile(file) {
     if (file.match(/\.js$/)) {
         var title = path.basename(file),
@@ -592,6 +591,12 @@ function runFile(file) {
     }
 }
 
+/**
+ * Clear the module cache for the given `file`.
+ *
+ * @param {String} file
+ */
+
 function clearCache(file) {
     var keys = Object.keys(module.moduleCache);
     for (var i = 0, len = keys.length; i < len; ++i) {
@@ -601,6 +606,12 @@ function clearCache(file) {
         }
     }
 }
+
+/**
+ * Watch the given `files` for changes.
+ *
+ * @param {Array} files
+ */
 
 function watchFiles(files) {
     var p = 0,
@@ -629,7 +640,6 @@ function watchFiles(files) {
  * @param {String} suite
  * @param {String} test
  * @param {Error} err
- * @api private
  */
 
 function error(suite, test, err) {
@@ -647,7 +657,6 @@ function error(suite, test, err) {
  *
  * @param  {String} title
  * @param  {Object} tests
- * @api private
  */
 
 function runSuite(title, tests) {
@@ -678,6 +687,10 @@ function runSuite(title, tests) {
         }
     })();
 }
+
+/**
+ * Report exceptions.
+ */
 
 function report() {
     process.emit('beforeExit');
