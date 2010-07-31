@@ -1,4 +1,15 @@
 
+0.6.0 / 2010-07-31
+==================
+
+  * Added _docs/api.html_
+  * Added -w, --watch
+  * Added `Array` support to `assert.includes()`
+  * Added; outputting exceptions immediately. Closes #19
+  * Fixed `assert.includes()` param ordering
+  * Fixed `assert.length()` param ordering
+  * Fixed jscoverage links
+
 0.5.0 / 2010-07-16
 ==================
 
