@@ -650,6 +650,7 @@ function error(suite, test, err) {
             ? test
             : suite + ' ' + test;
     print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
+    if (watch) notify(label + ' failed');
 }
 
 /**
