@@ -687,7 +687,6 @@ function report() {
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
     }
-    process.reallyExit(failures);
 }
 
 /**
@@ -725,6 +724,7 @@ var orig = process.emit;
 process.emit = function(event){
     if (event === 'exit') {
         report();
+        process.reallyExit(failures);
     }
     orig.apply(this, arguments);
 };
