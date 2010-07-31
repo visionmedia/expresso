@@ -592,6 +592,16 @@ function runFile(file) {
     }
 }
 
+function clearCache(file) {
+    var keys = Object.keys(module.moduleCache);
+    for (var i = 0, len = keys.length; i < len; ++i) {
+        var key = keys[i];
+        if (key.indexOf(file) === key.length - file.length) {
+            delete module.moduleCache[key];
+        }
+    }
+}
+
 function watchFiles(files) {
     var p = 0,
         c = ['▫   ', '▫▫  ', '▫▫▫ ', ' ▫▫▫',
@@ -606,6 +616,7 @@ function watchFiles(files) {
         fs.watchFile(file, { interval: 100 }, function(curr, prev){
             if (curr.mtime > prev.mtime) {
                 print('  [yellow]{◦} ' + file);
+                clearCache(file);
                 runFile(file);
             }
         });
