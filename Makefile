@@ -29,13 +29,20 @@ $(JSCOV):
 clean:
 	@cd deps/jscoverage && git clean -fd
 
-docs: $(HTMLDOCS)
+docs: docs/api.html $(HTMLDOCS)
 
 %.html: %.md
 	@echo "... $< > $@"
 	@ronn -5 --pipe --fragment $< \
 		| cat docs/layout/head.html - docs/layout/foot.html \
 		> $@
+
+docs/api.html: bin/expresso
+	dox \
+		--title "Expresso" \
+		--ribbon "http://github.com/visionmedia/expresso" \
+		--desc "Insanely fast TDD framework for [node](http://nodejs.org) featuring code coverage reporting." \
+		$< > $@
 
 docclean:
 	rm -f docs/*.html
