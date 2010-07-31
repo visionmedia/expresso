@@ -558,6 +558,14 @@ function run(files) {
     runFiles(files);
 }   
 
+function cursor(show) {
+    if (show) {
+        sys.print('\x1b[?25h');
+    } else {
+        sys.print('\x1b[?25l');
+    }
+}
+
 /**
  * Run the given test `files`.
  *
@@ -590,8 +598,7 @@ function watchFiles(files) {
              '  ▫▫', '   ▫', '   ▫', '  ▫▫',
              '▫▫▫ ', '▫▫  ', '▫   '],
         l = c.length;
-    // TODO: show: sys.print('\x1b[?25h');
-    // TODO: hide: sys.print('\x1b[?25l');
+    cursor(false);
     setInterval(function(){
         sys.print(colorize('  [green]{' + c[p++ % l] + '} watching\r'));
     }, 100);
@@ -677,6 +684,15 @@ function notify(msg) {
 
 process.addListener('uncaughtException', function(err){
     error('uncaught', 'uncaught', err);
+});
+
+// Show cursor
+
+['INT', 'TERM', 'QUIT'].forEach(function(sig){
+    process.addListener('SIG' + sig, function(){
+        cursor(true);
+        process.exit(1);
+    });
 });
 
 // Report test coverage when available
