@@ -699,15 +699,8 @@ function report() {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
-        var quote = [
-            's`all good',
-            'eyyyy-ok',
-            'wahoo, your stuff is not broken!',
-            'TATFT',
-            ':)'
-        ][Math.random() * 5 | 0];
-    	print('\n   [green]{100%} [bold]{' + quote + '}\n');
-    	notify('100% ' + quote);
+    	print('\n   [green]{100%} ok\n');
+    	notify('100% ok');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
