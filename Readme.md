@@ -13,6 +13,7 @@
   - `assert.eql()` alias of `assert.deepEqual()`
   - `assert.response()` http response utility
   - `assert.includes()`
+  - `assert.type()`
   - `assert.isNull()`
   - `assert.isUndefined()`
   - `assert.isNotNull()`

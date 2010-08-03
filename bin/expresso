@@ -238,6 +238,20 @@ assert.isDefined = function(val, msg) {
 };
 
 /**
+ * Assert that `obj` is `type`.
+ *
+ * @param {Mixed} obj
+ * @param {String} type
+ * @api public
+ */
+
+assert.type = function(obj, type, msg){
+    var real = typeof obj;
+    msg = msg || 'typeof ' + sys.inspect(obj) + ' is ' + real + ', expected ' + type;
+    assert.ok(type === real, msg);
+};
+
+/**
  * Assert that `str` matches `regexp`.
  *
  * @param {String} str

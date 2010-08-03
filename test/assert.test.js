@@ -3,6 +3,14 @@ module.exports = {
         assert.equal(assert.deepEqual, assert.eql);
     },
     
+    'assert.type()': function(assert){
+        assert.type('foobar', 'string');
+        assert.type(2, 'number');
+        assert.throws(function(){
+            assert.type([1,2,3], 'string');
+        });
+    },
+    
     'assert.includes()': function(assert){
         assert.includes('some random string', 'dom');
         assert.throws(function(){

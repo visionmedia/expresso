@@ -120,6 +120,12 @@ Assert that the given _val_ has a length of _n_.
     assert.length([1,2,3], 3);
     assert.length('foo', 3);
 
+### assert.type(obj, type[, msg])
+
+Assert that the given _obj_ is typeof _type_.
+
+    assert.type(3, 'number');
+
 ### assert.eql(a, b[, msg])
 
 Assert that object _b_ is equal to object _a_. This is an

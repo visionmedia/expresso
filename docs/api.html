@@ -399,6 +399,22 @@ Disabled when --boring is set.</p>
 </tr>
 <tr class="code">
 <td class="docs">
+<p>Assert that <code>obj</code> is <code>type</code>.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Mixed</em>  obj</p></li><li><p><strong>param</strong>: <em>String</em>  type</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">assert</span>.<span class="variable">type</span> = <span class="keyword">function</span>(<span class="variable">obj</span>, <span class="variable">type</span>, <span class="variable">msg</span>){
+    <span class="keyword">var</span> <span class="variable">real</span> = <span class="keyword">typeof</span> <span class="variable">obj</span>;
+    <span class="variable">msg</span> = <span class="variable">msg</span> || <span class="string">'typeof '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">obj</span>) + <span class="string">' is '</span> + <span class="variable">real</span> + <span class="string">', expected '</span> + <span class="variable">type</span>;
+    <span class="variable">assert</span>.<span class="variable">ok</span>(<span class="variable">type</span> === <span class="variable">real</span>, <span class="variable">msg</span>);
+};</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
 <p>Assert that <code>str</code> matches <code>regexp</code>.</p>
 
 <h2></h2>
