@@ -233,7 +233,7 @@ assert.isUndefined = function(val, msg) {
  * @param {String} msg
  */
 
-assert.isNotUndefined = function(val, msg) {
+assert.isDefined = function(val, msg) {
     assert.notStrictEqual(undefined, val, msg);
 };
 

@@ -14,7 +14,7 @@
   - `assert.isNull()`
   - `assert.isUndefined()`
   - `assert.isNotNull()`
-  - `assert.isNotUndefined()`
+  - `assert.isDefined()`
   - `assert.match()`
   - `assert.length()`
 
@@ -99,12 +99,12 @@ Asserts that the given _val_ is _undefined_.
 
     assert.isUndefined(undefined);
 
-### assert.isNotUndefined(val[, msg])
+### assert.isDefined(val[, msg])
 
 Asserts that the given _val_ is not _undefined_.
 
-    assert.isNotUndefined(null);
-    assert.isNotUndefined(false);
+    assert.isDefined(null);
+    assert.isDefined(false);
 
 ### assert.match(str, regexp[, msg])
 
@@ -130,7 +130,7 @@ comparisons, opposed to _assert.equal()_ which uses _==_.
     assert.eql([1,2], [1,2]);
     assert.eql({ foo: 'bar' }, { foo: 'bar' });
 
-### assert.includes(val, obj[, msg])
+### assert.includes(obj, val[, msg])
 
 Assert that _obj_ is within _val_. This method supports _Array_s
 and _Strings_s.

@@ -16,7 +16,7 @@
   - `assert.isNull()`
   - `assert.isUndefined()`
   - `assert.isNotNull()`
-  - `assert.isNotUndefined()`
+  - `assert.isDefined()`
   - `assert.match()`
   - `assert.length()`
 

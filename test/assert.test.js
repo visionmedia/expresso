@@ -51,11 +51,11 @@ module.exports = {
         });
     },
     
-    'assert.isNotUndefined()': function(assert){
-        assert.isNotUndefined(false);
-        assert.isNotUndefined(null);
+    'assert.isDefined()': function(assert){
+        assert.isDefined(false);
+        assert.isDefined(null);
         assert.throws(function(){
-            assert.isNotUndefined(undefined);
+            assert.isDefined(undefined);
         });
     },
     
