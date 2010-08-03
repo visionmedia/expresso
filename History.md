@@ -1,4 +1,11 @@
 
+0.6.2 / 2010-08-03
+==================
+
+  * Added `assert.type()`
+  * Renamed `assert.isNotUndefined()` to `assert.isDefined()`
+  * Fixed `assert.includes()` param ordering
+
 0.6.0 / 2010-07-31
 ==================
 
