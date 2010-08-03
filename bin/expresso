@@ -255,15 +255,15 @@ assert.match = function(str, regexp, msg) {
  *
  * Examples:
  *
- *    assert.includes('bar', 'foobar');
- *    assert.includes('foo', ['foo', 'bar']);
+ *    assert.includes('foobar', 'bar');
+ *    assert.includes(['foo', 'bar'], 'foo');
  *
- * @param {Mixed} val
  * @param {String|Array} obj
+ * @param {Mixed} val
  * @param {String} msg
  */
 
-assert.includes = function(val, obj, msg) {
+assert.includes = function(obj, val, msg) {
     msg = msg || sys.inspect(obj) + ' does not include ' + sys.inspect(val);
     assert.ok(obj.indexOf(val) >= 0, msg);
 };

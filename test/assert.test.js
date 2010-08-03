@@ -4,22 +4,22 @@ module.exports = {
     },
     
     'assert.includes()': function(assert){
-        assert.includes('dom', 'some random string');
+        assert.includes('some random string', 'dom');
         assert.throws(function(){
-           assert.include('foobar', 'some random string');
+           assert.include('some random string', 'foobar');
         });
 
-        assert.includes('bar', ['foo', 'bar']);
-        assert.includes('foo', ['foo', 'bar']);
-        assert.includes(3, [1,2,3]);
-        assert.includes(2, [1,2,3]);
-        assert.includes(1, [1,2,3]);
+        assert.includes(['foo', 'bar'], 'bar');
+        assert.includes(['foo', 'bar'], 'foo');
+        assert.includes([1,2,3], 3);
+        assert.includes([1,2,3], 2);
+        assert.includes([1,2,3], 1);
         assert.throws(function(){
-            assert.includes('baz', ['foo', 'bar']);
+            assert.includes(['foo', 'bar'], 'baz');
         });
         
         assert.throws(function(){
-            assert.includes('baz', { wrong: 'type' });
+            assert.includes({ wrong: 'type' }, 'foo');
         });
     },
     
