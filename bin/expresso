@@ -33,7 +33,7 @@ var failures = 0;
 
 
 /**
- * Number of tests exectued.
+ * Number of tests executed.
  */
 
 var testcount = 0;
@@ -692,7 +692,7 @@ function runSuite(title, tests) {
                 test = tests[key = keys.shift()];
             if (test) {
                 try {
-                    testcount++;
+                    ++testcount;
                     assert.testTitle = key;
                     test(assert, function(fn){
                         process.addListener('beforeExit', function(){
@@ -722,8 +722,8 @@ function report() {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
-    	print('\n   ' + testcount + ' tests. [green]{100%} ok\n');
-    	notify('100% ok');
+        print('\n   [green]{100%} ' + testcount + ' tests\n');
+        notify('100% ok');
     }
     if (typeof _$jscoverage === 'object') {
         reportCoverage(_$jscoverage);
