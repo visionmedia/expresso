@@ -31,6 +31,13 @@ var version = '0.6.1';
 
 var failures = 0;
 
+
+/**
+ * Number of tests exectued.
+ */
+
+var testcount = 0;
+
 /**
  * Whitelist of tests to run.
  */
@@ -685,6 +692,7 @@ function runSuite(title, tests) {
                 test = tests[key = keys.shift()];
             if (test) {
                 try {
+                    testcount++;
                     assert.testTitle = key;
                     test(assert, function(fn){
                         process.addListener('beforeExit', function(){
@@ -714,7 +722,7 @@ function report() {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
-    	print('\n   [green]{100%} ok\n');
+    	print('\n   ' + testcount + ' tests. [green]{100%} ok\n');
     	notify('100% ok');
     }
     if (typeof _$jscoverage === 'object') {
