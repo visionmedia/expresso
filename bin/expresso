@@ -694,6 +694,7 @@ function error(suite, test, err) {
  * @param  {Object} tests
  */
 
+var dots = 0;
 function runSuite(title, tests) {
     var keys = only.length
         ? only.slice(0)
@@ -707,7 +708,8 @@ function runSuite(title, tests) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        sys.print(colorize('   ... [yellow]{' + key + '}\x1b[K\r'));
+                        sys.print('.');
+                        if (++dots % 25 === 0) sys.print('\n');
                         if (test.length < 2) {
                             test(assert);
                             next();
@@ -744,7 +746,7 @@ function report() {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
-        if (serial) sys.print('\x1b[K');
+        if (serial) print('');
         print('\n   [green]{100%} ' + testcount + ' tests\n');
         notify('100% ok');
     }
