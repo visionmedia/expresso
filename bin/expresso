@@ -708,6 +708,7 @@ function runSuite(title, tests) {
                     assert.testTitle = key;
                     if (serial) {
                         test(assert, next);
+                        sys.print(colorize('   ... [yellow]{' + key + '}\x1b[K\r'));
                     } else {
                         test(assert, function(fn){
                             process.addListener('beforeExit', function(){
@@ -738,6 +739,7 @@ function report() {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
+        if (serial) sys.print('\x1b[K');
         print('\n   [green]{100%} ' + testcount + ' tests\n');
         notify('100% ok');
     }
