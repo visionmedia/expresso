@@ -706,20 +706,24 @@ function runSuite(title, tests) {
                 try {
                     ++testcount;
                     assert.testTitle = key;
-                    test(assert, function(fn){
-                        process.addListener('beforeExit', function(){
-                            try {
-                                fn();
-                            } catch (err) {
-                                error(title, key, err);
-                            }
+                    if (serial) {
+                        test(assert, next);
+                    } else {
+                        test(assert, function(fn){
+                            process.addListener('beforeExit', function(){
+                                try {
+                                    fn();
+                                } catch (err) {
+                                    error(title, key, err);
+                                }
+                            });
                         });
-                    });
+                    }
                 } catch (err) {
                     error(title, key, err);
                 }
             }
-            next();
+            if (!serial) next();
         }
     })();
 }
