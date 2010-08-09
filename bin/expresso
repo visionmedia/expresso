@@ -696,13 +696,23 @@ function error(suite, test, err) {
 
 var dots = 0;
 function runSuite(title, tests) {
+    // Keys
     var keys = only.length
         ? only.slice(0)
         : Object.keys(tests);
+
+    // Setup
+    var setup = tests.setup || function(fn){ fn(); };
+    
+    // Iterate tests
     (function next(){
         if (keys.length) {
             var key,
                 test = tests[key = keys.shift()];
+            // Non-tests
+            if (key === 'setup') return next();
+
+            // Run test
             if (test) {
                 try {
                     ++testcount;
@@ -710,12 +720,14 @@ function runSuite(title, tests) {
                     if (serial) {
                         sys.print('.');
                         if (++dots % 25 === 0) sys.print('\n');
-                        if (test.length < 2) {
-                            test(assert);
-                            next();
-                        } else {
-                            test(assert, next);
-                        }
+                        setup(function(){
+                            if (test.length < 2) {
+                                test(assert);
+                                next();
+                            } else {
+                                test(assert, next);
+                            } 
+                        });
                     } else {
                         test(assert, function(fn){
                             process.addListener('beforeExit', function(){
