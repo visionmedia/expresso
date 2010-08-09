@@ -69,6 +69,12 @@ var port = 5555;
 var watch = false;
 
 /**
+ * Execute serially.
+ */
+
+var serial = false;
+
+/**
  * Usage documentation.
  */
 
@@ -83,6 +89,7 @@ var usage = ''
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
+    + '\n  -s, --serial         Execute tests serially'
     + '\n  -b, --boring         Suppress ansi-escape colors'
     + '\n  -v, --version        Output version number'
     + '\n  -h, --help           Display help information'
@@ -157,9 +164,13 @@ while (args.length) {
         case '--watch':
             watch = true;
             break;
-        case '--g':
+        case '-g':
         case '--growl':
             growl = true;
+            break;
+        case '-s':
+        case '--serial':
+            serial = true;
             break;
         default:
             if (/\.js$/.test(arg)) {
