@@ -11,6 +11,9 @@ test: $(BIN)
 test-cov:
 	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
 
+test-serial:
+	@./$(BIN) --serial -I lib $(TEST_FLAGS) test/serial/*.test.js
+
 install: install-jscov install-expresso
 
 uninstall:
