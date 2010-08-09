@@ -508,6 +508,7 @@ function populateCoverage(cov) {
             cov.totalMisses += file.totalMisses = coverage(file, false);
             file.totalLines = file.totalHits + file.totalMisses;
             cov.SLOC += file.SLOC = file.totalLines;
+            if (!file.source) file.source = [];
             cov.LOC += file.LOC = file.source.length;
             file.coverage = (file.totalHits / file.totalLines) * 100;
             // Source
