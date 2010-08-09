@@ -707,8 +707,13 @@ function runSuite(title, tests) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        test(assert, next);
                         sys.print(colorize('   ... [yellow]{' + key + '}\x1b[K\r'));
+                        if (test.length < 2) {
+                            test(assert);
+                            next();
+                        } else {
+                            test(assert, next);
+                        }
                     } else {
                         test(assert, function(fn){
                             process.addListener('beforeExit', function(){
