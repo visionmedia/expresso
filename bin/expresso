@@ -718,8 +718,10 @@ function runSuite(title, tests) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        sys.print('.');
-                        if (++dots % 25 === 0) sys.print('\n');
+                        if (!watch) {
+                            sys.print('.');
+                            if (++dots % 25 === 0) sys.print('\n');
+                        }
                         setup(function(){
                             if (test.length < 2) {
                                 test(assert);
