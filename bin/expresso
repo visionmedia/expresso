@@ -725,7 +725,13 @@ function runSuite(title, tests) {
                                 test(assert);
                                 next();
                             } else {
-                                test(assert, next);
+                                var id = setTimeout(function(){
+                                    throw new Error('test ' + key + ' timed out');
+                                }, 2000);
+                                test(assert, function(){
+                                    clearTimeout(id);
+                                    next();
+                                });
                             } 
                         });
                     } else {
