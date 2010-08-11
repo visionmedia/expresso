@@ -728,7 +728,7 @@ function runSuite(title, tests) {
                                 next();
                             } else {
                                 var id = setTimeout(function(){
-                                    throw new Error('test ' + key + ' timed out');
+                                    throw new Error("'" + key + "' timed out");
                                 }, 2000);
                                 test(assert, function(){
                                     clearTimeout(id);
