@@ -342,7 +342,7 @@ assert.response = function(server, req, res, msg){
 
     // Create client
     if (!server.fd) {
-        server.listen(server.__port = port++);
+        server.listen(server.__port = port++, '127.0.0.1');
         server.client = http.createClient(server.__port);
     }
 
