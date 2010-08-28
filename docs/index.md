@@ -35,8 +35,6 @@ Install via npm:
 
 ## Examples
 
-## Examples
-
 To define tests we simply export several functions:
 
 	exports['test String#length'] = function(assert){

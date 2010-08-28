@@ -142,7 +142,7 @@ code .this { color: #19469D; }</style>
  </p>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">version</span> = <span class="string">'0.6.0'</span>;</code></pre>
+<pre><code><span class="keyword">var</span> <span class="variable">version</span> = <span class="string">'0.6.1'</span>;</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -152,6 +152,15 @@ code .this { color: #19469D; }</style>
 </td>
 <td class="code">
 <pre><code><span class="keyword">var</span> <span class="variable">failures</span> = <span class="number integer">0</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Number of tests executed.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">testcount</span> = <span class="number integer">0</span>;</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -201,6 +210,15 @@ code .this { color: #19469D; }</style>
 </tr>
 <tr class="code">
 <td class="docs">
+<p>Execute serially.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">serial</span> = <span class="variable">false</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
 <p>Usage documentation.
  </p>
 </td>
@@ -216,6 +234,7 @@ code .this { color: #19469D; }</style>
     + <span class="string">'\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'</span>
     + <span class="string">'\n  -I, --include PATH   Unshift the given path to require.paths'</span>
     + <span class="string">'\n  -p, --port NUM       Port number for test servers, starts at 5555'</span>
+    + <span class="string">'\n  -s, --serial         Execute tests serially'</span>
     + <span class="string">'\n  -b, --boring         Suppress ansi-escape colors'</span>
     + <span class="string">'\n  -v, --version        Output version number'</span>
     + <span class="string">'\n  -h, --help           Display help information'</span>
@@ -290,9 +309,13 @@ code .this { color: #19469D; }</style>
         <span class="keyword">case</span> <span class="string">'--watch'</span>:
             <span class="variable">watch</span> = <span class="variable">true</span>;
             <span class="keyword">break</span>;
-        <span class="keyword">case</span> <span class="string">'--g'</span>:
+        <span class="keyword">case</span> <span class="string">'-g'</span>:
         <span class="keyword">case</span> <span class="string">'--growl'</span>:
             <span class="variable">growl</span> = <span class="variable">true</span>;
+            <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="string">'-s'</span>:
+        <span class="keyword">case</span> <span class="string">'--serial'</span>:
+            <span class="variable">serial</span> = <span class="variable">true</span>;
             <span class="keyword">break</span>;
         <span class="keyword">default</span>:
             <span class="keyword">if</span> (<span class="regexp">/\.js$/</span>.<span class="variable">test</span>(<span class="variable">arg</span>)) {
@@ -482,6 +505,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
             : <span class="keyword">function</span>(){};
 
     <span class="comment">// Default messate to test title</span>
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">msg</span> === <span class="string">'function'</span>) <span class="variable">msg</span> = <span class="keyword">null</span>;
     <span class="variable">msg</span> = <span class="variable">msg</span> || <span class="variable">assert</span>.<span class="variable">testTitle</span>;
     <span class="variable">msg</span> += <span class="string">'. '</span>;
 
@@ -491,7 +515,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 
     <span class="comment">// Create client</span>
     <span class="keyword">if</span> (!<span class="variable">server</span>.<span class="variable">fd</span>) {
-        <span class="variable">server</span>.<span class="variable">listen</span>(<span class="variable">server</span>.<span class="variable">__port</span> = <span class="variable">port</span>++);
+        <span class="variable">server</span>.<span class="variable">listen</span>(<span class="variable">server</span>.<span class="variable">__port</span> = <span class="variable">port</span>++, <span class="string">'127.0.0.1'</span>);
         <span class="variable">server</span>.<span class="variable">client</span> = <span class="variable">http</span>.<span class="variable">createClient</span>(<span class="variable">server</span>.<span class="variable">__port</span>);
     }
 
@@ -680,6 +704,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
             <span class="variable">cov</span>.<span class="variable">totalMisses</span> += <span class="variable">file</span>.<span class="variable">totalMisses</span> = <span class="variable">coverage</span>(<span class="variable">file</span>, <span class="variable">false</span>);
             <span class="variable">file</span>.<span class="variable">totalLines</span> = <span class="variable">file</span>.<span class="variable">totalHits</span> + <span class="variable">file</span>.<span class="variable">totalMisses</span>;
             <span class="variable">cov</span>.<span class="class">SLOC</span> += <span class="variable">file</span>.<span class="class">SLOC</span> = <span class="variable">file</span>.<span class="variable">totalLines</span>;
+            <span class="keyword">if</span> (!<span class="variable">file</span>.<span class="variable">source</span>) <span class="variable">file</span>.<span class="variable">source</span> = [];
             <span class="variable">cov</span>.<span class="class">LOC</span> += <span class="variable">file</span>.<span class="class">LOC</span> = <span class="variable">file</span>.<span class="variable">source</span>.<span class="variable">length</span>;
             <span class="variable">file</span>.<span class="variable">coverage</span> = (<span class="variable">file</span>.<span class="variable">totalHits</span> / <span class="variable">file</span>.<span class="variable">totalLines</span>) * <span class="number integer">100</span>;
             <span class="comment">// Source</span>
@@ -886,31 +911,64 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 <ul><li><p><strong>param</strong>: <em>String</em>  title</p></li><li><p><strong>param</strong>: <em>Object</em>  tests</p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">tests</span>) {
+<pre><code><span class="keyword">var</span> <span class="variable">dots</span> = <span class="number integer">0</span>;
+<span class="keyword">function</span> <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">tests</span>) {
+    <span class="comment">// Keys</span>
     <span class="keyword">var</span> <span class="variable">keys</span> = <span class="variable">only</span>.<span class="variable">length</span>
         ? <span class="variable">only</span>.<span class="variable">slice</span>(<span class="number integer">0</span>)
         : <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">tests</span>);
+
+    <span class="comment">// Setup</span>
+    <span class="keyword">var</span> <span class="variable">setup</span> = <span class="variable">tests</span>.<span class="variable">setup</span> || <span class="keyword">function</span>(<span class="variable">fn</span>){ <span class="variable">fn</span>(); };
+    
+    <span class="comment">// Iterate tests</span>
     (<span class="keyword">function</span> <span class="variable">next</span>(){
         <span class="keyword">if</span> (<span class="variable">keys</span>.<span class="variable">length</span>) {
             <span class="keyword">var</span> <span class="variable">key</span>,
                 <span class="variable">test</span> = <span class="variable">tests</span>[<span class="variable">key</span> = <span class="variable">keys</span>.<span class="variable">shift</span>()];
+            <span class="comment">// Non-tests</span>
+            <span class="keyword">if</span> (<span class="variable">key</span> === <span class="string">'setup'</span>) <span class="keyword">return</span> <span class="variable">next</span>();
+
+            <span class="comment">// Run test</span>
             <span class="keyword">if</span> (<span class="variable">test</span>) {
                 <span class="keyword">try</span> {
+                    ++<span class="variable">testcount</span>;
                     <span class="variable">assert</span>.<span class="variable">testTitle</span> = <span class="variable">key</span>;
-                    <span class="variable">test</span>(<span class="variable">assert</span>, <span class="keyword">function</span>(<span class="variable">fn</span>){
-                        <span class="variable">process</span>.<span class="variable">addListener</span>(<span class="string">'beforeExit'</span>, <span class="keyword">function</span>(){
-                            <span class="keyword">try</span> {
-                                <span class="variable">fn</span>();
-                            } <span class="keyword">catch</span> (<span class="variable">err</span>) {
-                                <span class="variable">error</span>(<span class="variable">title</span>, <span class="variable">key</span>, <span class="variable">err</span>);
-                            }
+                    <span class="keyword">if</span> (<span class="variable">serial</span>) {
+                        <span class="keyword">if</span> (!<span class="variable">watch</span>) {
+                            <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'.'</span>);
+                            <span class="keyword">if</span> (++<span class="variable">dots</span> % <span class="number integer">25</span> === <span class="number integer">0</span>) <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\n'</span>);
+                        }
+                        <span class="variable">setup</span>(<span class="keyword">function</span>(){
+                            <span class="keyword">if</span> (<span class="variable">test</span>.<span class="variable">length</span> &<span class="variable">lt</span>; <span class="number integer">2</span>) {
+                                <span class="variable">test</span>(<span class="variable">assert</span>);
+                                <span class="variable">next</span>();
+                            } <span class="keyword">else</span> {
+                                <span class="keyword">var</span> <span class="variable">id</span> = <span class="variable">setTimeout</span>(<span class="keyword">function</span>(){
+                                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(&<span class="variable">quot</span>;<span class="string">'&quot; + key + &quot;'</span> <span class="variable">timed</span> <span class="variable">out</span>&<span class="variable">quot</span>;);
+                                }, <span class="number integer">2000</span>);
+                                <span class="variable">test</span>(<span class="variable">assert</span>, <span class="keyword">function</span>(){
+                                    <span class="variable">clearTimeout</span>(<span class="variable">id</span>);
+                                    <span class="variable">next</span>();
+                                });
+                            } 
                         });
-                    });
+                    } <span class="keyword">else</span> {
+                        <span class="variable">test</span>(<span class="variable">assert</span>, <span class="keyword">function</span>(<span class="variable">fn</span>){
+                            <span class="variable">process</span>.<span class="variable">addListener</span>(<span class="string">'beforeExit'</span>, <span class="keyword">function</span>(){
+                                <span class="keyword">try</span> {
+                                    <span class="variable">fn</span>();
+                                } <span class="keyword">catch</span> (<span class="variable">err</span>) {
+                                    <span class="variable">error</span>(<span class="variable">title</span>, <span class="variable">key</span>, <span class="variable">err</span>);
+                                }
+                            });
+                        });
+                    }
                 } <span class="keyword">catch</span> (<span class="variable">err</span>) {
                     <span class="variable">error</span>(<span class="variable">title</span>, <span class="variable">key</span>, <span class="variable">err</span>);
                 }
             }
-            <span class="variable">next</span>();
+            <span class="keyword">if</span> (!<span class="variable">serial</span>) <span class="variable">next</span>();
         }
     })();
 }</code></pre>
@@ -928,8 +986,9 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
         <span class="variable">print</span>(<span class="string">'\n   [bold]{Failures}: [red]{'</span> + <span class="variable">failures</span> + <span class="string">'}\n\n'</span>);
         <span class="variable">notify</span>(<span class="string">'Failures: '</span> + <span class="variable">failures</span>);
     } <span class="keyword">else</span> {
-    	<span class="variable">print</span>(<span class="string">'\n   [green]{100%} ok\n'</span>);
-    	<span class="variable">notify</span>(<span class="string">'100% ok'</span>);
+        <span class="keyword">if</span> (<span class="variable">serial</span>) <span class="variable">print</span>(<span class="string">''</span>);
+        <span class="variable">print</span>(<span class="string">'\n   [green]{100%} '</span> + <span class="variable">testcount</span> + <span class="string">' tests\n'</span>);
+        <span class="variable">notify</span>(<span class="string">'100% ok'</span>);
     }
     <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">_</span>$<span class="variable">jscoverage</span> === <span class="string">'object'</span>) {
         <span class="variable">reportCoverage</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>);

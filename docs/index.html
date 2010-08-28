@@ -4,21 +4,8 @@
 		<style>
 			body {
 				font: 13px/1.4 "Helvetica", "Lucida Grande", Arial, sans-serif;
+				text-align: center;
 			}
-			#header {
-				position: absolute;
-			    top: 10px;
-			    left: 0;
-			    padding: 14px 0 12px 0;
-			    text-indent: 40px;
-			    font-family: "Helvetica";
-			    width: 100%;
-			    border-top: 1px solid rgba(0,0,0,0.2);
-			    border-bottom: 1px solid rgba(0,0,0,0.2);
-			    background: rgba(255,255,255,0.6) url(http://www.sencha.com/favicon.ico) no-repeat 15px 50%;
-			    text-align: left;
-			    color: #888;
-		    }
 			#ribbon {
 				position: absolute;
 				top: 0;
@@ -26,15 +13,24 @@
 				z-index: 10;
 			}
 			#wrapper {
-				padding: 80px;
+			  margin: 0 auto;
+				padding: 50px 80px;
+				width: 700px;
+				text-align: left;
 			}
 			h1, h2, h3 {
 				margin: 25px 0 15px 0;
 			}
+			h1 {
+			  font-size: 35px;
+			}
 			pre {
 				margin: 0 5px;
-				padding: 10px;
+				padding: 15px;
 				border: 1px solid #eee;
+			}
+			a {
+			  color: #00aaff;
 			}
 		</style>
 	</head>
@@ -42,7 +38,6 @@
 		<a href="http://github.com/visionmedia/expresso">
 			<img alt="Fork me on GitHub" id="ribbon" src="http://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" />
 		</a>
-		<div id="header"><strong>Sencha</strong> labs</div>
 		<div id="wrapper">
 			<h1>Expresso</h1>
 <div class='mp'>
@@ -85,8 +80,6 @@ the command below, which will first compile node-jscoverage:</p>
 
 <pre><code>$ npm install expresso
 </code></pre>
-
-<h2 id="Examples">Examples</h2>
 
 <h2 id="Examples">Examples</h2>
 
