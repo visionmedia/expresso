@@ -5,7 +5,7 @@
  * Copyright(c) TJ Holowaychuk <tj@vision-media.ca>
  * (MIT Licensed)
  */
- 
+
 /**
  * Module dependencies.
  */
@@ -41,13 +41,13 @@ var testcount = 0;
 /**
  * Whitelist of tests to run.
  */
- 
+
 var only = [];
 
 /**
  * Boring output.
  */
- 
+
 var boring = false;
 
 /**
@@ -504,11 +504,11 @@ function reportCoverage(cov) {
  */
 
 function populateCoverage(cov) {
-    cov.LOC = 
+    cov.LOC =
     cov.SLOC =
     cov.totalFiles =
     cov.totalHits =
-    cov.totalMisses = 
+    cov.totalMisses =
     cov.coverage = 0;
     for (var name in cov) {
         var file = cov[name];
@@ -554,7 +554,7 @@ function coverage(data, val) {
     for (var i = 0, len = data.length; i < len; ++i) {
         if (data[i] !== undefined && data[i] == val) ++n;
     }
-    return n;  
+    return n;
 }
 
 /**
@@ -568,6 +568,13 @@ function run(files) {
         try {
             files = fs.readdirSync('test').map(function(file){
                 return 'test/' + file;
+            }).filter(function(file){
+
+                if (file.match(/(^\.)|(\/\.)/) != null) {
+                    return false;
+                }
+
+                return true;
             });
         } catch (err) {
             print('\n  failed to load tests in [bold]{./test}\n');
@@ -703,7 +710,7 @@ function runSuite(title, tests) {
 
     // Setup
     var setup = tests.setup || function(fn){ fn(); };
-    
+
     // Iterate tests
     (function next(){
         if (keys.length) {
@@ -734,7 +741,7 @@ function runSuite(title, tests) {
                                     clearTimeout(id);
                                     next();
                                 });
-                            } 
+                            }
                         });
                     } else {
                         test(assert, function(fn){
