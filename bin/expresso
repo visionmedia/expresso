@@ -732,6 +732,8 @@ function run(files) {
         try {
             files = fs.readdirSync('test').map(function(file){
                 return 'test/' + file;
+            }).filter(function(file){
+                return !(/(^\.)|(\/\.)/.test(file));
             });
         } catch (err) {
             print('\n  failed to load tests in [bold]{./test}\n');
