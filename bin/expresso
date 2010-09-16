@@ -75,6 +75,12 @@ var watch = false;
 var serial = false;
 
 /**
+ * Default timeout.
+ */
+
+var timeout = 2000;
+
+/**
  * Usage documentation.
  */
 
@@ -85,6 +91,7 @@ var usage = ''
     + '\n  -w, --watch          Watch for modifications and re-execute tests'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
+    + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
@@ -146,6 +153,14 @@ while (args.length) {
                 throw new Error('--require requires a path');
             }
             break;
+        case '-t':
+        case '--timeout':
+          if (arg = args.shift()) {
+            timeout = parseInt(arg, 10);
+          } else {
+            throw new Error('--timeout requires an argument');
+          }
+          break;
         case '-c':
         case '--cov':
         case '--coverage':
@@ -729,7 +744,7 @@ function runSuite(title, tests) {
                             } else {
                                 var id = setTimeout(function(){
                                     throw new Error("'" + key + "' timed out");
-                                }, 2000);
+                                }, timeout);
                                 test(assert, function(){
                                     clearTimeout(id);
                                     next();
