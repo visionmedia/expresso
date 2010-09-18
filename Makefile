@@ -1,6 +1,6 @@
 
+PREFIX ?= /usr/local
 BIN = bin/expresso
-PREFIX = /usr/local
 JSCOV = deps/jscoverage/node-jscoverage
 DOCS = docs/index.md
 HTMLDOCS = $(DOCS:.md=.html)
