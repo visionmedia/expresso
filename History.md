@@ -1,4 +1,14 @@
 
+0.6.2 / 2010-09-17 
+==================
+
+  * Added _node-jsocoverage_ to package.json (aka will respect npm's binroot)
+  * Added _-t, --timeout_ MS option, defaulting to 2000 ms
+  * Added _-s, --serial_
+  * __PREFIX__ clobberable
+  * Fixed `assert.response()` for latest node
+  * Fixed cov reporting from exploding on empty files
+
 0.6.2 / 2010-08-03
 ==================
 
