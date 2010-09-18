@@ -2,8 +2,11 @@
   "version": "0.6.1",
   "description": "TDD framework, light-weight, fast, CI-friendly",
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
-  "bin": { "expresso": "./bin/expresso" },
+  "bin": { 
+    "expresso": "./bin/expresso",
+    "node-jscoverage": "./deps/jscoverage/node-jscoverage"
+  },
   "scripts": {
-    "install": "make install-jscov"	
+    "install": "make deps/jscoverage/node-jscoverage"	
   }
 }
