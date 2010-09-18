@@ -7,6 +7,6 @@
     "node-jscoverage": "./deps/jscoverage/node-jscoverage"
   },
   "scripts": {
-    "install": "make deps/jscoverage/node-jscoverage"	
+    "preinstall": "make deps/jscoverage/node-jscoverage"	
   }
 }
