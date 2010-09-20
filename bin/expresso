@@ -391,9 +391,11 @@ assert.response = function(server, req, res, msg){
 
             // Assert response body
             if (res.body !== undefined) {
-                assert.equal(
-                    response.body,
-                    res.body,
+                var eql = res.body instanceof RegExp
+                  ? res.body.test(response.body)
+                  : res.body === response.body;
+                assert.ok(
+                    eql,
                     msg + 'Invalid response body.\n'
                         + '    Expected: ' + sys.inspect(res.body) + '\n'
                         + '    Got: ' + sys.inspect(response.body)

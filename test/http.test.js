@@ -72,5 +72,11 @@ module.exports = {
         beforeExit(function(){
             assert.equal(2, called);
         });
+    },
+    
+    'test assert.response() regexp': function(assert){
+      assert.response(server,
+        { url: '/foo', method: 'POST', data: 'foobar' },
+        { body: /^\/foo foo(bar)?/ });
     }
 };
