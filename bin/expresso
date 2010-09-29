@@ -696,7 +696,7 @@ function watchFiles(files) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack.replace(err.name, ''),
+        stack = (err.stack ? err.stack.replace(err.name, '') : 'sorry, no stack trace'),
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
