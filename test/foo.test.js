@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-var foo = require('foo');
+var foo = require('../lib/foo');
 
 module.exports = {
     'foo()': function(assert){
