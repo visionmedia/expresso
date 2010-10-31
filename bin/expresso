@@ -39,6 +39,18 @@ var failures = 0;
 var testcount = 0;
 
 /**
+ * Number of test files run
+ */
+
+var testFilesRun = 0;
+
+/**
+ * Number of tests remaining
+ */
+
+var testsRemaining = 0;
+
+/**
  * Whitelist of tests to run.
  */
  
@@ -367,17 +379,17 @@ assert.response = function(server, req, res, msg){
         method = req.method || 'GET',
         status = res.status || res.statusCode,
         data = req.data || req.body,
-        timeout = req.timeout || 0;
+        requestTimeout = req.timeout || 0;
 
     var request = client.request(method, req.url, req.headers);
 
     // Timeout
-    if (timeout) {
+    if (requestTimeout) {
         timer = setTimeout(function(){
             --server.__pending || server.close();
             delete req.timeout;
-            assert.fail(msg + 'Request timed out after ' + timeout + 'ms.');
-        }, timeout);
+            assert.fail(msg + 'Request timed out after ' + requestTimeout + 'ms.');
+        }, requestTimeout);
     }
 
     if (data) request.write(data);
@@ -618,6 +630,7 @@ function cursor(show) {
 
 function runFiles(files) {
     files.forEach(runFile);
+    waitForExit(files.length);
 }
 
 /**
@@ -640,6 +653,18 @@ function runFile(file) {
            }
         })();
     }
+    testFilesRun++;
+}
+
+function waitForExit(testFiles){
+  var interval = setInterval(function(){
+    if(testFilesRun == testFiles && testsRemaining == 0){
+      clearInterval(interval);
+      setTimeout(function(){
+        process.exit(failures ? 1 : 0);
+      }, timeout);
+    }
+  }, 500);
 }
 
 /**
@@ -720,7 +745,7 @@ function runSuite(title, tests) {
 
     // Setup
     var setup = tests.setup || function(fn){ fn(); };
-    
+
     // Iterate tests
     (function next(){
         if (keys.length) {
@@ -731,6 +756,7 @@ function runSuite(title, tests) {
 
             // Run test
             if (test) {
+                testsRemaining++;
                 try {
                     ++testcount;
                     assert.testTitle = key;
@@ -767,6 +793,7 @@ function runSuite(title, tests) {
                 } catch (err) {
                     error(title, key, err);
                 }
+                testsRemaining--;
             }
             if (!serial) next();
         }
