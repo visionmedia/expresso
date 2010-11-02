@@ -78,5 +78,11 @@ module.exports = {
       assert.response(server,
         { url: '/foo', method: 'POST', data: 'foobar' },
         { body: /^\/foo foo(bar)?/ });
+    },
+    
+    'test assert.response() regexp headers': function(assert){
+      assert.response(server,
+        { url: '/' },
+        { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
     }
 };

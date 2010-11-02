@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-/*!
+/*
  * Expresso
  * Copyright(c) TJ Holowaychuk <tj@vision-media.ca>
  * (MIT Licensed)
@@ -431,10 +431,12 @@ assert.response = function(server, req, res, msg){
                 for (var i = 0, len = keys.length; i < len; ++i) {
                     var name = keys[i],
                         actual = response.headers[name.toLowerCase()],
-                        expected = res.headers[name];
-                    assert.equal(
-                        actual,
-                        expected,
+                        expected = res.headers[name],
+                        eql = expected instanceof RegExp
+                          ? expected.test(actual)
+                          : expected == actual;
+                    assert.ok(
+                        eql,
                         msg + colorize('Invalid response header [bold]{' + name + '}.\n'
                             + '    Expected: [green]{' + expected + '}\n'
                             + '    Got: [red]{' + actual + '}')
