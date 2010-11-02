@@ -1,4 +1,10 @@
 
+0.6.4 / 2010-11-02 
+==================
+
+  * Added regexp support to `assert.response()` headers
+  * Removed `waitForExit` code, causing issues
+
 0.6.3 / 2010-11-02 
 ==================
 
