@@ -39,18 +39,6 @@ var failures = 0;
 var testcount = 0;
 
 /**
- * Number of test files run
- */
-
-var testFilesRun = 0;
-
-/**
- * Number of tests remaining
- */
-
-var testsRemaining = 0;
-
-/**
  * Whitelist of tests to run.
  */
  
@@ -640,7 +628,6 @@ function runFiles(files) {
     } else {
       files.forEach(runFile);
     }
-    waitForExit(files.length);
 }
 
 /**
@@ -664,18 +651,6 @@ function runFile(file, fn) {
            }
         })();
     }
-    testFilesRun++;
-}
-
-function waitForExit(testFiles){
-  var interval = setInterval(function(){
-    if(testFilesRun == testFiles && testsRemaining == 0){
-      clearInterval(interval);
-      setTimeout(function(){
-        process.exit(failures ? 1 : 0);
-      }, timeout);
-    }
-  }, 500);
 }
 
 /**
@@ -768,7 +743,6 @@ function runSuite(title, tests, fn) {
 
             // Run test
             if (test) {
-                testsRemaining++;
                 try {
                     ++testcount;
                     assert.testTitle = key;
@@ -805,7 +779,6 @@ function runSuite(title, tests, fn) {
                 } catch (err) {
                     error(title, key, err);
                 }
-                testsRemaining--;
             }
             if (!serial) next();
         } else if (serial) {
