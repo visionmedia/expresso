@@ -629,17 +629,26 @@ function cursor(show) {
  */
 
 function runFiles(files) {
-    files.forEach(runFile);
+    if (serial) {
+        (function next(){
+            if (files.length) {
+                runFile(files.shift(), next);
+            }
+        })();
+    } else {
+      files.forEach(runFile);
+    }
     waitForExit(files.length);
 }
 
 /**
- * Run tests for the given `file`.
+ * Run tests for the given `file`, callback `fn()` when finished.
  *
  * @param {String} file
+ * @param {Function} fn
  */
 
-function runFile(file) {
+function runFile(file, fn) {
     if (file.match(/\.js$/)) {
         var title = path.basename(file),
             file = path.join(cwd, file),
@@ -647,7 +656,7 @@ function runFile(file) {
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
-               runSuite(title, mod);
+               runSuite(title, mod, fn);
            } else {
                setTimeout(check, 20);
            }
@@ -730,14 +739,15 @@ function error(suite, test, err) {
 }
 
 /**
- * Run the given tests.
+ * Run the given tests, callback `fn()` when finished.
  *
  * @param  {String} title
  * @param  {Object} tests
+ * @param  {Function} fn
  */
 
 var dots = 0;
-function runSuite(title, tests) {
+function runSuite(title, tests, fn) {
     // Keys
     var keys = only.length
         ? only.slice(0)
@@ -796,6 +806,8 @@ function runSuite(title, tests) {
                 testsRemaining--;
             }
             if (!serial) next();
+        } else if (serial) {
+          fn();
         }
     })();
 }
