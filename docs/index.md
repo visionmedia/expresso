@@ -164,9 +164,9 @@ receives the response for assertions, or an object
 which is then used to perform several assertions
 on the response with the following properties:
 
-  - _body_ assert response body
+  - _body_ assert response body (regexp or string)
   - _status_ assert response status code
-  - _header_ assert that all given headers match (unspecified are ignored)
+  - _header_ assert that all given headers match (unspecified are ignored, use a regexp or string)
 
 When providing _res_ you may then also pass a callback function
 as the fourth argument for additional assertions.

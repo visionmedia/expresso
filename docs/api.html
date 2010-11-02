@@ -613,10 +613,12 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
                 <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">len</span> = <span class="variable">keys</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">len</span>; ++<span class="variable">i</span>) {
                     <span class="keyword">var</span> <span class="variable">name</span> = <span class="variable">keys</span>[<span class="variable">i</span>],
                         <span class="variable">actual</span> = <span class="variable">response</span>.<span class="variable">headers</span>[<span class="variable">name</span>.<span class="variable">toLowerCase</span>()],
-                        <span class="variable">expected</span> = <span class="variable">res</span>.<span class="variable">headers</span>[<span class="variable">name</span>];
-                    <span class="variable">assert</span>.<span class="variable">equal</span>(
-                        <span class="variable">actual</span>,
-                        <span class="variable">expected</span>,
+                        <span class="variable">expected</span> = <span class="variable">res</span>.<span class="variable">headers</span>[<span class="variable">name</span>],
+                        <span class="variable">eql</span> = <span class="variable">expected</span> <span class="variable">instanceof</span> <span class="class">RegExp</span>
+                          ? <span class="variable">expected</span>.<span class="variable">test</span>(<span class="variable">actual</span>)
+                          : <span class="variable">expected</span> == <span class="variable">actual</span>;
+                    <span class="variable">assert</span>.<span class="variable">ok</span>(
+                        <span class="variable">eql</span>,
                         <span class="variable">msg</span> + <span class="variable">colorize</span>(<span class="string">'Invalid response header [bold]{'</span> + <span class="variable">name</span> + <span class="string">'}.\n'</span>
                             + <span class="string">'    Expected: [green]{'</span> + <span class="variable">expected</span> + <span class="string">'}\n'</span>
                             + <span class="string">'    Got: [red]{'</span> + <span class="variable">actual</span> + <span class="string">'}'</span>)
