@@ -1,4 +1,11 @@
 
+0.6.3 / 2010-11-02 
+==================
+
+  * Added `assert.response()` body RegExp support
+  * Fixed issue with _--serial_ not executing files sequentially. Closes #42
+  * Fixed hang when modules use `setInterval` - monitor running tests & force the process to quit after all have completed + timeout [Steve Mason]
+
 0.6.2 / 2010-09-17 
 ==================
 
