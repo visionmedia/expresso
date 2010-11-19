@@ -1,4 +1,11 @@
 
+0.7.0 / 2010-11-19 
+==================
+
+  * Removed `assert` from test function signature
+    Just use `require('assert')` :) this will make integration
+    with libraries like [should](http://github.com/visionmedia/should) cleaner.
+
 0.6.4 / 2010-11-02 
 ==================
 

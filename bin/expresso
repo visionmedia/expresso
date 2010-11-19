@@ -23,7 +23,7 @@ var assert = require('assert'),
  * Expresso version.
  */
 
-var version = '0.6.4';
+var version = '0.7.0';
 
 /**
  * Failure count.
