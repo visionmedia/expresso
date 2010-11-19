@@ -752,21 +752,21 @@ function runSuite(title, tests, fn) {
                             if (++dots % 25 === 0) sys.print('\n');
                         }
                         setup(function(){
-                            if (test.length < 2) {
-                                test(assert);
+                            if (test.length < 1) {
+                                test();
                                 next();
                             } else {
                                 var id = setTimeout(function(){
                                     throw new Error("'" + key + "' timed out");
                                 }, timeout);
-                                test(assert, function(){
+                                test(function(){
                                     clearTimeout(id);
                                     next();
                                 });
                             } 
                         });
                     } else {
-                        test(assert, function(fn){
+                        test(function(fn){
                             process.addListener('beforeExit', function(){
                                 try {
                                     fn();

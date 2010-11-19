@@ -3,7 +3,8 @@
  * Module dependencies.
  */
 
-var http = require('http');
+var assert = require('assert')
+  , http = require('http');
 
 var server = http.createServer(function(req, res){
     if (req.method === 'GET') {
@@ -32,7 +33,7 @@ var server = http.createServer(function(req, res){
 });
 
 module.exports = {
-    'test assert.response()': function(assert, beforeExit){
+    'test assert.response()': function(beforeExit){
         var called = 0;
 
         assert.response(server, {
@@ -74,13 +75,13 @@ module.exports = {
         });
     },
 
-    'test assert.response() regexp': function(assert){
+    'test assert.response() regexp': function(){
       assert.response(server,
         { url: '/foo', method: 'POST', data: 'foobar' },
         { body: /^\/foo foo(bar)?/ });
     },
     
-    'test assert.response() regexp headers': function(assert){
+    'test assert.response() regexp headers': function(){
       assert.response(server,
         { url: '/' },
         { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
