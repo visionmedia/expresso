@@ -89,7 +89,7 @@ the command below, which will first compile node-jscoverage:</p>
 
 <p>To define tests we simply export several functions:</p>
 
-<pre><code>exports['test String#length'] = function(assert){
+<pre><code>exports['test String#length'] = function(){
     assert.equal(6, 'foobar'.length);
 };
 </code></pre>
@@ -99,7 +99,7 @@ export your own object containing the tests, however this
 is essentially the as above:</p>
 
 <pre><code>module.exports = {
-    'test String#length': function(assert){
+    'test String#length': function(){
         assert.equal(6, 'foobar'.length);
     }
 };
@@ -107,16 +107,16 @@ is essentially the as above:</p>
 
 <p>If you prefer not to use quoted keys:</p>
 
-<pre><code>exports.testsStringLength = function(assert){
+<pre><code>exports.testsStringLength = function(){
     assert.equal(6, 'foobar'.length);
 };
 </code></pre>
 
-<p>The second argument passed to each callback is <em>beforeExit</em>,
+<p>The argument passed to each callback is <em>beforeExit</em>,
 which is typically used to assert that callbacks have been
 invoked.</p>
 
-<pre><code>exports.testAsync = function(assert, beforeExit){
+<pre><code>exports.testAsync = function(beforeExit){
     var n = 0;
     setTimeout(function(){
         ++n;
@@ -365,7 +365,7 @@ future <code>--cov</code> will most likely accept a path.</p>
 <p>Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the <em>exports.foo = function(){};</em> syntax is supported for this:</p>
 
 <pre><code>setTimeout(function(){
-    exports['test async exports'] = function(assert){
+    exports['test async exports'] = function(){
         assert.ok('wahoo');
     };
 }, 100);
