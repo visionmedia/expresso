@@ -764,7 +764,7 @@ function runSuite(title, tests, fn) {
                                     next();
                                 });
                             } 
-                        });
+                        }, key);
                     } else {
                         test(function(fn){
                             process.addListener('beforeExit', function(){
