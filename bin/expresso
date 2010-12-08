@@ -81,6 +81,12 @@ var serial = false;
 var timeout = 2000;
 
 /**
+ * Quiet output.
+ */
+
+var quiet = false;
+
+/**
  * Usage documentation.
  */
 
@@ -91,6 +97,7 @@ var usage = ''
     + '\n  -w, --watch          Watch for modifications and re-execute tests'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
+    + '\n  -q, --quiet          Suprress coverage report if 100%'
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
@@ -170,6 +177,10 @@ while (args.length) {
                 require.paths.unshift('lib-cov');
                 run(files);
             })
+            break;
+        case '-q':
+        case '--quiet':
+            quiet = true;
             break;
         case '-b':
         case '--boring':
@@ -478,7 +489,6 @@ function rpad(str, width) {
  */
 
 function reportCoverage(cov) {
-    populateCoverage(cov);
     // Stats
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
@@ -574,6 +584,25 @@ function coverage(data, val) {
         if (data[i] !== undefined && data[i] == val) ++n;
     }
     return n;  
+}
+
+/**
+ * Test if all files have 100% coverage
+ *
+ * @param  {Object} cov
+ * @return {Boolean}
+ */
+
+function hasFullCoverage(cov) {
+  for (var name in cov) {
+    var file = cov[name];
+    if (file instanceof Array) {
+      if (file.coverage !== 100) {
+	return false;
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -802,7 +831,10 @@ function report() {
         notify('100% ok');
     }
     if (typeof _$jscoverage === 'object') {
-        reportCoverage(_$jscoverage);
+        populateCoverage(_$jscoverage);
+        if (!hasFullCoverage(_$jscoverage) || !quiet) {
+            reportCoverage(_$jscoverage);
+        }
     }
 }
 
