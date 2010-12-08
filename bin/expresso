@@ -598,7 +598,7 @@ function hasFullCoverage(cov) {
     var file = cov[name];
     if (file instanceof Array) {
       if (file.coverage !== 100) {
-	return false;
+	      return false;
       }
     }
   }
