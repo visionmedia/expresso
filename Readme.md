@@ -10,6 +10,7 @@
   - intuitive test runner executable
   - test coverage support and reporting
   - uses the _assert_ module
+  - life cycle methods `before` and `after` methods
   - `assert.eql()` alias of `assert.deepEqual()`
   - `assert.response()` http response utility
   - `assert.includes()`
@@ -33,7 +34,7 @@ To install expresso alone (no build required) run:
 
 Install via npm:
 
-	$ npm install expresso
+    $ npm install expresso
 
 ## License 
 
