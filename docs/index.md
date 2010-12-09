@@ -279,15 +279,18 @@ and the other will run tests normally:
 Currently coverage is bound to the _lib_ directory, however in the
 future `--cov` will most likely accept a path.
 
-## Lifecycle Callbacks
+To execute tests in a more serial manner, excu
 
-To better support asynchronous testing, a test suite may define lifecycle 
+
+## Test Suite Life Cycle
+
+To better support asynchronous testing, a test suite may define life cycle 
 callbacks. These methods are invoked in the following order:
 
-1. `beforeAll(done)` - one time, before all tests, supported in non-serial mode
-2. `before(done)` - before each test
+1. `beforeAll(done)` - one time, before all tests
+2. `before(done)` - before each test, same as `setup`
 3. `after(done)` - after each test
-4. `afterAll(done)` - one time, after all tests, supported in non-serial mode
+4. `afterAll(done)` - one time, after all tests
 
 In all cases, the `done` callback is required and must be invoked for 
 succeeding tests to proceed.
@@ -337,3 +340,14 @@ Example code:
         });
       }
     };
+
+To run the tests:
+
+    expresso --serial test/user.test.js
+
+`--serial` changes the signature of test methods to `test(done)` instead of
+`test(beforeExit)`. The key difference is a test *must* invoke `done()` if 
+the parameter is declared on a test fuction. `--serial` mode does not 
+guarantee completion order. Method #2 could very well finish after method #10.
+
+

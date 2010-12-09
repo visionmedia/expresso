@@ -760,10 +760,11 @@ function runSuite(title, tests, fn) {
         : Object.keys(tests);
 
     // Lifecycle methods. Keep legacy setup method.
-    var setup = tests.setup || tests.before || function(fn){ fn(); };
-    var after = tests.after || function(fn){ fn(); };
-    var beforeAll = tests.beforeAll || function(fn){ fn(); };
-    var afterAll = tests.afterAll || function(fn){ fn(); };
+    var action = function(fn){ fn(); };
+    var setup = tests.setup || tests.before || action; 
+    var after = tests.after || action; 
+    var beforeAll = tests.beforeAll ||  action;
+    var afterAll = tests.afterAll || action; 
 
     // Iterate tests
     var iterateTests = (function next(){
@@ -794,7 +795,6 @@ function runSuite(title, tests, fn) {
                                     throw new Error("'" + key + "' timed out");
                                 }, timeout);
 
-                                // testfn(done)
                                 test(function(){
                                     clearTimeout(id);
                                     after(function(){

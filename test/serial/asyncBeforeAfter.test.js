@@ -7,17 +7,19 @@ var assert = require('assert')
 module.exports = {
   
     before: function(done){
+        order.push('before');
         ++before;
         done();
     },
 
     after: function(done) {
+        order.push('after');
         ++after;
         done();
     },
 
-
     beforeAll: function(done) {
+        order.push('beforeAll');
         assert.equal(-3, before);
         assert.equal(-14, after);
         setTimeout(function(){
@@ -28,15 +30,37 @@ module.exports = {
     },
 
     afterAll: function(done) {
-        assert.equal(before, 4);
-        assert.equal(after, 4);
+        order.push('afterAll');
+        assert.equal(before, 5);
+        assert.equal(after, 5);
+        assert.eql(order, [
+          'beforeAll', 
+          'before', 'before_prefix', 'after',
+          'before', 'suffix_before', 'after',
+          'before', 'a', 'after',
+          'before', 'b', 'after',
+          'before', 'c',  'after',
+          'afterAll'
+        ]);
         setTimeout(function(){
             done();
         }, 325);
     },
 
-    a: function(done){
+    // ensure pattern matching does not treat a prefix as life cycle
+    before_prefix: function() {
         assert.equal(1, before);
+        order.push('before_prefix');
+    },
+
+    // ensure pattern matching does not treat a suffix as life cycle
+    suffix_before: function() {
+        assert.equal(2, before);
+        order.push('suffix_before');
+    },
+
+    a: function(done){
+        assert.equal(3, before);
         order.push('a');
         setTimeout(function(){
             var current = after;
@@ -46,7 +70,7 @@ module.exports = {
     },
     
     b: function(done){
-        assert.equal(2, before);
+        assert.equal(4, before);
         order.push('b');
         setTimeout(function(){
             var current = after;
@@ -56,7 +80,7 @@ module.exports = {
     },
     
     c: function(done){
-        assert.equal(3, before);
+        assert.equal(5, before);
         order.push('c');
         setTimeout(function(){
             var current = after;
@@ -64,8 +88,4 @@ module.exports = {
             assert.ok(current < after);
         }, 1000);
     },
-
-    d: function(){
-        assert.eql(order, ['a', 'b', 'c']);
-    }
 };
