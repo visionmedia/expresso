@@ -279,12 +279,63 @@ and the other will run tests normally:
 Currently coverage is bound to the _lib_ directory, however in the
 future `--cov` will most likely accept a path.
 
-## Async Exports
+## Lifecycle Callbacks
 
-Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the _exports.foo = function(){};_ syntax is supported for this:
-    
-	setTimeout(function(){
-	    exports['test async exports'] = function(){
-	        assert.ok('wahoo');
-	    };
-	}, 100);
+To better support asynchronous testing, a test suite may define lifecycle 
+callbacks. These methods are invoked in the following order:
+
+1. `beforeAll(done)` - one time, before all tests, supported in non-serial mode
+2. `before(done)` - before each test
+3. `after(done)` - after each test
+4. `afterAll(done)` - one time, after all tests, supported in non-serial mode
+
+In all cases, the `done` callback is required and must be invoked for 
+succeeding tests to proceed.
+
+As an example, testing asynchronous database operations usually require these
+steps:
+
+1. Connect to the database before running tests.
+2. Before each test, drop/reset the table/collection to a known state.
+3. After all tests have run, disconnect from the database. (In some cases, 
+   Expresso appears to hang if a database connection is open. That is
+   the normal behaviour for an active event loop.)
+
+Example code:
+
+    module.exports = {
+      beforeAll: function(done){
+        db.connect(done);
+      },
+
+      before: function(done){
+        reloadData(done);
+      },
+
+      afterAll: function(done) {
+        db.disconnect();
+        done();
+      },
+
+      'should save a new user': function(done) {
+        var u = new User({
+          name: {
+            first: 'John',
+            last: 'Doe'
+          },
+          email: 'jdoe@test.com'
+        });
+
+        u.save(function(err, user) {
+          assert.equal('John', user.name.first);
+          done();
+        });
+      },
+
+      'should have admin': function(done) {
+        User.find({'email': 'coyote@acme.com'}).first(function(err, admin) {
+          assert.equal('admin', admin.name.first);
+          done();
+        });
+      }
+    };
