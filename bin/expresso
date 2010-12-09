@@ -761,18 +761,22 @@ function runSuite(title, tests, fn) {
 
     // Lifecycle methods. Keep legacy setup method.
     var action = function(fn){ fn(); };
-    var setup = tests.setup || tests.before || action; 
-    var after = tests.after || action; 
-    var beforeAll = tests.beforeAll ||  action;
-    var afterAll = tests.afterAll || action; 
+    var afterSuite = tests.afterAll || tests.afterThis || action; 
+    var afterEach = tests.after || tests.afterEach || action; 
+    var beforeSuite = tests.beforeAll || tests.beforeThis ||  action;
+    var beforeEach = tests.before || tests.beforeEach || tests.setup || action; 
+    if (tests.setup) {
+        print("\nWarning: `setup` method is obsolete in " + title + ". Use `beforeEach` instead.\n");
+    }
 
     // Iterate tests
     var iterateTests = (function next(){
         if (keys.length) {
             var key,
                 test = tests[key = keys.shift()];
+
             // Non-tests
-            if (/^(?:setup|afterAll|after|beforeAll|before|)$/.test(key)) return next(); 
+            if (['after', 'afterEach', 'afterAll', 'afterThis', 'before', 'beforeEach', 'beforeAll', 'beforeThis', 'setup'].indexOf(key) > -1) return next(); 
 
             // Run test
             if (test) {
@@ -784,10 +788,10 @@ function runSuite(title, tests, fn) {
                             sys.print('.');
                             if (++dots % 25 === 0) sys.print('\n');
                         }
-                        setup(function(){
+                        beforeEach(function(){
                             if (test.length < 1) {
                                 test();
-                                after(function(){
+                                afterEach(function(){
                                     next();
                                 });
                             } else {
@@ -797,7 +801,7 @@ function runSuite(title, tests, fn) {
 
                                 test(function(){
                                     clearTimeout(id);
-                                    after(function(){
+                                    afterEach(function(){
                                         next();
                                     });
                                 });
@@ -821,18 +825,20 @@ function runSuite(title, tests, fn) {
             }
             if (!serial) next();
         } else if (serial) {
-            afterAll(function() {
+            afterSuite(function() {
                 fn();
-            });
-        } else {
-            afterAll(function() {
             });
         }
     });
 
-    beforeAll(function() {
+    if (serial) {
+        beforeSuite(function() {
+            iterateTests();
+        });
+    }
+    else {
         iterateTests();
-    });
+    }
 }
 
 /**

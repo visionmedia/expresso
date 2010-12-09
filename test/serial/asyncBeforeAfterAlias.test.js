@@ -15,21 +15,21 @@ var assert = require('assert')
 module.exports = {
  
     // alias `before`
-    beforeEach: function(done){
+    before: function(done){
         order.push('before');
         ++before;
         done();
     },
 
     // alias `after`
-    afterEach: function(done) {
+    after: function(done) {
         order.push('after');
         ++after;
         done();
     },
 
     // alias 'beforeAll'
-    beforeThis: function(done) {
+    beforeAll: function(done) {
         order.push('beforeThis');
         assert.equal(-3, before);
         assert.equal(-14, after);
@@ -41,7 +41,7 @@ module.exports = {
     },
 
     // alias 'afterAll'
-    afterThis: function(done) {
+    afterAll: function(done) {
         order.push('afterThis');
         assert.equal(before, 5);
         assert.equal(after, 5);
