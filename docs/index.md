@@ -348,7 +348,18 @@ To run the tests:
 the test method if the parameter was declared. `--serial` mode does not 
 guarantee completion order. Method #2 could very well finish after method #10.
 
-### Gotchas
+### Aliases
+
+These aliases are available if you are familiar with other testing frameworks, 
+most notably rspec (node loves all coders):
+
+`before` aliases `beforeEach`
+`after` aliases `afterEach`
+`beforeAll` aliases `beforeThis`
+`afterAll` aliases `afterThis`
+
+
+## Gotchas
 
 Test fixtures *should not* create class or instance variables, doing so is likely
 to introduce side-effects that mask subtle bugs. For example,
@@ -360,14 +371,11 @@ to introduce side-effects that mask subtle bugs. For example,
             done();
         },
 
-        test1: function(done){
+        test1: function(){
             setTimeout(function(){
-
                 // fail! test2 changed `_user` to 'bar' while this 
                 // callback was still in the event loop queue
                 assert.equal('foo', _user); 
-
-                done();
             }, 1000);
         },
 
@@ -375,14 +383,3 @@ to introduce side-effects that mask subtle bugs. For example,
             _user = 'bar';
         }
     }
-
-
-### Aliases
-
-These aliases are available if you are familiar with other testing frameworks, 
-most notably rspec (node loves all coders):
-
-`before` aliases `beforeEach`
-`after` aliases `afterEach`
-`beforeAll` aliases `beforeThis`
-`afterAll` aliases `afterThis`
