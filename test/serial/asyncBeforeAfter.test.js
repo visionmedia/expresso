@@ -99,5 +99,5 @@ module.exports = {
             done();
             assert.ok(current < after);
         }, 1000);
-    },
+    }
 };
