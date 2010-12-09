@@ -296,10 +296,8 @@ As an example, testing asynchronous database operations usually require these
 steps:
 
 1. Connect to the database before running tests.
-2. Before each test, drop/reset the table/collection to a known state.
-3. After all tests have run, disconnect from the database. (In some cases, 
-   Expresso appears to hang if a database connection is open. That is
-   the normal behaviour for an active event loop.)
+2. Before each test, drop or reset tables/collections to a known state.
+3. After all tests have run, disconnect from the database.
 
 Example code:
 
