@@ -759,16 +759,19 @@ function runSuite(title, tests, fn) {
         ? only.slice(0)
         : Object.keys(tests);
 
-    // Setup
-    var setup = tests.setup || function(fn){ fn(); };
+    // Lifecycle methods. Keep legacy setup method.
+    var setup = tests.setup || tests.before || function(fn){ fn(); };
+    var after = tests.after || function(fn){ fn(); };
+    var beforeAll = tests.beforeAll || function(fn){ fn(); };
+    var afterAll = tests.afterAll || function(fn){ fn(); };
 
     // Iterate tests
-    (function next(){
+    var iterateTests = (function next(){
         if (keys.length) {
             var key,
                 test = tests[key = keys.shift()];
             // Non-tests
-            if (key === 'setup') return next();
+            if (/^(?:setup|afterAll|after|beforeAll|before|)$/.test(key)) return next(); 
 
             // Run test
             if (test) {
@@ -783,16 +786,23 @@ function runSuite(title, tests, fn) {
                         setup(function(){
                             if (test.length < 1) {
                                 test();
-                                next();
+                                after(function(){
+                                    next();
+                                });
                             } else {
                                 var id = setTimeout(function(){
                                     throw new Error("'" + key + "' timed out");
                                 }, timeout);
+
+                                // testfn(done)
                                 test(function(){
                                     clearTimeout(id);
-                                    next();
+                                    after(function(){
+                                        next();
+                                    });
                                 });
                             } 
+
                         });
                     } else {
                         test(function(fn){
@@ -811,9 +821,18 @@ function runSuite(title, tests, fn) {
             }
             if (!serial) next();
         } else if (serial) {
-          fn();
+            afterAll(function() {
+                fn();
+            });
+        } else {
+            afterAll(function() {
+            });
         }
-    })();
+    });
+
+    beforeAll(function() {
+        iterateTests();
+    });
 }
 
 /**
@@ -881,3 +900,5 @@ process.emit = function(event){
 // Run test files
 
 if (!defer) run(files);
+
+// vim: set ft=javascript sts=4 sw=4:

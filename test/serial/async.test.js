@@ -4,7 +4,7 @@ var assert = require('assert')
   , order = [];
 
 module.exports = {
-    setup: function(done){
+    before: function(done){
         ++setup;
         done();
     },
