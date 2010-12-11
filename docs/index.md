@@ -303,7 +303,7 @@ steps:
 Example code:
 
     module.exports = {
-      beforeThis: function(done){
+      beforeModule: function(done){
         db.connect(done);
       },
 
@@ -311,7 +311,7 @@ Example code:
         reloadData(done);
       },
 
-      afterThis: function(done) {
+      afterModule: function(done) {
         db.disconnect();
         done();
       },
@@ -355,8 +355,8 @@ most notably rspec (node loves all coders):
 
 `before` aliases `beforeEach`
 `after` aliases `afterEach`
-`beforeAll` aliases `beforeThis`
-`afterAll` aliases `afterThis`
+`beforeAll` aliases `beforeModule`
+`afterAll` aliases `afterModule`
 
 
 ## Gotchas

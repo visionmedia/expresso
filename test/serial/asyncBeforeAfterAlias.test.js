@@ -27,7 +27,7 @@ module.exports = {
     },
 
     beforeAll: function(done) {
-        order.push('beforeThis');
+        order.push('beforeAll');
         assert.equal(-3, before);
         assert.equal(-14, after);
         setTimeout(function(){
@@ -38,17 +38,17 @@ module.exports = {
     },
 
     afterAll: function(done) {
-        order.push('afterThis');
+        order.push('afterAll');
         assert.equal(before, 5);
         assert.equal(after, 5);
         assert.eql(order, [
-          'beforeThis', 
+          'beforeAll', 
           'before', 'before_prefix', 'after',
           'before', 'suffix_before', 'after',
           'before', 'a', 'after',
           'before', 'b', 'after',
           'before', 'c',  'after',
-          'afterThis'
+          'afterAll'
         ]);
         setTimeout(function(){
             done();

@@ -761,12 +761,13 @@ function runSuite(title, tests, fn) {
 
     // Lifecycle methods. Keep legacy setup method.
     var action = function(fn){ fn(); };
-    var afterSuite = tests.afterAll || tests.afterThis || action; 
+    var afterSuite = tests.afterAll || tests.afterModule || action; 
     var afterEach = tests.after || tests.afterEach || action; 
-    var beforeSuite = tests.beforeAll || tests.beforeThis ||  action;
+    var beforeSuite = tests.beforeAll || tests.beforeModule ||  action;
     var beforeEach = tests.before || tests.beforeEach || tests.setup || action; 
     if (tests.setup) {
-        print("\nWarning: `setup` method is obsolete in " + title + ". Use `beforeEach` instead.\n");
+        print("\nWarning: `setup` method is obsolete in " + title 
+            + ". Use `beforeEach` instead.\n");
     }
 
     // Iterate tests
@@ -776,7 +777,9 @@ function runSuite(title, tests, fn) {
                 test = tests[key = keys.shift()];
 
             // Non-tests
-            if (['after', 'afterEach', 'afterAll', 'afterThis', 'before', 'beforeEach', 'beforeAll', 'beforeThis', 'setup'].indexOf(key) > -1) return next(); 
+            if (['after', 'afterEach', 'afterAll', 'afterModule', 
+                'before', 'beforeEach', 'beforeAll', 'beforeModule', 
+                'setup'].indexOf(key) > -1) return next(); 
 
             // Run test
             if (test) {

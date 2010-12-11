@@ -360,15 +360,116 @@ $ expresso -I lib --cov test/*
 <p>Currently coverage is bound to the <em>lib</em> directory, however in the
 future <code>--cov</code> will most likely accept a path.</p>
 
-<h2 id="Async-Exports">Async Exports</h2>
+<h2 id="Test-Suite-Life-Cycle">Test Suite Life Cycle</h2>
 
-<p>Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the <em>exports.foo = function(){};</em> syntax is supported for this:</p>
+<p>To facilitate asynchronous testing, a test suite may define life cycle
+methods in <code>--serial</code> mode. These methods are invoked in the this order:</p>
 
-<pre><code>setTimeout(function(){
-    exports['test async exports'] = function(){
-        assert.ok('wahoo');
-    };
-}, 100);
+<ol>
+<li><code>beforeThis(done)</code> - one time, before this suite is run</li>
+<li><code>beforeEach(done)</code> - before each test</li>
+<li><code>afterEach(done)</code> - after each test</li>
+<li><code>afterThis(done)</code> - one time, after this suite has ran</li>
+</ol>
+
+
+<p>In all cases, the <code>done</code> callback is required and must be invoked for
+succeeding tests to proceed.</p>
+
+<p>A gernal use case migt be testing asynchronous database operations usually requires these
+steps:</p>
+
+<ol>
+<li>Connect to the database before running tests.</li>
+<li>Drop or set table/collections to a known state.</li>
+<li>After all tests have run, disconnect from the database.</li>
+</ol>
+
+
+<p>Example code:</p>
+
+<pre><code>module.exports = {
+  beforeModule: function(done){
+    db.connect(done);
+  },
+
+  beforeEach: function(done){
+    reloadData(done);
+  },
+
+  afterModule: function(done) {
+    db.disconnect();
+    done();
+  },
+
+  'should save a new user': function(done) {
+    var u = new User({
+      name: {
+        first: 'John',
+        last: 'Doe'
+      },
+      email: 'jdoe@test.com'
+    });
+
+    u.save(function(err, user) {
+      assert.equal('John', user.name.first);
+      done();
+    });
+  },
+
+  'should have admin': function(done) {
+    User.find({'email': 'coyote@acme.com'}).first(function(err, admin) {
+      assert.equal('admin', admin.name.first);
+      done();
+    });
+  }
+};
+</code></pre>
+
+<p>To run the tests:</p>
+
+<pre><code>expresso --serial test/user.test.js
+</code></pre>
+
+<p><code>--serial</code> mode changes the signature of test methods to <code>test(done)</code> instead of
+<code>test(beforeExit)</code>. The key difference is a test <em>must</em> invoke <code>done()</code> within
+the test method if the parameter was declared. <code>--serial</code> mode does not
+guarantee completion order. Method #2 could very well finish after method #10.</p>
+
+<h3 id="Aliases">Aliases</h3>
+
+<p>These aliases are available if you are familiar with other testing frameworks,
+most notably rspec (node loves all coders):</p>
+
+<p><code>before</code> aliases <code>beforeEach</code>
+<code>after</code> aliases <code>afterEach</code>
+<code>beforeAll</code> aliases <code>beforeModule</code>
+<code>afterAll</code> aliases <code>afterModule</code></p>
+
+<h2 id="Gotchas">Gotchas</h2>
+
+<p>Test fixtures <em>should not</em> create class or instance variables, doing so is likely
+to introduce side-effects that mask subtle bugs. For example,</p>
+
+<pre><code>var _user;
+module.exports = {
+    beforeEach: function(done){
+        _user = 'foo';
+        done();
+    },
+
+    test1: function(){
+        setTimeout(function(){
+            // fail! test2 changed `_user` to 'bar' while this 
+            // callback was still in the event loop queue
+            assert.equal('foo', _user); 
+        }, 1000);
+    },
+
+    test2: function(){
+        _user = 'bar';
+    }
+}
 </code></pre>
 
 </div>

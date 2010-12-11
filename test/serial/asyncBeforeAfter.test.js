@@ -29,8 +29,8 @@ module.exports = {
     },
 
     // alias 'beforeAll'
-    beforeThis: function(done) {
-        order.push('beforeThis');
+    beforeModule: function(done) {
+        order.push('beforeModule');
         assert.equal(-3, before);
         assert.equal(-14, after);
         setTimeout(function(){
@@ -41,18 +41,18 @@ module.exports = {
     },
 
     // alias 'afterAll'
-    afterThis: function(done) {
-        order.push('afterThis');
+    afterModule: function(done) {
+        order.push('afterModule');
         assert.equal(before, 5);
         assert.equal(after, 5);
         assert.eql(order, [
-          'beforeThis', 
+          'beforeModule', 
           'before', 'before_prefix', 'after',
           'before', 'suffix_before', 'after',
           'before', 'a', 'after',
           'before', 'b', 'after',
           'before', 'c',  'after',
-          'afterThis'
+          'afterModule'
         ]);
         setTimeout(function(){
             done();
