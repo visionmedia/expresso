@@ -519,9 +519,11 @@ function reportCoverage(cov) {
     for (var name in cov) {
         if (name.match(/\.js$/)) {
             var file = cov[name];
-            print('\n   [bold]{' + name + '}:');
-            print(file.source);
-            sys.print('\n');
+            if ((file.coverage < 100) || !quiet) {
+               print('\n   [bold]{' + name + '}:'); 
+               print(file.source);
+               sys.print('\n');
+            }
         }
     }
 }
