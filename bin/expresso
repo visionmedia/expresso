@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
 /*
+ * A namespaced shim that allows me to run modules in both the browser and Node.
+ * See http://www.sitepen.com/blog/2010/09/30/run-anywhere-javascript-modules-boilerplate-code/
+ */
+ZC_DEFINE = typeof(define) == 'undefined';
+
+/*
  * Expresso
  * Copyright(c) TJ Holowaychuk <tj@vision-media.ca>
  * (MIT Licensed)
