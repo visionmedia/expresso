@@ -63,12 +63,6 @@ var growl = false;
 var port = 5555;
 
 /**
- * Watch mode.
- */
-
-var watch = false;
-
-/**
  * Execute serially.
  */
 
@@ -94,7 +88,6 @@ var usage = ''
     + '[bold]{Usage}: expresso [options] <file ...>'
     + '\n'
     + '\n[bold]{Options}:'
-    + '\n  -w, --watch          Watch for modifications and re-execute tests'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -q, --quiet          Suppress coverage report if 100%'
@@ -186,10 +179,6 @@ while (args.length) {
         case '--boring':
         	boring = true;
         	break;
-        case '-w':
-        case '--watch':
-            watch = true;
-            break;
         case '-g':
         case '--growl':
             growl = true;
@@ -625,7 +614,6 @@ function run(files) {
             process.exit(1);
         }
     }
-    if (watch) watchFiles(files);
     runFiles(files);
 }
 
@@ -685,49 +673,6 @@ function runFile(file, fn) {
 }
 
 /**
- * Clear the module cache for the given `file`.
- *
- * @param {String} file
- */
-
-function clearCache(file) {
-    var keys = Object.keys(module.moduleCache);
-    for (var i = 0, len = keys.length; i < len; ++i) {
-        var key = keys[i];
-        if (key.indexOf(file) === key.length - file.length) {
-            delete module.moduleCache[key];
-        }
-    }
-}
-
-/**
- * Watch the given `files` for changes.
- *
- * @param {Array} files
- */
-
-function watchFiles(files) {
-    var p = 0,
-        c = ['▫   ', '▫▫  ', '▫▫▫ ', ' ▫▫▫',
-             '  ▫▫', '   ▫', '   ▫', '  ▫▫',
-             '▫▫▫ ', '▫▫  ', '▫   '],
-        l = c.length;
-    cursor(false);
-    setInterval(function(){
-        sys.print(colorize('  [green]{' + c[p++ % l] + '} watching\r'));
-    }, 100);
-    files.forEach(function(file){
-        fs.watchFile(file, { interval: 100 }, function(curr, prev){
-            if (curr.mtime > prev.mtime) {
-                print('  [yellow]{◦} ' + file);
-                clearCache(file);
-                runFile(file);
-            }
-        });
-    });
-}
-
-/**
  * Report `err` for the given `test` and `suite`.
  *
  * @param {String} suite
@@ -743,7 +688,6 @@ function error(suite, test, err) {
             ? test
             : suite + ' ' + test;
     print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
-    if (watch) notify(label + ' failed');
 }
 
 /**
@@ -778,10 +722,8 @@ function runSuite(title, tests, fn) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        if (!watch) {
-                            sys.print('.');
-                            if (++dots % 25 === 0) sys.print('\n');
-                        }
+                        sys.print('.');
+                        if (++dots % 25 === 0) sys.print('\n');
                         setup(function(){
                             if (test.length < 1) {
                                 test();
