@@ -1,4 +1,10 @@
 
+0.7.1 / 2010-12-28 
+==================
+
+  * Fixed `assert.request()` client logic into an issue() function, fired upon the `listen()` callback if the server doesn't have an assigned fd. [guillermo]
+  * Removed `--watch`
+
 0.7.0 / 2010-11-19 
 ==================
 
