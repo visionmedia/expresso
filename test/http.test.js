@@ -32,6 +32,19 @@ var server = http.createServer(function(req, res){
     }
 });
 
+var delayedServer = http.createServer(function(req, res){
+  res.writeHead(200);
+  res.end('it worked');
+});
+
+var oldListen = delayedServer.listen;
+delayedServer.listen = function(){
+  var args = arguments;
+  setTimeout(function(){
+    oldListen.apply(delayedServer, args);
+  }, 100);
+};
+
 module.exports = {
     'test assert.response()': function(beforeExit){
         var called = 0;
@@ -85,5 +98,12 @@ module.exports = {
       assert.response(server,
         { url: '/' },
         { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
+    },
+
+    // [!] if this test doesn't pass, an uncaught ECONNREFUSED will display
+    'test assert.response() with deferred listen()': function(){
+      assert.response(delayedServer,
+        { url: '/' },
+        { body: 'it worked' });
     }
 };
