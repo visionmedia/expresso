@@ -339,6 +339,27 @@ assert.length = function(val, n, msg) {
  */
 
 assert.response = function(server, req, res, msg){
+    // Check that the server is ready or defer
+    if (!server.fd) {
+        if (!('__deferred' in server)) {
+            server.__deferred = [];
+        }
+        server.__deferred.push(arguments);
+        if (!server.__started) {
+            server.listen(server.__port = port++, '127.0.0.1', function(){
+                if (server.__deferred) {
+                    process.nextTick(function(){
+                        server.__deferred.forEach(function(args){
+                          assert.response.apply(assert, args);
+                        });
+                    });
+                }
+            });
+            server.__started = true;
+        }
+        return;
+    }
+
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
         ? res
