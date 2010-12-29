@@ -348,8 +348,10 @@ assert.response = function(server, req, res, msg){
         if (!server.__started) {
             server.listen(server.__port = port++, '127.0.0.1', function(){
                 if (server.__deferred) {
-                    server.__deferred.forEach(function(args){
-                      assert.response.apply(assert, args);
+                    process.nextTick(function(){
+                        server.__deferred.forEach(function(args){
+                          assert.response.apply(assert, args);
+                        });
                     });
                 }
             });
