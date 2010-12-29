@@ -1,4 +1,9 @@
 
+0.7.2 / 2010-12-29 
+==================
+
+  * Fixed problem with `listen()` sometimes firing on the same tick [guillermo]
+
 0.7.1 / 2010-12-28 
 ==================
 
