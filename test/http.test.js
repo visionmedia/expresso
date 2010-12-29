@@ -105,5 +105,8 @@ module.exports = {
       assert.response(delayedServer,
         { url: '/' },
         { body: 'it worked' });
+      assert.response(delayedServer,
+        { url: '/' },
+        { body: 'it worked' });
     }
 };

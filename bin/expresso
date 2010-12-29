@@ -351,20 +351,34 @@ assert.response = function(server, req, res, msg){
     msg = msg || assert.testTitle;
     msg += '. ';
 
-    // Pending responses
-    server.__pending = server.__pending || 0;
-    server.__pending++;
-
     // Create client
     if (!server.fd) {
-        server.listen(server.__port = port++, '127.0.0.1', issue);
+        if (!('__deferred' in server)) {
+            server.__deferred = [];
+        }
+        server.__deferred.push(arguments);
+        if (!server.__started) {
+            server.listen(server.__port = port++, '127.0.0.1', function(){
+                if (server.__deferred) {
+                    server.__deferred.forEach(function(args){
+                      assert.response.apply(assert, args);
+                    });
+                }
+            });
+            server.__started = true;
+        }
     } else {
+        // Pending responses
+        server.__pending = server.__pending || 0;
+        server.__pending++;
+
         issue();
     }
 
     function issue(){
-        if (!server.client)
+        if (!server.client) {
             server.client = http.createClient(server.__port);
+        }
 
         // Issue request
         var timer,
