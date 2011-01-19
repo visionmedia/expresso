@@ -711,10 +711,13 @@ function runFile(file, fn) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack.replace(err.name, ''),
+        stack = (err && err.stack)               ? 
+                 err.stack.replace(err.name, '') :
+                 err,
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
+
     print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
 }
 
