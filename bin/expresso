@@ -711,7 +711,7 @@ function runFile(file, fn) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack.replace(err.name, ''),
+        stack = err.stack ? err.stack.replace(err.name, '') : '',
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
