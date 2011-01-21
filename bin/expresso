@@ -505,6 +505,17 @@ function rpad(str, width) {
  */
 
 function reportCoverage(cov) {
+    // Source
+    for (var name in cov) {
+        if (name.match(/\.js$/)) {
+            var file = cov[name];
+            if ((file.coverage < 100) || !quiet) {
+               print('\n   [bold]{' + name + '}:'); 
+               print(file.source);
+               sys.print('\n');
+            }
+        }
+    }
     // Stats
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
@@ -531,17 +542,6 @@ function reportCoverage(cov) {
     sys.print(' | ' + lpad(cov.totalMisses, 6));
     sys.print(' |\n');
     sys.puts(lastSep);
-    // Source
-    for (var name in cov) {
-        if (name.match(/\.js$/)) {
-            var file = cov[name];
-            if ((file.coverage < 100) || !quiet) {
-               print('\n   [bold]{' + name + '}:'); 
-               print(file.source);
-               sys.print('\n');
-            }
-        }
-    }
 }
 
 /**
@@ -795,6 +795,12 @@ function runSuite(title, tests, fn) {
 function report() {
     cursor(true);
     process.emit('beforeExit');
+    if (typeof _$jscoverage === 'object') {
+        populateCoverage(_$jscoverage);
+        if (!hasFullCoverage(_$jscoverage) || !quiet) {
+            reportCoverage(_$jscoverage);
+        }
+    }
     if (failures) {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
@@ -802,12 +808,6 @@ function report() {
         if (serial) print('');
         print('\n   [green]{100%} ' + testcount + ' tests\n');
         notify('100% ok');
-    }
-    if (typeof _$jscoverage === 'object') {
-        populateCoverage(_$jscoverage);
-        if (!hasFullCoverage(_$jscoverage) || !quiet) {
-            reportCoverage(_$jscoverage);
-        }
     }
 }
 
