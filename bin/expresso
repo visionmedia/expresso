@@ -686,9 +686,11 @@ function runFiles(files) {
 
 function runFile(file, fn) {
     if (file.match(/\.js$/)) {
-        var title = path.basename(file),
-            file = path.join(cwd, file),
-            mod = require(file.replace(/\.js$/, ''));
+        var title = path.basename(file);
+        if (!file.match(/^\//)) {
+            file = path.join(cwd, file);
+        }
+        var mod = require(file.replace(/\.js$/, ''));
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
