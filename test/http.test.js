@@ -87,7 +87,7 @@ module.exports = {
     var calls = 0;
 
     assert.response(server,
-      { url: '/delay', timeout: 300 },
+      { url: '/delay', timeout: 1500 },
       { body: 'delayed' },
       function(){
         ++calls;
