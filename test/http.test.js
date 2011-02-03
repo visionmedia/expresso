@@ -24,8 +24,8 @@ var server = http.createServer(function(req, res){
   } else {
     var body = '';
     req.setEncoding('utf8');
-    req.addListener('data', function(chunk){ body += chunk });
-    req.addListener('end', function(){
+    req.on('data', function(chunk){ body += chunk });
+    req.on('end', function(){
       res.writeHead(200, {});
       res.end(req.url + ' ' + body);
     });

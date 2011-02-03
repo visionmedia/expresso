@@ -407,11 +407,11 @@ assert.response = function(server, req, res, msg){
         }
 
         if (data) request.write(data);
-        request.addListener('response', function(response){
+        request.on('response', function(response){
             response.body = '';
             response.setEncoding('utf8');
-            response.addListener('data', function(chunk){ response.body += chunk; });
-            response.addListener('end', function(){
+            response.on('data', function(chunk){ response.body += chunk; });
+            response.on('end', function(){
                 --server.__pending || server.close();
                 if (timer) clearTimeout(timer);
 
@@ -768,7 +768,7 @@ function runSuite(title, tests, fn) {
                         });
                     } else {
                         test(function(fn){
-                            process.addListener('beforeExit', function(){
+                            process.on('beforeExit', function(){
                                 try {
                                     fn();
                                 } catch (err) {
@@ -825,14 +825,14 @@ function notify(msg) {
 
 // Report uncaught exceptions
 
-process.addListener('uncaughtException', function(err){
+process.on('uncaughtException', function(err){
     error('uncaught', 'uncaught', err);
 });
 
 // Show cursor
 
 ['INT', 'TERM', 'QUIT'].forEach(function(sig){
-    process.addListener('SIG' + sig, function(){
+    process.on('SIG' + sig, function(){
         cursor(true);
         process.exit(1);
     });
