@@ -118,7 +118,10 @@ module.exports = {
 
     assert.response(server,
       { url: '/' },
-      { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
+      { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } },
+      function(){
+        ++calls;
+      });
     
     beforeExit(function(){
       assert.equal(1, calls);
