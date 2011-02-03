@@ -46,64 +46,98 @@ delayedServer.listen = function(){
 };
 
 module.exports = {
-    'test assert.response()': function(beforeExit){
-      var called = 0;
+  'test assert.response(req, res, fn)': function(beforeExit){
+    var calls = 0;
 
-      assert.response(server, {
-        url: '/',
-        method: 'GET'
-      },{
-        body: '{"name":"tj"}',
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json; charset=utf8'
-        }
-      });
-
-      assert.response(server, {
-        url: '/foo',
-        method: 'POST',
-        data: 'bar baz'
-      },{
-        body: '/foo bar baz',
-        status: 200
-      }, function(res){
-        ++called;
-        assert.ok(res);
-      });
-
-      assert.response(server, {
-        url: '/foo'
-      }, function(res){
-        ++called;
-        assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
-      });
-
-      assert.response(server,
-        { url: '/delay', timeout: 300 },
-        { body: 'delayed' });
-
-      beforeExit(function(){
-        assert.equal(2, called);
-      });
-    },
-
-    'test assert.response() regexp': function(){
-      assert.response(server,
-        { url: '/foo', method: 'POST', data: 'foobar' },
-        { body: /^\/foo foo(bar)?/ });
-    },
+    assert.response(server, {
+      url: '/',
+      method: 'GET'
+    },{
+      body: '{"name":"tj"}',
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json; charset=utf8'
+      }
+    }, function(res){
+      ++calls;
+      assert.ok(res);
+    });
     
-    'test assert.response() regexp headers': function(){
-      assert.response(server,
-        { url: '/' },
-        { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
-    },
+    beforeExit(function(){
+      assert.equal(1, calls);
+    })
+  },
 
-    // [!] if this test doesn't pass, an uncaught ECONNREFUSED will display
-    'test assert.response() with deferred listen()': function(){
-      assert.response(delayedServer,
-        { url: '/' },
-        { body: 'it worked' });
-    }
+  'test assert.response(req, fn)': function(beforeExit){
+    var calls = 0;
+
+    assert.response(server, {
+      url: '/foo'
+    }, function(res){
+      ++calls;
+      assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
+    });
+
+    beforeExit(function(){
+      assert.equal(1, calls);
+    });
+  },
+  
+  'test assert.response() delay': function(beforeExit){
+    var calls = 0;
+
+    assert.response(server,
+      { url: '/delay', timeout: 300 },
+      { body: 'delayed' },
+      function(){
+        ++calls;
+      });
+
+    beforeExit(function(){
+      assert.equal(1, calls);
+    });
+  },
+
+  'test assert.response() regexp': function(beforeExit){
+    var calls = 0;
+
+    assert.response(server,
+      { url: '/foo', method: 'POST', data: 'foobar' },
+      { body: /^\/foo foo(bar)?/ },
+      function(){
+        ++calls;
+      });
+    
+    beforeExit(function(){
+      assert.equal(1, calls);
+    });
+  },
+  
+  'test assert.response() regexp headers': function(beforeExit){
+    var calls = 0;
+
+    assert.response(server,
+      { url: '/' },
+      { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
+    
+    beforeExit(function(){
+      assert.equal(1, calls);
+    });
+  },
+
+  // [!] if this test doesn't pass, an uncaught ECONNREFUSED will display
+  'test assert.response() with deferred listen()': function(beforeExit){
+    var calls = 0;
+
+    assert.response(delayedServer,
+      { url: '/' },
+      { body: 'it worked' },
+      function(){
+        ++calls;
+      });
+
+    beforeExit(function(){
+      assert.equal(1, calls);
+    });
+  }
 };
