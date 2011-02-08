@@ -798,7 +798,7 @@ function report() {
     if (failures) {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
-    } else {
+    } else if(!quiet) {
         if (serial) print('');
         print('\n   [green]{100%} ' + testcount + ' tests\n');
         notify('100% ok');
