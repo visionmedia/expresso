@@ -57,6 +57,12 @@ var boring = false;
 var growl = false;
 
 /**
+ * Libnotify notifications.
+ */
+
+var libnotify = false;
+
+/**
  * Server port.
  */
 
@@ -89,6 +95,7 @@ var usage = ''
     + '\n'
     + '\n[bold]{Options}:'
     + '\n  -g, --growl          Enable growl notifications'
+    + '\n  -l, --libnotify      Enable libnotify notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
     + '\n  -q, --quiet          Suppress coverage report if 100%'
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
@@ -182,6 +189,10 @@ while (args.length) {
         case '-g':
         case '--growl':
             growl = true;
+            break;
+        case '-l':
+        case '--libnotify':
+            libnotify = true;
             break;
         case '-s':
         case '--serial':
@@ -820,6 +831,8 @@ function report() {
 function notify(msg) {
     if (growl) {
         childProcess.exec('growlnotify -name Expresso -m "' + msg + '"');
+    } else if (libnotify) {
+        childProcess.exec('notify-send "Expresso" "' + msg + '"');	
     }
 }
 
