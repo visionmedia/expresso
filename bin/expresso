@@ -652,10 +652,12 @@ function run(files) {
  */
 
 function cursor(show) {
-    if (show) {
-        sys.print('\x1b[?25h');
-    } else {
-        sys.print('\x1b[?25l');
+    if (!quiet) {
+        if (show) {
+            sys.print('\x1b[?25h');
+        } else {
+            sys.print('\x1b[?25l');
+        }
     }
 }
 
