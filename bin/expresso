@@ -23,7 +23,7 @@ var assert = require('assert'),
  * Expresso version.
  */
 
-var version = '0.7.2';
+var version = '0.7.2-bozuko';
 
 /**
  * Failure count.
@@ -339,28 +339,6 @@ assert.length = function(val, n, msg) {
  */
 
 assert.response = function(server, req, res, msg){
-    // Check that the server is ready or defer
-    if (!server.__listening) {
-        if (!('__deferred' in server)) {
-            server.__deferred = [];
-        }
-        server.__deferred.push(arguments);
-        if (!server.__started) {
-            server.listen(server.__port = port++, '127.0.0.1', function(){
-	        server.__listening = true;
-                if (server.__deferred) {
-                    process.nextTick(function(){
-                        server.__deferred.forEach(function(args){
-                          assert.response.apply(assert, args);
-                        });
-                    });
-                }
-            });
-            server.__started = true;
-        }
-        return;
-    }
-
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
         ? res
@@ -368,21 +346,12 @@ assert.response = function(server, req, res, msg){
             ? msg
             : function(){};
 
-    // Default messate to test title
+    // Default message to test title
     if (typeof msg === 'function') msg = null;
     msg = msg || assert.testTitle;
     msg += '. ';
-
-    // Pending responses
-    server.__pending = server.__pending || 0;
-    server.__pending++;
-
-    // Create client
-    if (!server.fd) {
-        server.listen(server.__port = port++, '127.0.0.1', issue);
-    } else {
-        issue();
-    }
+    
+    issue();
 
     function issue(){
         if (!server.client)
@@ -401,8 +370,7 @@ assert.response = function(server, req, res, msg){
         // Timeout
         if (requestTimeout) {
             timer = setTimeout(function(){
-                --server.__pending || server.close();
-                delete req.timeout;
+                    delete req.timeout;
                 assert.fail(msg + 'Request timed out after ' + requestTimeout + 'ms.');
             }, requestTimeout);
         }
@@ -413,8 +381,7 @@ assert.response = function(server, req, res, msg){
             response.setEncoding('utf8');
             response.on('data', function(chunk){ response.body += chunk; });
             response.on('end', function(){
-                --server.__pending || server.close();
-                if (timer) clearTimeout(timer);
+	        if (timer) clearTimeout(timer);
 
                 // Assert response body
                 if (res.body !== undefined) {
@@ -712,7 +679,7 @@ function runFile(file, fn) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack ? err.stack.replace(err.name, '') : '',
+        stack = err.stack.replace(err.name, ''),
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
@@ -734,9 +701,8 @@ function runSuite(title, tests, fn) {
         ? only.slice(0)
         : Object.keys(tests);
 
-    // Setup
     var setup = tests.setup || function(fn){ fn(); };
-
+    
     // Iterate tests
     (function next(){
         if (keys.length) {
