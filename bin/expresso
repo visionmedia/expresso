@@ -65,7 +65,7 @@ var port = 5555;
 /**
  * testsuite module for the given set of tests
  */
-var testsuite = require('test/testsuite.js');
+var testsuite = null;
 
 /**
  * Execute serially.
@@ -647,24 +647,26 @@ function hasFullCoverage(cov) {
 
 function run(files) {
     cursor(false);
-    var suite = 'test/testsuite.js';
-    var testfiles = [];
     if (!files.length) {
         try {
             files = fs.readdirSync('test').map(function(file){
                 return 'test/' + file;
             });
-	    testfiles = files.filter(function(val, index, array) {
-					     return (val != suite);
-					 });
         } catch (err) {
             print('\n  failed to load tests in [bold]{./test}\n');
             ++failures;
             process.exit(1);
         }
     }
-    if (testsuite) {
+    var suite = 'test/testsuite.js';
+    var testfiles = files.filter(function(val, index, array) {
+         return (val != suite);
+    });
+    if (files.length != testfiles.length) {
+	testsuite = require(suite);
 	testsuite.setup(function(){ runFiles(testfiles); });
+    } else {
+	runFiles(testfiles);
     }
 }
 
