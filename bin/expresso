@@ -658,11 +658,15 @@ function run(files) {
             process.exit(1);
         }
     }
-    var suite = 'test/testsuite.js';
+    var suite = null;
     var testfiles = files.filter(function(val, index, array) {
-         return (val != suite);
+	 if (val.match(/testsuite\.js/)) {
+	     suite = val;
+	     return false;
+	 } 
+         return true;
     });
-    if (files.length != testfiles.length) {
+    if (suite) {
 	testsuite = require(suite);
 	testsuite.setup(function(){ runFiles(testfiles); });
     } else {
