@@ -1,4 +1,3 @@
-var print = require('util').debug;
 var assert = require('assert');
 var testserver = require('testserver');
 
