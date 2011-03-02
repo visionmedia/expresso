@@ -347,9 +347,9 @@ assert.response = function(server, req, res, msg){
             server.__listening = true;
             if (server.__deferred) {
                 server.__deferred.forEach(function(args){
-		     assert.response.apply(assert, args);
+	            assert.response.apply(assert, args);
 		});
-		server.__deferred = null;
+	        server.__deferred = null;
             }
          });
 	return;
@@ -357,8 +357,8 @@ assert.response = function(server, req, res, msg){
 
     // The socket was created but is not yet listening, so keep deferring
     if (!server.__listening) {
-	server.__deferred.push(arguments);
-	return;
+        server.__deferred.push(arguments);
+        return;
     }
 
     // Callback as third or fourth arg
