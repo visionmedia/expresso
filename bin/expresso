@@ -400,8 +400,8 @@ assert.response = function(server, req, res, msg){
 
 	var check = function() {
 	    if (--server.__pending === 0) {
-		server.close();
-		server.__listening = false;
+	        server.close();
+	        server.__listening = false;
 	    }
 	};
 
