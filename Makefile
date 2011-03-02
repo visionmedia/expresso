@@ -8,9 +8,6 @@ HTMLDOCS = $(DOCS:.md=.html)
 test: $(BIN)
 	@./$(BIN) -I lib --growl $(TEST_FLAGS) test/*.test.js
 
-test-testsuite:
-	@./$(BIN) -I lib --growl $(TEST_FLAGS) test/testsuite/*.js
-
 test-cov:
 	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
 
