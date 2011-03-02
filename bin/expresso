@@ -64,7 +64,7 @@ var port = 5555;
 
 /**
  * Execute serially.
-  */
+ */
 
 var serial = false;
 
@@ -348,8 +348,8 @@ assert.response = function(server, req, res, msg){
             if (server.__deferred) {
                 server.__deferred.forEach(function(args){
                     assert.response.apply(assert, args);
-	        });
-	        server.__deferred = null;
+                });
+                server.__deferred = null;
             }
         });
         return;
