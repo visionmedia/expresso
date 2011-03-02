@@ -396,9 +396,9 @@ assert.response = function(server, req, res, msg){
             data = req.data || req.body,
             requestTimeout = req.timeout || 0;
 
-        var request = client.request(method, req.url, req.headers);
+	var request = client.request(method, req.url, req.headers);
 
-	var check = function(){
+	var check = function() {
 	    if (--server.__pending === 0) {
 		server.close();
 		server.__listening = false;
