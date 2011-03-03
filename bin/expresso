@@ -5,7 +5,7 @@
  * Copyright(c) TJ Holowaychuk <tj@vision-media.ca>
  * (MIT Licensed)
  */
- 
+
 /**
  * Module dependencies.
  */
@@ -41,13 +41,13 @@ var testcount = 0;
 /**
  * Whitelist of tests to run.
  */
- 
+
 var only = [];
 
 /**
  * Boring output.
  */
- 
+
 var boring = false;
 
 /**
@@ -341,22 +341,23 @@ assert.length = function(val, n, msg) {
 assert.response = function(server, req, res, msg){
     // Check that the server is ready or defer
     if (!server.fd) {
-        if (!('__deferred' in server)) {
-            server.__deferred = [];
-        }
+        server.__deferred = server.__deferred || [];
         server.__deferred.push(arguments);
-        if (!server.__started) {
-            server.listen(server.__port = port++, '127.0.0.1', function(){
-                if (server.__deferred) {
-                    process.nextTick(function(){
-                        server.__deferred.forEach(function(args){
-                          assert.response.apply(assert, args);
-                        });
-                    });
-                }
-            });
-            server.__started = true;
-        }
+        server.listen(server.__port = port++, '127.0.0.1', function(){
+            server.__listening = true;
+            if (server.__deferred) {
+                server.__deferred.forEach(function(args){
+                    assert.response.apply(assert, args);
+                });
+                server.__deferred = null;
+            }
+        });
+        return;
+    }
+
+    // The socket was created but is not yet listening, so keep deferring
+    if (!server.__listening) {
+        server.__deferred.push(arguments);
         return;
     }
 
@@ -397,10 +398,17 @@ assert.response = function(server, req, res, msg){
 
         var request = client.request(method, req.url, req.headers);
 
+        var check = function() {
+            if (--server.__pending === 0) {
+                server.close();
+                server.__listening = false;
+            }
+        };
+
         // Timeout
         if (requestTimeout) {
             timer = setTimeout(function(){
-                --server.__pending || server.close();
+                check();
                 delete req.timeout;
                 assert.fail(msg + 'Request timed out after ' + requestTimeout + 'ms.');
             }, requestTimeout);
@@ -412,7 +420,6 @@ assert.response = function(server, req, res, msg){
             response.setEncoding('utf8');
             response.on('data', function(chunk){ response.body += chunk; });
             response.on('end', function(){
-                --server.__pending || server.close();
                 if (timer) clearTimeout(timer);
 
                 // Assert response body
@@ -460,6 +467,7 @@ assert.response = function(server, req, res, msg){
 
                 // Callback
                 callback(response);
+                check();
             });
         });
         request.end();
@@ -536,7 +544,7 @@ function reportCoverage(cov) {
         if (name.match(/\.js$/)) {
             var file = cov[name];
             if ((file.coverage < 100) || !quiet) {
-               print('\n   [bold]{' + name + '}:'); 
+               print('\n   [bold]{' + name + '}:');
                print(file.source);
                sys.print('\n');
             }
@@ -551,11 +559,11 @@ function reportCoverage(cov) {
  */
 
 function populateCoverage(cov) {
-    cov.LOC = 
+    cov.LOC =
     cov.SLOC =
     cov.totalFiles =
     cov.totalHits =
-    cov.totalMisses = 
+    cov.totalMisses =
     cov.coverage = 0;
     for (var name in cov) {
         var file = cov[name];
@@ -601,7 +609,7 @@ function coverage(data, val) {
     for (var i = 0, len = data.length; i < len; ++i) {
         if (data[i] !== undefined && data[i] == val) ++n;
     }
-    return n;  
+    return n;
 }
 
 /**
@@ -764,7 +772,7 @@ function runSuite(title, tests, fn) {
                                     clearTimeout(id);
                                     next();
                                 });
-                            } 
+                            }
                         });
                     } else {
                         test(function(fn){
@@ -789,7 +797,7 @@ function runSuite(title, tests, fn) {
 }
 
 /**
- * Report exceptions.
+* Report exceptions.
  */
 
 function report() {
