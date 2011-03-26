@@ -20,6 +20,16 @@ var assert = require('assert'),
     defer;
 
 /**
+ * Setup the regex which is used to match test files.
+ * Adjust it to include coffeescript files if CS is available
+ */
+var file_matcher = /\.js$/;
+try { 
+  require('coffee-script'); 
+  file_matcher = /\.(js|coffee)$/;
+} catch (e) {}
+
+/**
  * Expresso version.
  */
 
@@ -188,7 +198,7 @@ while (args.length) {
             serial = true;
             break;
         default:
-            if (/\.js$/.test(arg)) {
+            if (file_matcher.test(arg)) {
                 files.push(arg);
             }
             break;
@@ -541,7 +551,7 @@ function reportCoverage(cov) {
     sys.puts(lastSep);
     // Source
     for (var name in cov) {
-        if (name.match(/\.js$/)) {
+        if (name.match(file_matcher)) {
             var file = cov[name];
             if ((file.coverage < 100) || !quiet) {
                print('\n   [bold]{' + name + '}:');
@@ -693,10 +703,10 @@ function runFiles(files) {
  */
 
 function runFile(file, fn) {
-    if (file.match(/\.js$/)) {
+    if (file.match(file_matcher)) {
         var title = path.basename(file),
             file = path.join(cwd, file),
-            mod = require(file.replace(/\.js$/, ''));
+            mod = require(file.replace(file_matcher,''));
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
