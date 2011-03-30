@@ -670,6 +670,7 @@ function run(files) {
  */
 
 function cursor(show) {
+    if (boring) return;    
     if (show) {
         sys.print('\x1b[?25h');
     } else {
