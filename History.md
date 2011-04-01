@@ -1,4 +1,9 @@
 
+0.7.5 / 2011-03-31 
+==================
+
+  * Fixed; removed some ansi-escape sequences in --boring mode [Norbert Schultz]
+
 0.7.4 / 2011-03-27 
 ==================
 
