@@ -349,6 +349,11 @@ assert.length = function(val, n, msg) {
  */
 
 assert.response = function(server, req, res, msg){
+    if (server.fd && !server.__listening) {
+        // This server was started before.
+        server.close();
+    }
+
     // Check that the server is ready or defer
     if (!server.fd) {
         server.__deferred = server.__deferred || [];
