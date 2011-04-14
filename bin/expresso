@@ -349,11 +349,6 @@ assert.length = function(val, n, msg) {
  */
 
 assert.response = function(server, req, res, msg){
-    if (server.fd && !server.__listening) {
-        // This server was started before.
-        server.close();
-    }
-
     // Check that the server is ready or defer
     if (!server.fd) {
         server.__deferred = server.__deferred || [];
@@ -368,6 +363,10 @@ assert.response = function(server, req, res, msg){
             }
         });
         return;
+    } else if (!server.__port) {
+        server.__deferred = server.__deferred || [];
+        server.__port = server.address().port;
+        server.__listening = true;
     }
 
     // The socket was created but is not yet listening, so keep deferring
