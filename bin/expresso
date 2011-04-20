@@ -730,11 +730,25 @@ function runFile(file, fn) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack ? err.stack.replace(err.name, '') : '',
+        stack = err.stack,
         label = test === 'uncaught'
             ? test
-            : suite + ' ' + test;
-    print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
+            : suite + ' ' + test,
+        message = err.message;
+    var s = '\n   [bold]{' + label + '}:';
+    if (name) {
+        s += ' [red]{' + name + '}';
+    }
+    if (message) {
+        s += ' ' + err.message;
+    }
+    if (!err.message && !(err instanceof Error)) {
+        s += ' ' + err;
+    }
+    if (stack) {
+        s += '\n' + err.stack.split('\n').slice(1).join('\n');
+    }
+    print(s + '\n');
 }
 
 /**
