@@ -733,16 +733,17 @@ function error(suite, test, err) {
         stack = err.stack,
         label = test === 'uncaught'
             ? test
-            : suite + ' ' + test,
-        message = err.message;
+            : suite + ' ' + test;
+    var message = name === 'AssertionError'
+            ? (err.actual + " " + err.operator + " " + err.actual)
+            : err.message;
     var s = '\n   [bold]{' + label + '}:';
     if (name) {
         s += ' [red]{' + name + '}';
     }
     if (message) {
-        s += ' ' + err.message;
-    }
-    if (!err.message && !(err instanceof Error)) {
+        s += ' ' + message;
+    } else {
         s += ' ' + err;
     }
     if (stack) {
