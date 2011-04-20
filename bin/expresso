@@ -735,17 +735,20 @@ function error(suite, test, err) {
             ? test
             : suite + ' ' + test,
         message = err.message;
-  var s = '\n   [bold]{' + label + '}:';
-  if (name) {
-    s += ' [red]{' + name + '}';
-  }
-  if (message) {
-    s += ' ' + err.message;
-  }
-  if (stack) {
-    s += '\n' + err.stack.split('\n').slice(1).join('\n');
-  }
-  print(s + '\n');
+    var s = '\n   [bold]{' + label + '}:';
+    if (name) {
+        s += ' [red]{' + name + '}';
+    }
+    if (message) {
+        s += ' ' + err.message;
+    }
+    if (!err.message && !(err instanceof Error)) {
+        s += ' ' + err;
+    }
+    if (stack) {
+        s += '\n' + err.stack.split('\n').slice(1).join('\n');
+    }
+    print(s + '\n');
 }
 
 /**
