@@ -404,7 +404,8 @@ assert.response = function(server, req, res, msg){
             method = req.method || 'GET',
             status = res.status || res.statusCode,
             data = req.data || req.body,
-            requestTimeout = req.timeout || 0;
+            requestTimeout = req.timeout || 0,
+            encoding = req.encoding || 'utf8';
 
         var request = client.request(method, req.url, req.headers);
 
@@ -427,7 +428,7 @@ assert.response = function(server, req, res, msg){
         if (data) request.write(data);
         request.on('response', function(response){
             response.body = '';
-            response.setEncoding('utf8');
+            response.setEncoding(encoding);
             response.on('data', function(chunk){ response.body += chunk; });
             response.on('end', function(){
                 if (timer) clearTimeout(timer);
