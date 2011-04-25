@@ -24,8 +24,8 @@ var assert = require('assert'),
  * Adjust it to include coffeescript files if CS is available
  */
 var file_matcher = /\.js$/;
-try { 
-  require('coffee-script'); 
+try {
+  require('coffee-script');
   file_matcher = /\.(js|coffee)$/;
 } catch (e) {}
 
@@ -670,7 +670,7 @@ function run(files) {
  */
 
 function cursor(show) {
-    if (boring) return;    
+    if (boring) return;
     if (show) {
         sys.print('\x1b[?25h');
     } else {
@@ -734,7 +734,8 @@ function error(suite, test, err) {
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
-    var message = name === 'AssertionError'
+    var message = name === 'AssertionError' &&
+                             (err.actual !== undefined && err.operator !== undefined && err.actual !== undefined)
             ? (err.actual + " " + err.operator + " " + err.actual)
             : err.message;
     var s = '\n   [bold]{' + label + '}:';
