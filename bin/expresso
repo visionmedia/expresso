@@ -90,6 +90,18 @@ var timeout = 2000;
 
 var quiet = false;
 
+/** 
+ * Output functions.
+ */
+
+function write(str) {
+    process.stderr.write(str);
+}
+
+function writeln(str) {
+    write(str + '\n');
+}
+
 /**
  * Usage documentation.
  */
@@ -127,7 +139,7 @@ while (args.length) {
             break;
         case '-v':
         case '--version':
-            sys.puts(version);
+            writeln(version);
             process.exit(1);
             break;
         case '-i':
@@ -527,28 +539,28 @@ function reportCoverage(cov) {
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
         lastSep = '                                              +----------+------+------+--------+';
-    sys.puts(sep);
-    sys.puts('   | filename                                 | coverage | LOC  | SLOC | missed |');
-    sys.puts(sep);
+    writeln(sep);
+    writeln('   | filename                                 | coverage | LOC  | SLOC | missed |');
+    writeln(sep);
     for (var name in cov) {
         var file = cov[name];
         if (Array.isArray(file)) {
-            sys.print('   | ' + rpad(name, 40));
-            sys.print(' | ' + lpad(file.coverage.toFixed(2), 8));
-            sys.print(' | ' + lpad(file.LOC, 4));
-            sys.print(' | ' + lpad(file.SLOC, 4));
-            sys.print(' | ' + lpad(file.totalMisses, 6));
-            sys.print(' |\n');
+            write('   | ' + rpad(name, 40));
+            write(' | ' + lpad(file.coverage.toFixed(2), 8));
+            write(' | ' + lpad(file.LOC, 4));
+            write(' | ' + lpad(file.SLOC, 4));
+            write(' | ' + lpad(file.totalMisses, 6));
+            write(' |\n');
         }
     }
-    sys.puts(sep);
-    sys.print('     ' + rpad('', 40));
-    sys.print(' | ' + lpad(cov.coverage.toFixed(2), 8));
-    sys.print(' | ' + lpad(cov.LOC, 4));
-    sys.print(' | ' + lpad(cov.SLOC, 4));
-    sys.print(' | ' + lpad(cov.totalMisses, 6));
-    sys.print(' |\n');
-    sys.puts(lastSep);
+    writeln(sep);
+    write('     ' + rpad('', 40));
+    write(' | ' + lpad(cov.coverage.toFixed(2), 8));
+    write(' | ' + lpad(cov.LOC, 4));
+    write(' | ' + lpad(cov.SLOC, 4));
+    write(' | ' + lpad(cov.totalMisses, 6));
+    write(' |\n');
+    writeln(lastSep);
     // Source
     for (var name in cov) {
         if (name.match(file_matcher)) {
@@ -556,7 +568,7 @@ function reportCoverage(cov) {
             if ((file.coverage < 100) || !quiet) {
                print('\n   [bold]{' + name + '}:');
                print(file.source);
-               sys.print('\n');
+               write('\n');
             }
         }
     }
@@ -672,9 +684,9 @@ function run(files) {
 function cursor(show) {
     if (boring) return;    
     if (show) {
-        sys.print('\x1b[?25h');
+        write('\x1b[?25h');
     } else {
-        sys.print('\x1b[?25l');
+        write('\x1b[?25l');
     }
 }
 
@@ -769,8 +781,8 @@ function runSuite(title, tests, fn) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        sys.print('.');
-                        if (++dots % 25 === 0) sys.print('\n');
+                        write('.');
+                        if (++dots % 25 === 0) write('\n');
                         setup(function(){
                             if (test.length < 1) {
                                 test();
