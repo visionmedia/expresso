@@ -734,10 +734,16 @@ function error(suite, test, err) {
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
-    var message = name === 'AssertionError' &&
-                             (err.actual !== undefined && err.operator !== undefined && err.actual !== undefined)
-            ? (err.actual + " " + err.operator + " " + err.actual)
-            : err.message;
+    var message = "";
+    if (err.actual !== undefined && err.operator !== undefined && err.expected !== undefined) {
+        message += (err.actual + " " + err.operator + " " + err.expected);
+        if (err.message) {
+            message += ". ";
+        }
+    }
+    if (err.message) {
+        message += err.message;
+    }
     var s = '\n   [bold]{' + label + '}:';
     if (name) {
         s += ' [red]{' + name + '}';
