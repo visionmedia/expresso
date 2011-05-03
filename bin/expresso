@@ -368,9 +368,7 @@ assert.response = function(server, req, res, msg){
     // Check that the server is ready or defer
     if (!server.fd) {
         server.__deferred = server.__deferred || [];
-        server.__deferred.push(arguments);
         server.listen(server.__port = port++, '127.0.0.1', check);
-        return;
     } else if (!server.__port) {
         server.__deferred = server.__deferred || [];
         process.nextTick(check);
