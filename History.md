@@ -1,4 +1,9 @@
 
+0.7.6 / 2011-04-20 
+==================
+
+  * Added teardown for serial tests. Sync tests no longer require parameter. [Raevel]
+
 0.7.5 / 2011-03-31 
 ==================
 
