@@ -436,22 +436,6 @@ assert.response = function(server, req, res, msg){
                 // Shut down the server
                 check();
                 
-                /**
-                 * I feel like this is almost right.  Instead, I think all these
-                 * asserts should be wrapped in a try/catch block and that there
-                 * should be an error callback that is passed in as a parameter.
-                 * If an error is caught, it should be passed along to the error
-                 * callback along with the response.  Otherwise the normal
-                 * callback should be called.
-                 *
-                 * For now, since I don't want to go through the logic of 
-                 * checking for an error callback (and should it come before or
-                 * after the normal one), I'm going to leave this.
-                 */
-                
-                // Callback
-                callback(response);
-
                 // Assert response body
                 if (res.body !== undefined) {
                     var eql = res.body instanceof RegExp
@@ -494,6 +478,9 @@ assert.response = function(server, req, res, msg){
                         );
                     }
                 }
+                
+                // Callback
+                callback(response);
             });
         });
         request.end();
