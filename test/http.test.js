@@ -68,6 +68,26 @@ module.exports = {
     })
   },
 
+  'test assert.response(req, res, fn) with POSTed body': function(beforeExit){
+    var calls = 0;
+
+    assert.response(server, {
+      url: '/echo',
+      method: 'POST',
+      body: 'Hello, Expresso!'
+    },{
+      body: '/echo Hello, Expresso!',
+      status: 200
+    }, function(res){
+      ++calls;
+      assert.ok(res);
+    });
+    
+    beforeExit(function(){
+      assert.equal(1, calls);
+    })
+  },
+
   'test assert.response(req, fn)': function(beforeExit){
     var calls = 0;
 
