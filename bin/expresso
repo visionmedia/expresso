@@ -710,6 +710,9 @@ function runFiles(files) {
  */
 
 function runFile(file, fn) {
+    var fileTimeout = setTimeout(function () {
+      throw new Error("Timeout while waiting for tests to be added in file " + file);
+    }, timeout);
     if (file.match(file_matcher)) {
         var title = path.basename(file),
             file = path.join(cwd, file),
@@ -717,6 +720,7 @@ function runFile(file, fn) {
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
+               clearTimeout(fileTimeout);
                runSuite(title, mod, fn);
            } else {
                setTimeout(check, 20);
