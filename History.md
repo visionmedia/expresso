@@ -1,4 +1,10 @@
 
+0.7.7 / 2011-05-24 
+==================
+
+  * Moved to new http request API. Fixing Connection Refused error [Renault John Lecoultre]
+  * Added encoding option to request function. Defaults to utf8 as before. [nateps]
+
 0.7.6 / 2011-04-20 
 ==================
 

@@ -33,7 +33,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.7.6';
+var version = '0.7.7';
 
 /**
  * Failure count.
@@ -395,19 +395,22 @@ assert.response = function(server, req, res, msg){
     }
 
     function issue(){
-        if (!server.client)
-            server.client = http.createClient(server.__port);
 
         // Issue request
         var timer,
-            client = server.client,
             method = req.method || 'GET',
             status = res.status || res.statusCode,
             data = req.data || req.body,
             requestTimeout = req.timeout || 0,
             encoding = req.encoding || 'utf8';
 
-        var request = client.request(method, req.url, req.headers);
+        var request = http.request({
+            host: '127.0.0.1',
+            port: server.__port,
+            path: req.url,
+            method: method,
+            headers: req.headers
+        });
 
         var check = function() {
             if (--server.__pending === 0) {
@@ -426,6 +429,7 @@ assert.response = function(server, req, res, msg){
         }
 
         if (data) request.write(data);
+
         request.on('response', function(response){
             response.body = '';
             response.setEncoding(encoding);
@@ -481,6 +485,7 @@ assert.response = function(server, req, res, msg){
                 check();
             });
         });
+
         request.end();
       }
 };
