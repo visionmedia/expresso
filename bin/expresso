@@ -55,6 +55,12 @@ var testcount = 0;
 var only = [];
 
 /**
+ * Directory to check for test files in.
+ */
+
+var directory = 'test';
+
+/**
  * Boring output.
  */
 
@@ -105,6 +111,7 @@ var usage = ''
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
+    + '\n  -d, --directory PATH Look for test files in this directory (defaults to "test")'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -s, --serial         Execute tests serially'
     + '\n  -b, --boring         Suppress ansi-escape colors'
@@ -145,6 +152,14 @@ while (args.length) {
                 only = only.concat(arg.split(/ *, */));
             } else {
                 throw new Error('--only requires comma-separated test names');
+            }
+            break;
+        case '-d':
+        case '--directory':
+            if (arg = args.shift()) {
+                directory = arg;
+            } else {
+                throw new Error('--directory requires a path');
             }
             break;
         case '-p':
@@ -657,8 +672,8 @@ function run(files) {
     cursor(false);
     if (!files.length) {
         try {
-            files = fs.readdirSync('test').map(function(file){
-                return 'test/' + file;
+            files = fs.readdirSync(directory).map(function(file){
+                return directory + '/' + file;
             });
         } catch (err) {
             print('\n  failed to load tests in [bold]{./test}\n');
