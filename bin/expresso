@@ -735,7 +735,7 @@ function runFile(file, fn) {
 
 function error(suite, test, err) {
     ++failures;
-    var name = err.name,
+    var name = err.name || sys.inspect(err),
         stack = err.stack ? err.stack.replace(err.name, '') : '',
         label = test === 'uncaught'
             ? test
