@@ -31,49 +31,49 @@ To install expresso alone without coverage reporting run:
 
 Install via npm:
 
-	$ npm install expresso
+  $ npm install expresso
 
 ## Examples
 
 To define tests we simply export several functions:
 
-	exports['test String#length'] = function(){
-		assert.equal(6, 'foobar'.length);
-	};
+  exports['test String#length'] = function(){
+    assert.equal(6, 'foobar'.length);
+  };
 
 Alternatively for large numbers of tests you may want to
 export your own object containing the tests, however this
 is essentially the as above:
 
     module.exports = {
-      	'test String#length': function(){
-        	assert.equal(6, 'foobar'.length);
-      	}
+        'test String#length': function(){
+          assert.equal(6, 'foobar'.length);
+        }
     };
 
 If you prefer not to use quoted keys:
 
-	exports.testsStringLength = function(){
-		assert.equal(6, 'foobar'.length);
-	};
+  exports.testsStringLength = function(){
+    assert.equal(6, 'foobar'.length);
+  };
 
 The argument passed to each callback is _beforeExit_,
 which is typically used to assert that callbacks have been
 invoked.
 
     exports.testAsync = function(beforeExit){
-		var n = 0;
-      	setTimeout(function(){
-        	++n;
-        	assert.ok(true);
-      	}, 200);
-      	setTimeout(function(){
-        	++n;
-        	assert.ok(true);
-      	}, 200);
-		beforeExit(function(){
-			assert.equal(2, n, 'Ensure both timeouts are called');
-		});
+    var n = 0;
+        setTimeout(function(){
+          ++n;
+          assert.ok(true);
+        }, 200);
+        setTimeout(function(){
+          ++n;
+          assert.ok(true);
+        }, 200);
+    beforeExit(function(){
+      assert.equal(2, n, 'Ensure both timeouts are called');
+    });
     };
 
 ## Assert Utilities
@@ -146,7 +146,7 @@ and _Strings_s.
 ### assert.response(server, req, res|fn[, msg|fn])
 
 Performs assertions on the given _server_, which should _not_ call
-listen(), as this is handled internally by expresso and the server 
+listen(), as this is handled internally by expresso and the server
 is killed after all responses have completed. This method works with
 any _http.Server_ instance, so _Connect_ and _Express_ servers will work
 as well.
@@ -174,9 +174,9 @@ as the fourth argument for additional assertions.
 Below are some examples:
 
     assert.response(server, {
-	  	url: '/', timeout: 500
+      url: '/', timeout: 500
     }, {
-		body: 'foobar'
+    body: 'foobar'
     });
 
     assert.response(server, {
@@ -187,10 +187,10 @@ Below are some examples:
         status: 200,
         headers: {
             'Content-Type': 'application/json; charset=utf8',
-			'X-Foo': 'bar'
+      'X-Foo': 'bar'
         }
     });
-    
+
     assert.response(server, {
         url: '/foo',
         method: 'POST',
@@ -208,8 +208,8 @@ Below are some examples:
         body: '/foo bar baz',
         status: 200
     }, function(res){
-		// All done, do some more tests if needed
-	});
+    // All done, do some more tests if needed
+  });
 
     assert.response(server, {
         url: '/'
@@ -279,12 +279,40 @@ and the other will run tests normally:
 Currently coverage is bound to the _lib_ directory, however in the
 future `--cov` will most likely accept a path.
 
+If you would like code coverage reports suitable for automated parsing, pass the _--json [output file]_ option:
+
+    $ expresso -I lib test/*
+    $ expresso -I lib --cov --json coverage.json test/*
+
+You should then see the json coverage details in the file you specified:
+
+    {
+        "LOC": 20,
+        "SLOC": 7,
+        "coverage": "71.43",
+        "files": {
+            "bar.js": {
+                "LOC": 4,
+                "SLOC": 2,
+                "coverage": "100.00",
+                "totalMisses": 0
+            },
+            "foo.js": {
+                "LOC": 16,
+                "SLOC": 5,
+                "coverage": "60.00",
+                "totalMisses": 2
+            }
+        },
+        "totalMisses": 2
+    }
+
 ## Async Exports
 
 Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the _exports.foo = function(){};_ syntax is supported for this:
-    
-	setTimeout(function(){
-	    exports['test async exports'] = function(){
-	        assert.ok('wahoo');
-	    };
-	}, 100);
+
+  setTimeout(function(){
+      exports['test async exports'] = function(){
+          assert.ok('wahoo');
+      };
+  }, 100);
