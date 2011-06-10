@@ -33,7 +33,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.7.7';
+var version = '0.7.8';
 
 /**
  * Failure count.
@@ -91,6 +91,12 @@ var timeout = 2000;
 var quiet = false;
 
 /**
+ * JSON code coverage report
+ */
+var jsonCoverage = false;
+var jsonFile;
+
+/**
  * Usage documentation.
  */
 
@@ -100,6 +106,7 @@ var usage = ''
     + '\n[bold]{Options}:'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
+    + '\n  -j, --json           Used in conjunction with --coverage, emit the coverage report as JSON instead of a table'
     + '\n  -q, --quiet          Suppress coverage report if 100%'
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
@@ -187,8 +194,8 @@ while (args.length) {
             break;
         case '-b':
         case '--boring':
-        	boring = true;
-        	break;
+            boring = true;
+            break;
         case '-g':
         case '--growl':
             growl = true;
@@ -196,6 +203,15 @@ while (args.length) {
         case '-s':
         case '--serial':
             serial = true;
+            break;
+        case '-j':
+        case '--json':
+            jsonCoverage = true;
+            if (arg = args.shift()) {
+                jsonFile = path.normalize(arg);
+            } else {
+                throw new Error('--json requires file to write to');
+            }
             break;
         default:
             if (file_matcher.test(arg)) {
@@ -523,12 +539,12 @@ function rpad(str, width) {
 }
 
 /**
- * Report test coverage.
+ * Report test coverage in tabular format
  *
  * @param  {Object} cov
  */
 
-function reportCoverage(cov) {
+function reportCoverageTable(cov) {
     // Stats
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
@@ -566,6 +582,36 @@ function reportCoverage(cov) {
             }
         }
     }
+}
+
+/**
+ * Report test coverage in raw json format
+ *
+ * @param {Object} cov
+ */
+
+function reportCoverageJson(cov) {
+    var report = {
+        "coverage" : cov.coverage.toFixed(2),
+        "LOC" : cov.LOC,
+        "SLOC" : cov.SLOC,
+        "totalMisses" : cov.totalMisses,
+        "files" : {}
+    };
+
+    for (var name in cov) {
+        var file = cov[name];
+        if (Array.isArray(file)) {
+            report.files[name] = {
+                "coverage" : file.coverage.toFixed(2),
+                "LOC" : file.LOC,
+                "SLOC" : file.SLOC,
+                "totalMisses" : file.totalMisses
+            };
+        }
+    }
+
+    fs.writeFileSync(jsonFile, JSON.stringify(report), "utf8");
 }
 
 /**
@@ -640,7 +686,7 @@ function hasFullCoverage(cov) {
     var file = cov[name];
     if (file instanceof Array) {
       if (file.coverage !== 100) {
-	      return false;
+          return false;
       }
     }
   }
@@ -832,7 +878,7 @@ function report() {
     if (typeof _$jscoverage === 'object') {
         populateCoverage(_$jscoverage);
         if (!hasFullCoverage(_$jscoverage) || !quiet) {
-            reportCoverage(_$jscoverage);
+            (jsonCoverage ? reportCoverageJson(_$jscoverage) : reportCoverageTable(_$jscoverage));
         }
     }
 }

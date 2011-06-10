@@ -1,45 +1,45 @@
 <html>
-	<head>
-		<title>Expresso - TDD Framework For Node</title>
-		<style>
-			body {
-				font: 13px/1.4 "Helvetica", "Lucida Grande", Arial, sans-serif;
-				text-align: center;
-			}
-			#ribbon {
-				position: absolute;
-				top: 0;
-				right: 0;
-				z-index: 10;
-			}
-			#wrapper {
-			  margin: 0 auto;
-				padding: 50px 80px;
-				width: 700px;
-				text-align: left;
-			}
-			h1, h2, h3 {
-				margin: 25px 0 15px 0;
-			}
-			h1 {
-			  font-size: 35px;
-			}
-			pre {
-				margin: 0 5px;
-				padding: 15px;
-				border: 1px solid #eee;
-			}
-			a {
-			  color: #00aaff;
-			}
-		</style>
-	</head>
-	<body>
-		<a href="http://github.com/visionmedia/expresso">
-			<img alt="Fork me on GitHub" id="ribbon" src="http://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" />
-		</a>
-		<div id="wrapper">
-			<h1>Expresso</h1>
+  <head>
+    <title>Expresso - TDD Framework For Node</title>
+    <style>
+      body {
+        font: 13px/1.4 "Helvetica", "Lucida Grande", Arial, sans-serif;
+        text-align: center;
+      }
+      #ribbon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+      }
+      #wrapper {
+        margin: 0 auto;
+        padding: 50px 80px;
+        width: 700px;
+        text-align: left;
+      }
+      h1, h2, h3 {
+        margin: 25px 0 15px 0;
+      }
+      h1 {
+        font-size: 35px;
+      }
+      pre {
+        margin: 0 5px;
+        padding: 15px;
+        border: 1px solid #eee;
+      }
+      a {
+        color: #00aaff;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="http://github.com/visionmedia/expresso">
+      <img alt="Fork me on GitHub" id="ribbon" src="http://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" />
+    </a>
+    <div id="wrapper">
+      <h1>Expresso</h1>
 <div class='mp'>
 <h2 id="NAME">NAME</h2>
 <p class="man-name">
@@ -361,6 +361,37 @@ $ expresso -I lib --cov test/*
 <p>Currently coverage is bound to the <em>lib</em> directory, however in the
 future <code>--cov</code> will most likely accept a path.</p>
 
+<p>If you would like code coverage reports suitable for automated parsing, pass the <code>--json [output file]</code> option:</p>
+
+<pre><code>$ expresso -I lib test/*
+$ expresso -I lib --cov --json coverage.json test/*
+</code></pre>
+
+<p>You should then see the json coverage details in the file you specified:</p>
+
+<pre><code>
+  {
+      "LOC": 20,
+      "SLOC": 7,
+      "coverage": "71.43",
+      "files": {
+          "bar.js": {
+              "LOC": 4,
+              "SLOC": 2,
+              "coverage": "100.00",
+              "totalMisses": 0
+          },
+          "foo.js": {
+              "LOC": 16,
+              "SLOC": 5,
+              "coverage": "60.00",
+              "totalMisses": 2
+          }
+      },
+      "totalMisses": 2
+  }
+</code></pre>
+
 <h2 id="Async-Exports">Async Exports</h2>
 
 <p>Sometimes it is useful to postpone running of tests until a callback or event has fired, currently the <em>exports.foo = function(){};</em> syntax is supported for this:</p>
@@ -373,6 +404,6 @@ future <code>--cov</code> will most likely accept a path.</p>
 </code></pre>
 
 </div>
-		</div>
-	</body>
+    </div>
+  </body>
 </html>
