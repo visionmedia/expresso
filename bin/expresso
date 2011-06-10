@@ -437,52 +437,56 @@ assert.response = function(server, req, res, msg){
             response.on('end', function(){
                 if (timer) clearTimeout(timer);
 
-                // Assert response body
-                if (res.body !== undefined) {
-                    var eql = res.body instanceof RegExp
-                      ? res.body.test(response.body)
-                      : res.body === response.body;
-                    assert.ok(
-                        eql,
-                        msg + 'Invalid response body.\n'
-                            + '    Expected: ' + sys.inspect(res.body) + '\n'
-                            + '    Got: ' + sys.inspect(response.body)
-                    );
-                }
+                try {
 
-                // Assert response status
-                if (typeof status === 'number') {
-                    assert.equal(
-                        response.statusCode,
-                        status,
-                        msg + colorize('Invalid response status code.\n'
-                            + '    Expected: [green]{' + status + '}\n'
-                            + '    Got: [red]{' + response.statusCode + '}')
-                    );
-                }
-
-                // Assert response headers
-                if (res.headers) {
-                    var keys = Object.keys(res.headers);
-                    for (var i = 0, len = keys.length; i < len; ++i) {
-                        var name = keys[i],
-                            actual = response.headers[name.toLowerCase()],
-                            expected = res.headers[name],
-                            eql = expected instanceof RegExp
-                              ? expected.test(actual)
-                              : expected == actual;
+                    // Assert response body
+                    if (res.body !== undefined) {
+                        var eql = res.body instanceof RegExp
+                          ? res.body.test(response.body)
+                          : res.body === response.body;
                         assert.ok(
                             eql,
-                            msg + colorize('Invalid response header [bold]{' + name + '}.\n'
-                                + '    Expected: [green]{' + expected + '}\n'
-                                + '    Got: [red]{' + actual + '}')
+                            msg + 'Invalid response body.\n'
+                                + '    Expected: ' + sys.inspect(res.body) + '\n'
+                                + '    Got: ' + sys.inspect(response.body)
                         );
                     }
-                }
 
-                // Callback
-                callback(response);
-                check();
+                    // Assert response status
+                    if (typeof status === 'number') {
+                        assert.equal(
+                            response.statusCode,
+                            status,
+                            msg + colorize('Invalid response status code.\n'
+                                + '    Expected: [green]{' + status + '}\n'
+                                + '    Got: [red]{' + response.statusCode + '}')
+                        );
+                    }
+
+                    // Assert response headers
+                    if (res.headers) {
+                        var keys = Object.keys(res.headers);
+                        for (var i = 0, len = keys.length; i < len; ++i) {
+                            var name = keys[i],
+                                actual = response.headers[name.toLowerCase()],
+                                expected = res.headers[name],
+                                eql = expected instanceof RegExp
+                                  ? expected.test(actual)
+                                  : expected == actual;
+                            assert.ok(
+                                eql,
+                                msg + colorize('Invalid response header [bold]{' + name + '}.\n'
+                                    + '    Expected: [green]{' + expected + '}\n'
+                                    + '    Got: [red]{' + actual + '}')
+                            );
+                        }
+                    }
+
+                    // Callback
+                    callback(response);
+                } finally {
+                    check();
+                }
             });
         });
 
