@@ -33,7 +33,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.7.8';
+var version = '0.7.7';
 
 /**
  * Failure count.
@@ -106,7 +106,7 @@ var usage = ''
     + '\n[bold]{Options}:'
     + '\n  -g, --growl          Enable growl notifications'
     + '\n  -c, --coverage       Generate and report test coverage'
-    + '\n  -j, --json PATH      Used in conjunction with --coverage, emit the coverage report as JSON instead of a table'
+    + '\n  -j, --json PATH      Used in conjunction with --coverage, ouput JSON coverage to PATH'
     + '\n  -q, --quiet          Suppress coverage report if 100%'
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
