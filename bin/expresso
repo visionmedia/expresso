@@ -807,6 +807,9 @@ function runSuite(title, tests, fn) {
     // Setup
     var setup = tests.setup || function(fn){ fn(); };
     var teardown = tests.teardown || function(fn){ fn(); };
+    
+    process.setMaxListeners(process.listeners('beforeExit').length  + keys.length + 1);
+
 
     // Iterate tests
     (function next(){
@@ -840,13 +843,18 @@ function runSuite(title, tests, fn) {
                         });
                     } else {
                         test(function(fn){
-                            process.on('beforeExit', function(){
+                            beforeExit = function(){
                                 try {
                                     fn();
                                 } catch (err) {
                                     error(title, key, err);
+                                } finally {
+                                    process.removeListener('beforeExit', beforeExit);
                                 }
-                            });
+
+                            };
+
+                            process.on('beforeExit', beforeExit);
                         });
                     }
                 } catch (err) {
