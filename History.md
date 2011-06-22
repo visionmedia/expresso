@@ -1,4 +1,9 @@
 
+0.7.9 / 2011-06-22 
+==================
+
+  * Fixed; increase maxListeners to prevent reaching the limit
+
 0.7.8 / 2011-06-22 
 ==================
 

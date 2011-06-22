@@ -33,7 +33,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.7.8';
+var version = '0.7.9';
 
 /**
  * Failure count.
