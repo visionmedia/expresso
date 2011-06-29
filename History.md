@@ -1,4 +1,14 @@
 
+0.7.9 / 2011-06-22 
+==================
+
+  * Fixed; increase maxListeners to prevent reaching the limit
+
+0.7.8 / 2011-06-22 
+==================
+
+  * Added `--json [file]` flag to output JSON test coverage reports
+
 0.7.7 / 2011-05-24 
 ==================
 
