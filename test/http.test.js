@@ -45,6 +45,13 @@ delayedServer.listen = function(){
   }, 100);
 };
 
+var runningServer = http.createServer(function(req, res){
+  res.writeHead(200);
+  res.end('it worked');
+});
+
+runningServer.listen(5554);
+
 module.exports = {
   'test assert.response(req, res, fn)': function(beforeExit){
     var calls = 0;
@@ -142,5 +149,20 @@ module.exports = {
     beforeExit(function(){
       assert.equal(1, calls);
     });
-  }
+  },
+
+  'test assert.response() with already running server': function(beforeExit){
+      var calls = 0;
+
+      assert.response(runningServer,
+        { url: '/' },
+        { body: 'it worked' },
+        function(){
+          ++calls;
+        });
+
+      beforeExit(function(){
+        assert.equal(1, calls);
+      });
+    }
 };
