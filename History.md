@@ -1,4 +1,10 @@
 
+0.8.1 / 2011-07-07 
+==================
+
+  * Revert "Changed: explicitly exit on failure"
+  * acquire port number from servers that are already running and wait until server started up
+
 0.8.0 / 2011-07-05 
 ==================
 
