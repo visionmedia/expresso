@@ -97,6 +97,12 @@ var jsonCoverage = false;
 var jsonFile;
 
 /**
+ * Directory where instrumented JS code will be stored
+ */
+
+var coverageDirectory = ".jscoverage";
+
+/**
  * Usage documentation.
  */
 
@@ -105,7 +111,8 @@ var usage = ''
     + '\n'
     + '\n[bold]{Options}:'
     + '\n  -g, --growl          Enable growl notifications'
-    + '\n  -c, --coverage       Generate and report test coverage'
+    + '\n  -c, --coverage       Generate and report test coverage for files in ./lib'
+    + '\n  -C, --cwd-coverage   Generate and report test coverage for files in working directory'
     + '\n  -j, --json PATH      Used in conjunction with --coverage, ouput JSON coverage to PATH'
     + '\n  -q, --quiet          Suppress coverage report if 100%'
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
@@ -178,6 +185,40 @@ while (args.length) {
             throw new Error('--timeout requires an argument');
           }
           break;
+        case '-C':
+        case '--cwd-coverage':
+            // Check if files were changed since the last run of jscoverage,
+            // to avoid running it again
+            var currentStat = fs.statSync('.')
+            try {
+                var tempStat = fs.statSync(coverageDirectory);
+                if (currentStat.mtime.valueOf() > tempStat.mtime.valueOf()) {
+                    defer = true;
+                }
+            } catch (e) {
+                // Coverage directory does not exist
+                defer = true;
+            }
+            if (defer) {
+                // Unlink the coverage directory and create a temporary one. This is necessary because
+                // node-jscoverage won't accept a destination directory nested in the source one
+                childProcess.exec('rm -fr '+coverageDirectory+' && mktemp -d "/tmp/expresso-XXXXXXXXXXXX"', function(err, stdout){
+                    if (err) throw err;
+                    // Remove newline at the end of mktemp output
+                    var tempPath = stdout.slice(0, -1);
+                    // Run node-jscoverage and move the results to the coverage directory
+                    childProcess.exec('node-jscoverage . '+tempPath+' && mv '+tempPath+' '+coverageDirectory, function(err) {
+                        if (err) throw err;
+                        process.chdir(coverageDirectory);
+                        cwd = process.cwd();
+                        run(files);
+                    })
+                })
+            } else {
+                process.chdir(coverageDirectory);
+                cwd = process.cwd();
+            }
+            break;
         case '-c':
         case '--cov':
         case '--coverage':
@@ -215,6 +256,9 @@ while (args.length) {
             break;
         default:
             if (file_matcher.test(arg)) {
+                if (arg.charAt(0) === '/') {
+                    throw new Error('expresso requires all provided paths to be relative');
+                }
                 files.push(arg);
             }
             break;
