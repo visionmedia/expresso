@@ -100,7 +100,7 @@ var jsonFile;
  * Directory where instrumented JS code will be stored
  */
 
-var coverageDirectory = ".jscoverage"
+var coverageDirectory = ".jscoverage";
 
 /**
  * Usage documentation.
