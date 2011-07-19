@@ -33,7 +33,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.7.9';
+var version = '0.8.1';
 
 /**
  * Failure count.
@@ -368,20 +368,29 @@ assert.response = function(server, req, res, msg){
     var suiteTitle = assert.suiteTitle;
     var testTitle = assert.testTitle;
 
+    function check(){
+        try {
+            server.__port = server.address().port;
+            server.__listening = true;
+        } catch (err) {
+            process.nextTick(check);
+            return;
+        }
+        if (server.__deferred) {
+            server.__deferred.forEach(function(args){
+                assert.response.apply(assert, args);
+            });
+            server.__deferred = null;
+        }
+    }
+
     // Check that the server is ready or defer
     if (!server.fd) {
         server.__deferred = server.__deferred || [];
-        server.__deferred.push(arguments);
-        server.listen(server.__port = port++, '127.0.0.1', function(){
-            server.__listening = true;
-            if (server.__deferred) {
-                server.__deferred.forEach(function(args){
-                    assert.response.apply(assert, args);
-                });
-                server.__deferred = null;
-            }
-        });
-        return;
+        server.listen(server.__port = port++, '127.0.0.1', check);
+    } else if (!server.__port) {
+        server.__deferred = server.__deferred || [];
+        process.nextTick(check);
     }
 
     // The socket was created but is not yet listening, so keep deferring
