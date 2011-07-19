@@ -367,6 +367,7 @@ assert.length = function(val, n, msg) {
 assert.response = function(server, req, res, msg){
     var suiteTitle = assert.suiteTitle;
     var testTitle = assert.testTitle;
+    var callbackFn = assert.callbackFn;
 
     function check(){
         try {
@@ -514,6 +515,8 @@ assert.response = function(server, req, res, msg){
                     callback(response);
                 } catch (err) {
                     error(suiteTitle, testTitle, err);
+                    if (callbackFn)
+                      callbackFn();
                 } finally {
                     check();
                 }
@@ -854,10 +857,11 @@ function runSuite(title, tests, fn) {
                                 var id = setTimeout(function(){
                                     throw new Error("'" + key + "' timed out");
                                 }, timeout);
-                                test(function(){
+                                assert.callbackFn = function(){
                                     clearTimeout(id);
                                     teardown(next);
-                                });
+                                };
+                                test(assert.callbackFn);
                             }
                         });
                     } else {
