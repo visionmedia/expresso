@@ -20,6 +20,12 @@ var assert = require('assert'),
     defer;
 
 /**
+ * Set the node env to test if it hasn't already been set
+ */
+
+if( !process.env.NODE_ENV ) process.env.NODE_ENV = 'test';
+
+/**
  * Setup the regex which is used to match test files.
  * Adjust it to include coffeescript files if CS is available
  */
