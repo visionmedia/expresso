@@ -473,23 +473,37 @@ assert.response = function(server, req, res, msg){
                     var eql = res.body instanceof RegExp
                       ? res.body.test(response.body)
                       : res.body === response.body;
-                    assert.ok(
-                        eql,
-                        msg + 'Invalid response body.\n'
-                            + '    Expected: ' + sys.inspect(res.body) + '\n'
-                            + '    Got: ' + sys.inspect(response.body)
-                    );
+                    try {
+                        assert.ok(
+                            eql,
+                            msg + colorize('Invalid response body.\n'
+                                + '    Expected: [green]{' + sys.inspect(res.body) + '}\n'
+                                + '    Got: [red]{' + sys.inspect(response.body) + '}')
+                        );
+                    }
+                    catch(err)
+                    {
+                        check();
+                        assert.ok(false, err.message);
+                     }
                 }
 
                 // Assert response status
                 if (typeof status === 'number') {
-                    assert.equal(
-                        response.statusCode,
-                        status,
-                        msg + colorize('Invalid response status code.\n'
-                            + '    Expected: [green]{' + status + '}\n'
-                            + '    Got: [red]{' + response.statusCode + '}')
-                    );
+                    try {
+                        assert.equal(
+                            response.statusCode,
+                            status,
+                            msg + colorize('Invalid response status code.\n'
+                                + '    Expected: [green]{' + status + '}\n'
+                                + '    Got: [red]{' + response.statusCode + '}')
+                        );
+                    }
+                    catch(err)
+                    {
+                        check();
+                        assert.ok(false, err.message);
+                    }
                 }
 
                 // Assert response headers
@@ -502,12 +516,19 @@ assert.response = function(server, req, res, msg){
                             eql = expected instanceof RegExp
                               ? expected.test(actual)
                               : expected == actual;
-                        assert.ok(
-                            eql,
-                            msg + colorize('Invalid response header [bold]{' + name + '}.\n'
-                                + '    Expected: [green]{' + expected + '}\n'
-                                + '    Got: [red]{' + actual + '}')
-                        );
+                        try {
+                            assert.ok(
+                                eql,
+                                msg + colorize('Invalid response header [bold]{' + name + '}.\n'
+                                    + '    Expected: [green]{' + expected + '}\n'
+                                    + '    Got: [red]{' + actual + '}')
+                            );
+                        }
+                        catch(err)
+                        {
+                            check();
+                            assert.ok(false, err.message);
+                        }
                     }
                 }
 
