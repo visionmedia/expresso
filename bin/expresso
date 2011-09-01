@@ -61,6 +61,12 @@ var testcount = 0;
 var only = [];
 
 /**
+ * Tag conditional for filtering tests.
+ */
+var tagCond = null;
+var tagsBase = {};
+
+/**
  * Boring output.
  */
 
@@ -117,6 +123,7 @@ var usage = ''
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
+    + '\n  -T, --tags TAGS      Execute only the tests that satisfy TAGS'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -s, --serial         Execute tests serially'
@@ -158,6 +165,18 @@ while (args.length) {
                 only = only.concat(arg.split(/ *, */));
             } else {
                 throw new Error('--only requires comma-separated test names');
+            }
+            break;
+        case '-T':
+        case '--tags':
+            if (arg = args.shift()) {
+                tagCond = arg
+                tagsBase = tagCond.split(/ +&& +| +\|\| +/).reduce( function (hash, tag) {
+                    hash[tag] = false;
+                    return hash
+                }, {});
+            } else {
+                throw new Error('--tags requires a boolean tag expression');
             }
             break;
         case '-p':
@@ -830,6 +849,23 @@ function runSuite(title, tests, fn) {
     var keys = only.length
         ? only.slice(0)
         : Object.keys(tests);
+    if (tagCond) keys = keys.filter( function (key) {
+        var terms = key.split(/ +/),
+            term,
+            i = terms.length,
+            tag,
+            tags = Object.create(tagsBase);
+        while (i--) {
+            term = terms[i];
+            if (term.charAt(0) !== '@')
+                break;
+            tag = term.substr(1);
+            tags[tag] = true
+        }
+        with (tags) {
+            return eval(tagCond);
+        }
+    });
 
     // Setup
     var setup = tests.setup || function(fn){ fn(); };
