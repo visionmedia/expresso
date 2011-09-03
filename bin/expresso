@@ -750,6 +750,8 @@ function runFiles(files) {
         (function next(){
             if (files.length) {
                 runFile(files.shift(), next);
+            } else {
+              process.exit(0);
             }
         })();
     } else {
