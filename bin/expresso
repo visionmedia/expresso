@@ -369,42 +369,12 @@ assert.length = function(val, n, msg) {
  * @param {Object|Function} res
  * @param {String} msg
  */
-
 assert.response = function(server, req, res, msg){
+    // @TODO: This is a big hack and breaks in asynchronous tests.
     var suiteTitle = assert.suiteTitle;
     var testTitle = assert.testTitle;
+    var testStatus = assert.testStatus;
     var callbackFn = assert.callbackFn;
-
-    function check(){
-        try {
-            server.__port = server.address().port;
-            server.__listening = true;
-        } catch (err) {
-            process.nextTick(check);
-            return;
-        }
-        if (server.__deferred) {
-            server.__deferred.forEach(function(args){
-                assert.response.apply(assert, args);
-            });
-            server.__deferred = null;
-        }
-    }
-
-    // Check that the server is ready or defer
-    if (!server.fd) {
-        server.__deferred = server.__deferred || [];
-        server.listen(server.__port = port++, '127.0.0.1', check);
-    } else if (!server.__port) {
-        server.__deferred = server.__deferred || [];
-        process.nextTick(check);
-    }
-
-    // The socket was created but is not yet listening, so keep deferring
-    if (!server.__listening) {
-        server.__deferred.push(arguments);
-        return;
-    }
 
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
@@ -418,19 +388,47 @@ assert.response = function(server, req, res, msg){
     msg = msg || testTitle;
     msg += '. ';
 
+    // Add a unique token for this call to assert.response(). We'll move it to
+    // succeeded/failed when done
+    var token = new Error('Response not completed: ' + msg);
+    testStatus.pending.push(token);
+
+    function check(){
+        try {
+            server.__port = server.address().port;
+            server.__listening = true;
+        } catch (err) {
+            process.nextTick(check);
+            return;
+        }
+        if (server.__deferred) {
+            server.__deferred.forEach(function(fn){ fn(); });
+            server.__deferred = null;
+        }
+    }
+
     // Pending responses
     server.__pending = server.__pending || 0;
     server.__pending++;
 
-    // Create client
+    // Check that the server is ready or defer
     if (!server.fd) {
-        server.listen(server.__port = port++, '127.0.0.1', issue);
+        server.__deferred = server.__deferred || [];
+        server.listen(server.__port = port++, '127.0.0.1', check);
+    } else if (!server.__port) {
+        server.__deferred = server.__deferred || [];
+        process.nextTick(check);
+    }
+
+    // The socket was created but is not yet listening, so keep deferring
+    if (!server.__listening) {
+        server.__deferred.push(issue);
+        return;
     } else {
         issue();
     }
 
     function issue(){
-
         // Issue request
         var timer,
             method = req.method || 'GET',
@@ -519,11 +517,25 @@ assert.response = function(server, req, res, msg){
 
                     // Callback
                     callback(response);
+
+                    // Add this to the succeeded bin.
+                    testStatus.succeeded.push(msg);
                 } catch (err) {
-                    error(suiteTitle, testTitle, err);
-                    if (callbackFn)
-                      callbackFn();
+                    testStatus.failed.push(err);
+                    if (callbackFn) {
+                        callbackFn();
+                    }
                 } finally {
+                    // Remove our token.
+                    var idx = testStatus.pending.indexOf(token);
+                    if (idx >= 0) {
+                        testStatus.pending.splice(idx, 1);
+                    } else {
+                        // Someone else took our token. This is an error.
+                        testStatus.failed.push(new Error('Request succeeded, but token vanished: ' + msg));
+                    }
+
+                    // Potentially shut down the server.
                     check();
                 }
             });
@@ -818,6 +830,16 @@ function error(suite, test, err) {
     print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
 }
 
+function reportTest(test) {
+    test.failed.forEach(function(err) { error(test.suite, test.title, err); });
+    test.pending.forEach(function(err) { error(test.suite, test.title, err); })
+
+    var got = test.failed.length + test.succeeded.length + test.pending.length;
+    if (test.expected > 0 && test.expected !== got) {
+        error(test.suite, test.title, new Error('Expected ' + test.expected + ' assertions, but got ' + got));
+    }
+}
+
 /**
  * Run the given tests, callback `fn()` when finished.
  *
@@ -845,53 +867,90 @@ function runSuite(title, tests, fn) {
     (function next(){
         if (keys.length) {
             var key,
-                test = tests[key = keys.shift()];
+                fn = tests[key = keys.shift()];
             // Non-tests
             if (key === 'setup' || key === 'teardown') return next();
 
             // Run test
-            if (test) {
-                try {
-                    ++testcount;
-                    assert.testTitle = key;
-                    if (serial) {
-                        sys.print('.');
-                        if (++dots % 25 === 0) sys.print('\n');
-                        setup(function(){
-                            if (test.length < 1) {
-                                test();
-                                teardown(next);
-                            } else {
-                                var id = setTimeout(function(){
-                                    throw new Error("'" + key + "' timed out");
-                                }, timeout);
-                                assert.callbackFn = function(){
-                                    clearTimeout(id);
-                                    teardown(next);
-                                };
-                                test(assert.callbackFn);
-                            }
-                        });
-                    } else {
-                        test(function(fn){
-                            process.on('beforeExit', function(){
-                                try {
-                                    fn();
-                                } catch (err) {
-                                    error(title, key, err);
-                                }
-                            });
-                        });
-                    }
-                } catch (err) {
-                    error(title, key, err);
-                }
+            if (fn) {
+                runTest(fn, title, key, setup, teardown, next);
+            } else {
+                // @TODO: Add warning message that there's no test.
+                next();
             }
-            if (!serial) next();
         } else if (serial) {
           fn();
         }
     })();
+}
+
+function runTest(fn, suiteTitle, testTitle, setup, teardown, next) {
+    var test = {
+        fn: fn,
+        suite: suiteTitle,
+        title: testTitle,
+        setup: setup,
+        teardown: teardown,
+        expected: 0,
+        succeeded: [],
+        failed: [],
+        pending: []
+    };
+
+    try {
+        ++testcount;
+        assert.testTitle = testTitle;
+        assert.testStatus = test;
+
+        if (serial) {
+            runSerialTest(test, next);
+        } else {
+            // @TODO: find a way to run setup/tearDown.
+            runParallelTest(test);
+            next();
+        }
+    } catch (err) {
+        test.failed.push(err);
+        reportTest(test);
+    }
+}
+
+function runSerialTest(test, next) {
+    sys.print('.');
+    if (++dots % 25 === 0) sys.print('\n');
+    test.setup(function(){
+        if (test.fn.length < 1) {
+            test.fn();
+            test.teardown(next);
+        } else {
+            var id = setTimeout(function(){
+                throw new Error("'" + key + "' timed out");
+            }, timeout);
+            assert.callbackFn = function(){
+                clearTimeout(id);
+                test.teardown(next);
+                reportTest(test);
+            };
+            test.fn(assert.callbackFn);
+        }
+    });
+}
+
+function runParallelTest(test) {
+    process.on('beforeExit', function() {
+        if (test.beforeExit) {
+            try {
+                test.beforeExit();
+            } catch (err) {
+                test.failed.push(err);
+            }
+        }
+        reportTest(test);
+    });
+
+    test.fn(function(fn) {
+        test.beforeExit = fn;
+    });
 }
 
 /**
