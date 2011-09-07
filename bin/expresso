@@ -902,11 +902,18 @@ function runTest(fn, suiteTitle, testTitle, setup, teardown, next) {
         assert.testTitle = testTitle;
         assert.testStatus = test;
 
+        var customAssert = {
+            __proto__: assert,
+            suiteTitle: assert.suiteTitle,
+            testTitle: assert.testTitle,
+            testStatus: assert.testStatus
+        };
+
         if (serial) {
-            runSerialTest(test, next);
+            runSerialTest(test, customAssert, next);
         } else {
             // @TODO: find a way to run setup/tearDown.
-            runParallelTest(test);
+            runParallelTest(test, customAssert);
             next();
         }
     } catch (err) {
@@ -915,28 +922,28 @@ function runTest(fn, suiteTitle, testTitle, setup, teardown, next) {
     }
 }
 
-function runSerialTest(test, next) {
+function runSerialTest(test, customAssert, next) {
     sys.print('.');
     if (++dots % 25 === 0) sys.print('\n');
     test.setup(function(){
-        if (test.fn.length < 1) {
-            test.fn();
+        if (test.fn.length < 2) {
+            test.fn(customAssert);
             test.teardown(next);
         } else {
             var id = setTimeout(function(){
                 throw new Error("'" + key + "' timed out");
             }, timeout);
-            assert.callbackFn = function(){
+            customAssert.callbackFn = assert.callbackFn = function(){
                 clearTimeout(id);
                 test.teardown(next);
                 reportTest(test);
             };
-            test.fn(assert.callbackFn);
+            test.fn(assert.callbackFn, customAssert);
         }
     });
 }
 
-function runParallelTest(test) {
+function runParallelTest(test, customAssert) {
     process.on('beforeExit', function() {
         if (test.beforeExit) {
             try {
@@ -950,7 +957,7 @@ function runParallelTest(test) {
 
     test.fn(function(fn) {
         test.beforeExit = fn;
-    });
+    }, customAssert);
 }
 
 /**
