@@ -825,6 +825,7 @@ function error(suite, test, err) {
  */
 
 var dots = 0;
+var maxListeners = 10;
 function runSuite(title, tests, fn) {
     // Keys
     var keys = only.length
@@ -837,7 +838,8 @@ function runSuite(title, tests, fn) {
 
     assert.suiteTitle = title;
 
-    process.setMaxListeners(10 + process.listeners('beforeExit').length  + keys.length);
+    maxListeners += keys.length;
+    process.setMaxListeners(maxListeners);
 
     // Iterate tests
     (function next(){
