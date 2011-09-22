@@ -194,7 +194,7 @@ while (args.length) {
         case '--cov':
         case '--coverage':
             defer = true;
-            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
+            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err) {
                 if (err) throw err;
                 require.paths.unshift('lib-cov');
                 run(files);
@@ -239,7 +239,7 @@ while (args.length) {
  * @param {String} str
  */
 
-function print(str){
+function print(str) {
     sys.error(colorize(str));
 }
 
@@ -251,9 +251,9 @@ function print(str){
  * @return {String}
  */
 
-function colorize(str){
+function colorize(str) {
     var colors = { bold: 1, red: 31, green: 32, yellow: 33 };
-    return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str){
+    return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str) {
         return boring
             ? str
             : '\x1B[' + colors[color] + 'm' + str + '\x1B[0m';
@@ -316,7 +316,7 @@ assert.isDefined = function(val, msg) {
  * @api public
  */
 
-assert.type = function(obj, type, msg){
+assert.type = function(obj, type, msg) {
     var real = typeof obj;
     msg = msg || 'typeof ' + sys.inspect(obj) + ' is ' + real + ', expected ' + type;
     assert.ok(type === real, msg);
@@ -375,7 +375,7 @@ assert.length = function(val, n, msg) {
  * @param {Object|Function} res
  * @param {String} msg
  */
-assert.response = function(server, req, res, msg){
+assert.response = function(server, req, res, msg) {
     var test = assert._test;
 
     // Callback as third or fourth arg
@@ -383,7 +383,7 @@ assert.response = function(server, req, res, msg){
         ? res
         : typeof msg === 'function'
             ? msg
-            : function(){};
+            : function() {};
 
     // Default messate to test title
     if (typeof msg === 'function') msg = null;
@@ -395,7 +395,7 @@ assert.response = function(server, req, res, msg){
     var token = new Error('Response not completed: ' + msg);
     test._pending.push(token);
 
-    function check(){
+    function check() {
         try {
             server.__port = server.address().port;
             server.__listening = true;
@@ -404,7 +404,7 @@ assert.response = function(server, req, res, msg){
             return;
         }
         if (server.__deferred) {
-            server.__deferred.forEach(function(fn){ fn(); });
+            server.__deferred.forEach(function(fn) { fn(); });
             server.__deferred = null;
         }
     }
@@ -430,7 +430,7 @@ assert.response = function(server, req, res, msg){
         issue();
     }
 
-    function issue(){
+    function issue() {
         // Issue request
         var timer,
             method = req.method || 'GET',
@@ -456,7 +456,7 @@ assert.response = function(server, req, res, msg){
 
         // Timeout
         if (requestTimeout) {
-            timer = setTimeout(function(){
+            timer = setTimeout(function() {
                 check();
                 delete req.timeout;
                 test.failure(new Error(msg + 'Request timed out after ' + requestTimeout + 'ms.'));
@@ -465,11 +465,11 @@ assert.response = function(server, req, res, msg){
 
         if (data) request.write(data);
 
-        request.on('response', function(response){
+        request.on('response', function(response) {
             response.body = '';
             response.setEncoding(encoding);
-            response.on('data', function(chunk){ response.body += chunk; });
-            response.on('end', function(){
+            response.on('data', function(chunk) { response.body += chunk; });
+            response.on('end', function() {
                 if (timer) clearTimeout(timer);
                 try {
                     // Assert response body
@@ -678,7 +678,7 @@ function populateCoverage(cov) {
             file.coverage = (file.totalHits / file.totalLines) * 100;
             // Source
             var width = file.source.length.toString().length;
-            file.source = file.source.map(function(line, i){
+            file.source = file.source.map(function(line, i) {
                 ++i;
                 var hits = file[i] === 0 ? 0 : (file[i] || ' ');
                 if (!boring) {
@@ -740,9 +740,9 @@ function run(files) {
     cursor(false);
     if (!files.length) {
         try {
-            files = fs.readdirSync('test').map(function(file){
+            files = fs.readdirSync('test').map(function(file) {
                 return 'test/' + file;
-            }).filter(function(file){
+            }).filter(function(file) {
                 return !(/(^\.)|(\/\.)/.test(file));
             });
         } catch (err) {
@@ -782,7 +782,7 @@ function runFiles(files) {
     suites = files.length;
 
     if (serial) {
-        (function next(){
+        (function next() {
             if (files.length) {
                 runFile(files.shift(), next);
             }
@@ -803,7 +803,7 @@ function runFile(file, fn) {
     var title = path.basename(file),
         file = path.join(cwd, file),
         mod = require(file.replace(file_matcher,''));
-    (function check(){
+    (function check() {
        var len = Object.keys(mod).length;
        if (len) {
            runSuite(title, mod, fn);
@@ -836,7 +836,7 @@ function runSuite(title, tests, callback) {
     process.setMaxListeners(10 + process.listeners('beforeExit').length  + keys.length);
 
     // Iterate tests
-    (function next(){
+    (function next() {
         if (keys.length) {
             var key,
                 fn = tests[key = keys.shift()];
@@ -927,10 +927,10 @@ Test.prototype.runSerial = function(callback) {
             test.fn();
             test.teardown(callback);
         } else {
-            var id = setTimeout(function(){
+            var id = setTimeout(function() {
                 throw new Error("'" + key + "' timed out");
             }, timeout);
-            test.callback = function(){
+            test.callback = function() {
                 clearTimeout(id);
                 test.teardown(callback);
                 process.nextTick(function() {
@@ -1021,8 +1021,8 @@ process.on('uncaughtException', function(err) {
 
 // Show cursor
 
-['INT', 'TERM', 'QUIT'].forEach(function(sig){
-    process.on('SIG' + sig, function(){
+['INT', 'TERM', 'QUIT'].forEach(function(sig) {
+    process.on('SIG' + sig, function() {
         cursor(true);
         process.exit(1);
     });
@@ -1033,7 +1033,7 @@ process.on('uncaughtException', function(err) {
 // final assertions
 
 var orig = process.emit;
-process.emit = function(event){
+process.emit = function(event) {
     if (event === 'exit') {
         report();
         process.reallyExit(failures);
