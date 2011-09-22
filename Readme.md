@@ -33,9 +33,23 @@ To install expresso alone (no build required) run:
 
 Install via npm:
 
-	$ npm install expresso
+    $ npm install expresso
 
-## License 
+## Usage
+
+Create a directory named `test` in your project and place JavaScript files in it. Each JavaScript file can export multiple tests of this format:
+
+```js
+exports['test String#length'] = function(beforeExit, assert) {
+    assert.equal(6, 'foobar'.length);
+};
+```
+
+To run tests, type `expresso`.
+
+For more information, [see the manual](http://visionmedia.github.com/expresso/).
+
+## License
 
 (The MIT License)
 
