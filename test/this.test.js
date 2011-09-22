@@ -15,6 +15,6 @@ module.exports = {
 
         beforeExit(function() {
             assert.ok(exiting);
-        })
+        });
     }
 };

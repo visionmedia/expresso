@@ -11,8 +11,8 @@ exports['first'] = function(beforeExit, assert) {
 // Using the broken global version of assert.
 exports['second'] = function(beforeExit) {
     process.nextTick(function() {
-        assert.equal(assert._test.suite, 'local-assert.test.js');
-        assert.equal(assert._test.title, 'third');
+        assert.notEqual(assert._test.suite, 'local-assert.test.js');
+        assert.notEqual(assert._test.title, 'third');
     });
 };
 

@@ -138,11 +138,34 @@ code .this { color: #19469D; }</style>
 </tr>
 <tr class="code">
 <td class="docs">
+<p>Set the node env to test if it hasn't already been set
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">if</span>( !<span class="variable">process</span>.<span class="variable">env</span>.<span class="class">NODE_ENV</span> ) <span class="variable">process</span>.<span class="variable">env</span>.<span class="class">NODE_ENV</span> = <span class="string">'test'</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Setup the regex which is used to match test files.
+Adjust it to include coffeescript files if CS is available
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">file_matcher</span> = <span class="regexp">/\.js$/</span>;
+<span class="keyword">try</span> {
+  <span class="variable">require</span>(<span class="string">'coffee-script'</span>);
+  <span class="variable">file_matcher</span> = <span class="regexp">/\.(js|coffee)$/</span>;
+} <span class="keyword">catch</span> (<span class="variable">e</span>) {}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
 <p>Expresso version.
  </p>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">version</span> = <span class="string">'0.6.4'</span>;</code></pre>
+<pre><code><span class="keyword">var</span> <span class="variable">version</span> = <span class="string">'0.8.1'</span>;</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -152,6 +175,16 @@ code .this { color: #19469D; }</style>
 </td>
 <td class="code">
 <pre><code><span class="keyword">var</span> <span class="variable">failures</span> = <span class="number integer">0</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Indicates whether all test files have been loaded.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">suites</span> = <span class="number integer">0</span>;
+<span class="keyword">var</span> <span class="variable">suitesRun</span> = <span class="number integer">0</span>;</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -201,15 +234,6 @@ code .this { color: #19469D; }</style>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Watch mode.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">watch</span> = <span class="variable">false</span>;</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
 <p>Execute serially.
  </p>
 </td>
@@ -228,6 +252,25 @@ code .this { color: #19469D; }</style>
 </tr>
 <tr class="code">
 <td class="docs">
+<p>Quiet output.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">quiet</span> = <span class="variable">false</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>JSON code coverage report
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">jsonCoverage</span> = <span class="variable">false</span>;
+<span class="keyword">var</span> <span class="variable">jsonFile</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
 <p>Usage documentation.
  </p>
 </td>
@@ -236,9 +279,10 @@ code .this { color: #19469D; }</style>
     + <span class="string">'[bold]{Usage}: expresso [options] &lt;file ...&gt;'</span>
     + <span class="string">'\n'</span>
     + <span class="string">'\n[bold]{Options}:'</span>
-    + <span class="string">'\n  -w, --watch          Watch for modifications and re-execute tests'</span>
     + <span class="string">'\n  -g, --growl          Enable growl notifications'</span>
     + <span class="string">'\n  -c, --coverage       Generate and report test coverage'</span>
+    + <span class="string">'\n  -j, --json PATH      Used in conjunction with --coverage, ouput JSON coverage to PATH'</span>
+    + <span class="string">'\n  -q, --quiet          Suppress coverage report if 100%'</span>
     + <span class="string">'\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'</span>
     + <span class="string">'\n  -r, --require PATH   Require the given module path'</span>
     + <span class="string">'\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'</span>
@@ -313,19 +357,19 @@ code .this { color: #19469D; }</style>
         <span class="keyword">case</span> <span class="string">'--cov'</span>:
         <span class="keyword">case</span> <span class="string">'--coverage'</span>:
             <span class="variable">defer</span> = <span class="variable">true</span>;
-            <span class="variable">childProcess</span>.<span class="variable">exec</span>(<span class="string">'rm -fr lib-cov &amp;&amp; node-jscoverage lib lib-cov'</span>, <span class="keyword">function</span>(<span class="variable">err</span>){
+            <span class="variable">childProcess</span>.<span class="variable">exec</span>(<span class="string">'rm -fr lib-cov &amp;&amp; node-jscoverage lib lib-cov'</span>, <span class="keyword">function</span>(<span class="variable">err</span>) {
                 <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">throw</span> <span class="variable">err</span>;
                 <span class="variable">require</span>.<span class="variable">paths</span>.<span class="variable">unshift</span>(<span class="string">'lib-cov'</span>);
                 <span class="variable">run</span>(<span class="variable">files</span>);
-            })
+            });
+            <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="string">'-q'</span>:
+        <span class="keyword">case</span> <span class="string">'--quiet'</span>:
+            <span class="variable">quiet</span> = <span class="variable">true</span>;
             <span class="keyword">break</span>;
         <span class="keyword">case</span> <span class="string">'-b'</span>:
         <span class="keyword">case</span> <span class="string">'--boring'</span>:
-        	<span class="variable">boring</span> = <span class="variable">true</span>;
-        	<span class="keyword">break</span>;
-        <span class="keyword">case</span> <span class="string">'-w'</span>:
-        <span class="keyword">case</span> <span class="string">'--watch'</span>:
-            <span class="variable">watch</span> = <span class="variable">true</span>;
+            <span class="variable">boring</span> = <span class="variable">true</span>;
             <span class="keyword">break</span>;
         <span class="keyword">case</span> <span class="string">'-g'</span>:
         <span class="keyword">case</span> <span class="string">'--growl'</span>:
@@ -335,8 +379,17 @@ code .this { color: #19469D; }</style>
         <span class="keyword">case</span> <span class="string">'--serial'</span>:
             <span class="variable">serial</span> = <span class="variable">true</span>;
             <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="string">'-j'</span>:
+        <span class="keyword">case</span> <span class="string">'--json'</span>:
+            <span class="variable">jsonCoverage</span> = <span class="variable">true</span>;
+            <span class="keyword">if</span> (<span class="variable">arg</span> = <span class="variable">args</span>.<span class="variable">shift</span>()) {
+                <span class="variable">jsonFile</span> = <span class="variable">path</span>.<span class="variable">normalize</span>(<span class="variable">arg</span>);
+            } <span class="keyword">else</span> {
+                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(<span class="string">'--json requires file to write to'</span>);
+            }
+            <span class="keyword">break</span>;
         <span class="keyword">default</span>:
-            <span class="keyword">if</span> (<span class="regexp">/\.js$/</span>.<span class="variable">test</span>(<span class="variable">arg</span>)) {
+            <span class="keyword">if</span> (<span class="variable">file_matcher</span>.<span class="variable">test</span>(<span class="variable">arg</span>)) {
                 <span class="variable">files</span>.<span class="variable">push</span>(<span class="variable">arg</span>);
             }
             <span class="keyword">break</span>;
@@ -353,7 +406,7 @@ code .this { color: #19469D; }</style>
 <ul><li><p><strong>param</strong>: <em>String</em>  str</p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">print</span>(<span class="variable">str</span>){
+<pre><code><span class="keyword">function</span> <span class="variable">print</span>(<span class="variable">str</span>) {
     <span class="variable">sys</span>.<span class="variable">error</span>(<span class="variable">colorize</span>(<span class="variable">str</span>));
 }</code></pre>
 </td>
@@ -368,9 +421,9 @@ Disabled when --boring is set.</p>
 <ul><li><p><strong>param</strong>: <em>String</em>  str</p></li><li><p><strong>return</strong>: <em>String</em> </p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">colorize</span>(<span class="variable">str</span>){
+<pre><code><span class="keyword">function</span> <span class="variable">colorize</span>(<span class="variable">str</span>) {
     <span class="keyword">var</span> <span class="variable">colors</span> = { <span class="variable">bold</span>: <span class="number integer">1</span>, <span class="variable">red</span>: <span class="number integer">31</span>, <span class="variable">green</span>: <span class="number integer">32</span>, <span class="variable">yellow</span>: <span class="number integer">33</span> };
-    <span class="keyword">return</span> <span class="variable">str</span>.<span class="variable">replace</span>(<span class="regexp">/\[(\w+)\]\{([^]*?)\}/g</span>, <span class="keyword">function</span>(<span class="variable">_</span>, <span class="variable">color</span>, <span class="variable">str</span>){
+    <span class="keyword">return</span> <span class="variable">str</span>.<span class="variable">replace</span>(<span class="regexp">/\[(\w+)\]\{([^]*?)\}/g</span>, <span class="keyword">function</span>(<span class="variable">_</span>, <span class="variable">color</span>, <span class="variable">str</span>) {
         <span class="keyword">return</span> <span class="variable">boring</span>
             ? <span class="variable">str</span>
             : <span class="string">'\x1B['</span> + <span class="variable">colors</span>[<span class="variable">color</span>] + <span class="string">'m'</span> + <span class="variable">str</span> + <span class="string">'\x1B[0m'</span>;
@@ -447,7 +500,7 @@ Disabled when --boring is set.</p>
 <ul><li><p><strong>param</strong>: <em>Mixed</em>  obj</p></li><li><p><strong>param</strong>: <em>String</em>  type</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="variable">assert</span>.<span class="variable">type</span> = <span class="keyword">function</span>(<span class="variable">obj</span>, <span class="variable">type</span>, <span class="variable">msg</span>){
+<pre><code><span class="variable">assert</span>.<span class="variable">type</span> = <span class="keyword">function</span>(<span class="variable">obj</span>, <span class="variable">type</span>, <span class="variable">msg</span>) {
     <span class="keyword">var</span> <span class="variable">real</span> = <span class="keyword">typeof</span> <span class="variable">obj</span>;
     <span class="variable">msg</span> = <span class="variable">msg</span> || <span class="string">'typeof '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">obj</span>) + <span class="string">' is '</span> + <span class="variable">real</span> + <span class="string">', expected '</span> + <span class="variable">type</span>;
     <span class="variable">assert</span>.<span class="variable">ok</span>(<span class="variable">type</span> === <span class="variable">real</span>, <span class="variable">msg</span>);
@@ -514,105 +567,172 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 <ul><li><p><strong>param</strong>: <em>Server</em>  server</p></li><li><p><strong>param</strong>: <em>Object</em>  req</p></li><li><p><strong>param</strong>: <em>Object | Function</em>  res</p></li><li><p><strong>param</strong>: <em>String</em>  msg</p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="variable">assert</span>.<span class="variable">response</span> = <span class="keyword">function</span>(<span class="variable">server</span>, <span class="variable">req</span>, <span class="variable">res</span>, <span class="variable">msg</span>){
+<pre><code><span class="variable">assert</span>.<span class="variable">response</span> = <span class="keyword">function</span>(<span class="variable">server</span>, <span class="variable">req</span>, <span class="variable">res</span>, <span class="variable">msg</span>) {
+    <span class="keyword">var</span> <span class="variable">test</span> = <span class="variable">assert</span>.<span class="variable">_test</span>;
+
     <span class="comment">// Callback as third or fourth arg</span>
     <span class="keyword">var</span> <span class="variable">callback</span> = <span class="keyword">typeof</span> <span class="variable">res</span> === <span class="string">'function'</span>
         ? <span class="variable">res</span>
         : <span class="keyword">typeof</span> <span class="variable">msg</span> === <span class="string">'function'</span>
             ? <span class="variable">msg</span>
-            : <span class="keyword">function</span>(){};
+            : <span class="keyword">function</span>() {};
 
     <span class="comment">// Default messate to test title</span>
     <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">msg</span> === <span class="string">'function'</span>) <span class="variable">msg</span> = <span class="keyword">null</span>;
-    <span class="variable">msg</span> = <span class="variable">msg</span> || <span class="variable">assert</span>.<span class="variable">testTitle</span>;
+    <span class="variable">msg</span> = <span class="variable">msg</span> || <span class="variable">test</span>.<span class="variable">title</span>;
     <span class="variable">msg</span> += <span class="string">'. '</span>;
+
+    <span class="comment">// Add a unique token for this call to assert.response(). We'll move it to</span>
+    <span class="comment">// succeeded/failed when done</span>
+    <span class="keyword">var</span> <span class="variable">token</span> = <span class="keyword">new</span> <span class="class">Error</span>(<span class="string">'Response not completed: '</span> + <span class="variable">msg</span>);
+    <span class="variable">test</span>.<span class="variable">_pending</span>.<span class="variable">push</span>(<span class="variable">token</span>);
+
+    <span class="keyword">function</span> <span class="variable">check</span>() {
+        <span class="keyword">try</span> {
+            <span class="variable">server</span>.<span class="variable">__port</span> = <span class="variable">server</span>.<span class="variable">address</span>().<span class="variable">port</span>;
+            <span class="variable">server</span>.<span class="variable">__listening</span> = <span class="variable">true</span>;
+        } <span class="keyword">catch</span> (<span class="variable">err</span>) {
+            <span class="variable">process</span>.<span class="variable">nextTick</span>(<span class="variable">check</span>);
+            <span class="keyword">return</span>;
+        }
+        <span class="keyword">if</span> (<span class="variable">server</span>.<span class="variable">__deferred</span>) {
+            <span class="variable">server</span>.<span class="variable">__deferred</span>.<span class="variable">forEach</span>(<span class="keyword">function</span>(<span class="variable">fn</span>) { <span class="variable">fn</span>(); });
+            <span class="variable">server</span>.<span class="variable">__deferred</span> = <span class="keyword">null</span>;
+        }
+    }
 
     <span class="comment">// Pending responses</span>
     <span class="variable">server</span>.<span class="variable">__pending</span> = <span class="variable">server</span>.<span class="variable">__pending</span> || <span class="number integer">0</span>;
     <span class="variable">server</span>.<span class="variable">__pending</span>++;
 
-    <span class="comment">// Create client</span>
+    <span class="comment">// Check that the server is ready or defer</span>
     <span class="keyword">if</span> (!<span class="variable">server</span>.<span class="variable">fd</span>) {
-        <span class="variable">server</span>.<span class="variable">listen</span>(<span class="variable">server</span>.<span class="variable">__port</span> = <span class="variable">port</span>++, <span class="string">'127.0.0.1'</span>);
-        <span class="variable">server</span>.<span class="variable">client</span> = <span class="variable">http</span>.<span class="variable">createClient</span>(<span class="variable">server</span>.<span class="variable">__port</span>);
+        <span class="variable">server</span>.<span class="variable">__deferred</span> = <span class="variable">server</span>.<span class="variable">__deferred</span> || [];
+        <span class="variable">server</span>.<span class="variable">listen</span>(<span class="variable">server</span>.<span class="variable">__port</span> = <span class="variable">port</span>++, <span class="string">'127.0.0.1'</span>, <span class="variable">check</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="variable">server</span>.<span class="variable">__port</span>) {
+        <span class="variable">server</span>.<span class="variable">__deferred</span> = <span class="variable">server</span>.<span class="variable">__deferred</span> || [];
+        <span class="variable">process</span>.<span class="variable">nextTick</span>(<span class="variable">check</span>);
     }
 
-    <span class="comment">// Issue request</span>
-    <span class="keyword">var</span> <span class="variable">timer</span>,
-        <span class="variable">client</span> = <span class="variable">server</span>.<span class="variable">client</span>,
-        <span class="variable">method</span> = <span class="variable">req</span>.<span class="variable">method</span> || <span class="string">'GET'</span>,
-        <span class="variable">status</span> = <span class="variable">res</span>.<span class="variable">status</span> || <span class="variable">res</span>.<span class="variable">statusCode</span>,
-        <span class="variable">data</span> = <span class="variable">req</span>.<span class="variable">data</span> || <span class="variable">req</span>.<span class="variable">body</span>,
-        <span class="variable">requestTimeout</span> = <span class="variable">req</span>.<span class="variable">timeout</span> || <span class="number integer">0</span>;
-
-    <span class="keyword">var</span> <span class="variable">request</span> = <span class="variable">client</span>.<span class="variable">request</span>(<span class="variable">method</span>, <span class="variable">req</span>.<span class="variable">url</span>, <span class="variable">req</span>.<span class="variable">headers</span>);
-
-    <span class="comment">// Timeout</span>
-    <span class="keyword">if</span> (<span class="variable">requestTimeout</span>) {
-        <span class="variable">timer</span> = <span class="variable">setTimeout</span>(<span class="keyword">function</span>(){
-            --<span class="variable">server</span>.<span class="variable">__pending</span> || <span class="variable">server</span>.<span class="variable">close</span>();
-            <span class="keyword">delete</span> <span class="variable">req</span>.<span class="variable">timeout</span>;
-            <span class="variable">assert</span>.<span class="variable">fail</span>(<span class="variable">msg</span> + <span class="string">'Request timed out after '</span> + <span class="variable">requestTimeout</span> + <span class="string">'ms.'</span>);
-        }, <span class="variable">requestTimeout</span>);
+    <span class="comment">// The socket was created but is not yet listening, so keep deferring</span>
+    <span class="keyword">if</span> (!<span class="variable">server</span>.<span class="variable">__listening</span>) {
+        <span class="variable">server</span>.<span class="variable">__deferred</span>.<span class="variable">push</span>(<span class="variable">issue</span>);
+        <span class="keyword">return</span>;
+    } <span class="keyword">else</span> {
+        <span class="variable">issue</span>();
     }
 
-    <span class="keyword">if</span> (<span class="variable">data</span>) <span class="variable">request</span>.<span class="variable">write</span>(<span class="variable">data</span>);
-    <span class="variable">request</span>.<span class="variable">addListener</span>(<span class="string">'response'</span>, <span class="keyword">function</span>(<span class="variable">response</span>){
-        <span class="variable">response</span>.<span class="variable">body</span> = <span class="string">''</span>;
-        <span class="variable">response</span>.<span class="variable">setEncoding</span>(<span class="string">'utf8'</span>);
-        <span class="variable">response</span>.<span class="variable">addListener</span>(<span class="string">'data'</span>, <span class="keyword">function</span>(<span class="variable">chunk</span>){ <span class="variable">response</span>.<span class="variable">body</span> += <span class="variable">chunk</span>; });
-        <span class="variable">response</span>.<span class="variable">addListener</span>(<span class="string">'end'</span>, <span class="keyword">function</span>(){
-            --<span class="variable">server</span>.<span class="variable">__pending</span> || <span class="variable">server</span>.<span class="variable">close</span>();
-            <span class="keyword">if</span> (<span class="variable">timer</span>) <span class="variable">clearTimeout</span>(<span class="variable">timer</span>);
+    <span class="keyword">function</span> <span class="variable">issue</span>() {
+        <span class="comment">// Issue request</span>
+        <span class="keyword">var</span> <span class="variable">timer</span>,
+            <span class="variable">method</span> = <span class="variable">req</span>.<span class="variable">method</span> || <span class="string">'GET'</span>,
+            <span class="variable">status</span> = <span class="variable">res</span>.<span class="variable">status</span> || <span class="variable">res</span>.<span class="variable">statusCode</span>,
+            <span class="variable">data</span> = <span class="variable">req</span>.<span class="variable">data</span> || <span class="variable">req</span>.<span class="variable">body</span>,
+            <span class="variable">requestTimeout</span> = <span class="variable">req</span>.<span class="variable">timeout</span> || <span class="number integer">0</span>,
+            <span class="variable">encoding</span> = <span class="variable">req</span>.<span class="variable">encoding</span> || <span class="string">'utf8'</span>;
 
-            <span class="comment">// Assert response body</span>
-            <span class="keyword">if</span> (<span class="variable">res</span>.<span class="variable">body</span> !== <span class="variable">undefined</span>) {
-                <span class="keyword">var</span> <span class="variable">eql</span> = <span class="variable">res</span>.<span class="variable">body</span> <span class="variable">instanceof</span> <span class="class">RegExp</span>
-                  ? <span class="variable">res</span>.<span class="variable">body</span>.<span class="variable">test</span>(<span class="variable">response</span>.<span class="variable">body</span>)
-                  : <span class="variable">res</span>.<span class="variable">body</span> === <span class="variable">response</span>.<span class="variable">body</span>;
-                <span class="variable">assert</span>.<span class="variable">ok</span>(
-                    <span class="variable">eql</span>,
-                    <span class="variable">msg</span> + <span class="string">'Invalid response body.\n'</span>
-                        + <span class="string">'    Expected: '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">res</span>.<span class="variable">body</span>) + <span class="string">'\n'</span>
-                        + <span class="string">'    Got: '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">response</span>.<span class="variable">body</span>)
-                );
-            }
-
-            <span class="comment">// Assert response status</span>
-            <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">status</span> === <span class="string">'number'</span>) {
-                <span class="variable">assert</span>.<span class="variable">equal</span>(
-                    <span class="variable">response</span>.<span class="variable">statusCode</span>,
-                    <span class="variable">status</span>,
-                    <span class="variable">msg</span> + <span class="variable">colorize</span>(<span class="string">'Invalid response status code.\n'</span>
-                        + <span class="string">'    Expected: [green]{'</span> + <span class="variable">status</span> + <span class="string">'}\n'</span>
-                        + <span class="string">'    Got: [red]{'</span> + <span class="variable">response</span>.<span class="variable">statusCode</span> + <span class="string">'}'</span>)
-                );
-            }
-
-            <span class="comment">// Assert response headers</span>
-            <span class="keyword">if</span> (<span class="variable">res</span>.<span class="variable">headers</span>) {
-                <span class="keyword">var</span> <span class="variable">keys</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">res</span>.<span class="variable">headers</span>);
-                <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">len</span> = <span class="variable">keys</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">len</span>; ++<span class="variable">i</span>) {
-                    <span class="keyword">var</span> <span class="variable">name</span> = <span class="variable">keys</span>[<span class="variable">i</span>],
-                        <span class="variable">actual</span> = <span class="variable">response</span>.<span class="variable">headers</span>[<span class="variable">name</span>.<span class="variable">toLowerCase</span>()],
-                        <span class="variable">expected</span> = <span class="variable">res</span>.<span class="variable">headers</span>[<span class="variable">name</span>],
-                        <span class="variable">eql</span> = <span class="variable">expected</span> <span class="variable">instanceof</span> <span class="class">RegExp</span>
-                          ? <span class="variable">expected</span>.<span class="variable">test</span>(<span class="variable">actual</span>)
-                          : <span class="variable">expected</span> == <span class="variable">actual</span>;
-                    <span class="variable">assert</span>.<span class="variable">ok</span>(
-                        <span class="variable">eql</span>,
-                        <span class="variable">msg</span> + <span class="variable">colorize</span>(<span class="string">'Invalid response header [bold]{'</span> + <span class="variable">name</span> + <span class="string">'}.\n'</span>
-                            + <span class="string">'    Expected: [green]{'</span> + <span class="variable">expected</span> + <span class="string">'}\n'</span>
-                            + <span class="string">'    Got: [red]{'</span> + <span class="variable">actual</span> + <span class="string">'}'</span>)
-                    );
-                }
-            }
-
-            <span class="comment">// Callback</span>
-            <span class="variable">callback</span>(<span class="variable">response</span>);
+        <span class="keyword">var</span> <span class="variable">request</span> = <span class="variable">http</span>.<span class="variable">request</span>({
+            <span class="variable">host</span>: <span class="string">'127.0.0.1'</span>,
+            <span class="variable">port</span>: <span class="variable">server</span>.<span class="variable">__port</span>,
+            <span class="variable">path</span>: <span class="variable">req</span>.<span class="variable">url</span>,
+            <span class="variable">method</span>: <span class="variable">method</span>,
+            <span class="variable">headers</span>: <span class="variable">req</span>.<span class="variable">headers</span>
         });
-    });
-    <span class="variable">request</span>.<span class="variable">end</span>();
+
+        <span class="keyword">var</span> <span class="variable">check</span> = <span class="keyword">function</span>() {
+            <span class="keyword">if</span> (--<span class="variable">server</span>.<span class="variable">__pending</span> === <span class="number integer">0</span>) {
+                <span class="variable">server</span>.<span class="variable">close</span>();
+                <span class="variable">server</span>.<span class="variable">__listening</span> = <span class="variable">false</span>;
+            }
+        };
+
+        <span class="comment">// Timeout</span>
+        <span class="keyword">if</span> (<span class="variable">requestTimeout</span>) {
+            <span class="variable">timer</span> = <span class="variable">setTimeout</span>(<span class="keyword">function</span>() {
+                <span class="variable">check</span>();
+                <span class="keyword">delete</span> <span class="variable">req</span>.<span class="variable">timeout</span>;
+                <span class="variable">test</span>.<span class="variable">failure</span>(<span class="keyword">new</span> <span class="class">Error</span>(<span class="variable">msg</span> + <span class="string">'Request timed out after '</span> + <span class="variable">requestTimeout</span> + <span class="string">'ms.'</span>));
+            }, <span class="variable">requestTimeout</span>);
+        }
+
+        <span class="keyword">if</span> (<span class="variable">data</span>) <span class="variable">request</span>.<span class="variable">write</span>(<span class="variable">data</span>);
+
+        <span class="variable">request</span>.<span class="variable">on</span>(<span class="string">'response'</span>, <span class="keyword">function</span>(<span class="variable">response</span>) {
+            <span class="variable">response</span>.<span class="variable">body</span> = <span class="string">''</span>;
+            <span class="variable">response</span>.<span class="variable">setEncoding</span>(<span class="variable">encoding</span>);
+            <span class="variable">response</span>.<span class="variable">on</span>(<span class="string">'data'</span>, <span class="keyword">function</span>(<span class="variable">chunk</span>) { <span class="variable">response</span>.<span class="variable">body</span> += <span class="variable">chunk</span>; });
+            <span class="variable">response</span>.<span class="variable">on</span>(<span class="string">'end'</span>, <span class="keyword">function</span>() {
+                <span class="keyword">if</span> (<span class="variable">timer</span>) <span class="variable">clearTimeout</span>(<span class="variable">timer</span>);
+                <span class="keyword">try</span> {
+                    <span class="comment">// Assert response body</span>
+                    <span class="keyword">if</span> (<span class="variable">res</span>.<span class="variable">body</span> !== <span class="variable">undefined</span>) {
+                        <span class="keyword">var</span> <span class="variable">eql</span> = <span class="variable">res</span>.<span class="variable">body</span> <span class="variable">instanceof</span> <span class="class">RegExp</span>
+                          ? <span class="variable">res</span>.<span class="variable">body</span>.<span class="variable">test</span>(<span class="variable">response</span>.<span class="variable">body</span>)
+                          : <span class="variable">res</span>.<span class="variable">body</span> === <span class="variable">response</span>.<span class="variable">body</span>;
+                        <span class="variable">assert</span>.<span class="variable">ok</span>(
+                            <span class="variable">eql</span>,
+                            <span class="variable">msg</span> + <span class="string">'Invalid response body.\n'</span>
+                                + <span class="string">'    Expected: '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">res</span>.<span class="variable">body</span>) + <span class="string">'\n'</span>
+                                + <span class="string">'    Got: '</span> + <span class="variable">sys</span>.<span class="variable">inspect</span>(<span class="variable">response</span>.<span class="variable">body</span>)
+                        );
+                    }
+
+                    <span class="comment">// Assert response status</span>
+                    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">status</span> === <span class="string">'number'</span>) {
+                        <span class="variable">assert</span>.<span class="variable">equal</span>(
+                            <span class="variable">response</span>.<span class="variable">statusCode</span>,
+                            <span class="variable">status</span>,
+                            <span class="variable">msg</span> + <span class="variable">colorize</span>(<span class="string">'Invalid response status code.\n'</span>
+                                + <span class="string">'    Expected: [green]{'</span> + <span class="variable">status</span> + <span class="string">'}\n'</span>
+                                + <span class="string">'    Got: [red]{'</span> + <span class="variable">response</span>.<span class="variable">statusCode</span> + <span class="string">'}'</span>)
+                        );
+                    }
+
+                    <span class="comment">// Assert response headers</span>
+                    <span class="keyword">if</span> (<span class="variable">res</span>.<span class="variable">headers</span>) {
+                        <span class="keyword">var</span> <span class="variable">keys</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">res</span>.<span class="variable">headers</span>);
+                        <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">len</span> = <span class="variable">keys</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">len</span>; ++<span class="variable">i</span>) {
+                            <span class="keyword">var</span> <span class="variable">name</span> = <span class="variable">keys</span>[<span class="variable">i</span>],
+                                <span class="variable">actual</span> = <span class="variable">response</span>.<span class="variable">headers</span>[<span class="variable">name</span>.<span class="variable">toLowerCase</span>()],
+                                <span class="variable">expected</span> = <span class="variable">res</span>.<span class="variable">headers</span>[<span class="variable">name</span>],
+                                <span class="variable">eql</span> = <span class="variable">expected</span> <span class="variable">instanceof</span> <span class="class">RegExp</span>
+                                  ? <span class="variable">expected</span>.<span class="variable">test</span>(<span class="variable">actual</span>)
+                                  : <span class="variable">expected</span> == <span class="variable">actual</span>;
+                            <span class="variable">assert</span>.<span class="variable">ok</span>(
+                                <span class="variable">eql</span>,
+                                <span class="variable">msg</span> + <span class="variable">colorize</span>(<span class="string">'Invalid response header [bold]{'</span> + <span class="variable">name</span> + <span class="string">'}.\n'</span>
+                                    + <span class="string">'    Expected: [green]{'</span> + <span class="variable">expected</span> + <span class="string">'}\n'</span>
+                                    + <span class="string">'    Got: [red]{'</span> + <span class="variable">actual</span> + <span class="string">'}'</span>)
+                            );
+                        }
+                    }
+
+                    <span class="comment">// Callback</span>
+                    <span class="variable">callback</span>(<span class="variable">response</span>);
+
+                    <span class="comment">// Add this to the succeeded bin.</span>
+                    <span class="variable">test</span>.<span class="variable">success</span>(<span class="variable">msg</span>);
+                } <span class="keyword">catch</span> (<span class="variable">err</span>) {
+                    <span class="variable">test</span>.<span class="variable">failure</span>(<span class="variable">err</span>);
+                    <span class="variable">test</span>.<span class="variable">callback</span>();
+                } <span class="keyword">finally</span> {
+                    <span class="comment">// Remove our token.</span>
+                    <span class="keyword">var</span> <span class="variable">idx</span> = <span class="variable">test</span>.<span class="variable">_pending</span>.<span class="variable">indexOf</span>(<span class="variable">token</span>);
+                    <span class="keyword">if</span> (<span class="variable">idx</span> &<span class="variable">gt</span>;= <span class="number integer">0</span>) {
+                        <span class="variable">test</span>.<span class="variable">_pending</span>.<span class="variable">splice</span>(<span class="variable">idx</span>, <span class="number integer">1</span>);
+                    } <span class="keyword">else</span> {
+                        <span class="comment">// Someone else took our token. This is an error.</span>
+                        <span class="variable">test</span>.<span class="variable">failure</span>(<span class="keyword">new</span> <span class="class">Error</span>(<span class="string">'Request succeeded, but token vanished: '</span> + <span class="variable">msg</span>));
+                    }
+
+                    <span class="comment">// Potentially shut down the server.</span>
+                    <span class="variable">check</span>();
+                }
+            });
+        });
+
+        <span class="variable">request</span>.<span class="variable">end</span>();
+      }
 };</code></pre>
 </td>
 </tr>
@@ -654,15 +774,14 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Report test coverage.</p>
+<p>Report test coverage in tabular format</p>
 
 <h2></h2>
 
 <ul><li><p><strong>param</strong>: <em>Object</em>  cov</p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">reportCoverage</span>(<span class="variable">cov</span>) {
-    <span class="variable">populateCoverage</span>(<span class="variable">cov</span>);
+<pre><code><span class="keyword">function</span> <span class="variable">reportCoverageTable</span>(<span class="variable">cov</span>) {
     <span class="comment">// Stats</span>
     <span class="variable">print</span>(<span class="string">'\n   [bold]{Test Coverage}\n'</span>);
     <span class="keyword">var</span> <span class="variable">sep</span> = <span class="string">'   +------------------------------------------+----------+------+------+--------+'</span>,
@@ -691,13 +810,49 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
     <span class="variable">sys</span>.<span class="variable">puts</span>(<span class="variable">lastSep</span>);
     <span class="comment">// Source</span>
     <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">name</span> <span class="keyword">in</span> <span class="variable">cov</span>) {
-        <span class="keyword">if</span> (<span class="variable">name</span>.<span class="variable">match</span>(<span class="regexp">/\.js$/</span>)) {
+        <span class="keyword">if</span> (<span class="variable">name</span>.<span class="variable">match</span>(<span class="variable">file_matcher</span>)) {
             <span class="keyword">var</span> <span class="variable">file</span> = <span class="variable">cov</span>[<span class="variable">name</span>];
-            <span class="variable">print</span>(<span class="string">'\n   [bold]{'</span> + <span class="variable">name</span> + <span class="string">'}:'</span>);
-            <span class="variable">print</span>(<span class="variable">file</span>.<span class="variable">source</span>);
-            <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\n'</span>);
+            <span class="keyword">if</span> ((<span class="variable">file</span>.<span class="variable">coverage</span> &<span class="variable">lt</span>; <span class="number integer">100</span>) || !<span class="variable">quiet</span>) {
+               <span class="variable">print</span>(<span class="string">'\n   [bold]{'</span> + <span class="variable">name</span> + <span class="string">'}:'</span>);
+               <span class="variable">print</span>(<span class="variable">file</span>.<span class="variable">source</span>);
+               <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\n'</span>);
+            }
         }
     }
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Report test coverage in raw json format</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object</em>  cov</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="keyword">function</span> <span class="variable">reportCoverageJson</span>(<span class="variable">cov</span>) {
+    <span class="keyword">var</span> <span class="variable">report</span> = {
+        &<span class="variable">quot</span>;<span class="variable">coverage</span>&<span class="variable">quot</span>; : <span class="variable">cov</span>.<span class="variable">coverage</span>.<span class="variable">toFixed</span>(<span class="number integer">2</span>),
+        &<span class="variable">quot</span>;<span class="class">LOC</span>&<span class="variable">quot</span>; : <span class="variable">cov</span>.<span class="class">LOC</span>,
+        &<span class="variable">quot</span>;<span class="class">SLOC</span>&<span class="variable">quot</span>; : <span class="variable">cov</span>.<span class="class">SLOC</span>,
+        &<span class="variable">quot</span>;<span class="variable">totalMisses</span>&<span class="variable">quot</span>; : <span class="variable">cov</span>.<span class="variable">totalMisses</span>,
+        &<span class="variable">quot</span>;<span class="variable">files</span>&<span class="variable">quot</span>; : {}
+    };
+
+    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">name</span> <span class="keyword">in</span> <span class="variable">cov</span>) {
+        <span class="keyword">var</span> <span class="variable">file</span> = <span class="variable">cov</span>[<span class="variable">name</span>];
+        <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">file</span>)) {
+            <span class="variable">report</span>.<span class="variable">files</span>[<span class="variable">name</span>] = {
+                &<span class="variable">quot</span>;<span class="variable">coverage</span>&<span class="variable">quot</span>; : <span class="variable">file</span>.<span class="variable">coverage</span>.<span class="variable">toFixed</span>(<span class="number integer">2</span>),
+                &<span class="variable">quot</span>;<span class="class">LOC</span>&<span class="variable">quot</span>; : <span class="variable">file</span>.<span class="class">LOC</span>,
+                &<span class="variable">quot</span>;<span class="class">SLOC</span>&<span class="variable">quot</span>; : <span class="variable">file</span>.<span class="class">SLOC</span>,
+                &<span class="variable">quot</span>;<span class="variable">totalMisses</span>&<span class="variable">quot</span>; : <span class="variable">file</span>.<span class="variable">totalMisses</span>
+            };
+        }
+    }
+
+    <span class="variable">fs</span>.<span class="variable">writeFileSync</span>(<span class="variable">jsonFile</span>, <span class="class">JSON</span>.<span class="variable">stringify</span>(<span class="variable">report</span>), &<span class="variable">quot</span>;<span class="variable">utf8</span>&<span class="variable">quot</span>;);
 }</code></pre>
 </td>
 </tr>
@@ -711,11 +866,11 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">populateCoverage</span>(<span class="variable">cov</span>) {
-    <span class="variable">cov</span>.<span class="class">LOC</span> = 
+    <span class="variable">cov</span>.<span class="class">LOC</span> =
     <span class="variable">cov</span>.<span class="class">SLOC</span> =
     <span class="variable">cov</span>.<span class="variable">totalFiles</span> =
     <span class="variable">cov</span>.<span class="variable">totalHits</span> =
-    <span class="variable">cov</span>.<span class="variable">totalMisses</span> = 
+    <span class="variable">cov</span>.<span class="variable">totalMisses</span> =
     <span class="variable">cov</span>.<span class="variable">coverage</span> = <span class="number integer">0</span>;
     <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">name</span> <span class="keyword">in</span> <span class="variable">cov</span>) {
         <span class="keyword">var</span> <span class="variable">file</span> = <span class="variable">cov</span>[<span class="variable">name</span>];
@@ -731,7 +886,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
             <span class="variable">file</span>.<span class="variable">coverage</span> = (<span class="variable">file</span>.<span class="variable">totalHits</span> / <span class="variable">file</span>.<span class="variable">totalLines</span>) * <span class="number integer">100</span>;
             <span class="comment">// Source</span>
             <span class="keyword">var</span> <span class="variable">width</span> = <span class="variable">file</span>.<span class="variable">source</span>.<span class="variable">length</span>.<span class="variable">toString</span>().<span class="variable">length</span>;
-            <span class="variable">file</span>.<span class="variable">source</span> = <span class="variable">file</span>.<span class="variable">source</span>.<span class="variable">map</span>(<span class="keyword">function</span>(<span class="variable">line</span>, <span class="variable">i</span>){
+            <span class="variable">file</span>.<span class="variable">source</span> = <span class="variable">file</span>.<span class="variable">source</span>.<span class="variable">map</span>(<span class="keyword">function</span>(<span class="variable">line</span>, <span class="variable">i</span>) {
                 ++<span class="variable">i</span>;
                 <span class="keyword">var</span> <span class="variable">hits</span> = <span class="variable">file</span>[<span class="variable">i</span>] === <span class="number integer">0</span> ? <span class="number integer">0</span> : (<span class="variable">file</span>[<span class="variable">i</span>] || <span class="string">' '</span>);
                 <span class="keyword">if</span> (!<span class="variable">boring</span>) {
@@ -764,7 +919,29 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
     <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">len</span> = <span class="variable">data</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">len</span>; ++<span class="variable">i</span>) {
         <span class="keyword">if</span> (<span class="variable">data</span>[<span class="variable">i</span>] !== <span class="variable">undefined</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">data</span>[<span class="variable">i</span>] == <span class="variable">val</span>) ++<span class="variable">n</span>;
     }
-    <span class="keyword">return</span> <span class="variable">n</span>;  
+    <span class="keyword">return</span> <span class="variable">n</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Test if all files have 100% coverage</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object</em>  cov</p></li><li><p><strong>return</strong>: <em>Boolean</em> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="keyword">function</span> <span class="variable">hasFullCoverage</span>(<span class="variable">cov</span>) {
+  <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">name</span> <span class="keyword">in</span> <span class="variable">cov</span>) {
+    <span class="keyword">var</span> <span class="variable">file</span> = <span class="variable">cov</span>[<span class="variable">name</span>];
+    <span class="keyword">if</span> (<span class="variable">file</span> <span class="variable">instanceof</span> <span class="class">Array</span>) {
+      <span class="keyword">if</span> (<span class="variable">file</span>.<span class="variable">coverage</span> !== <span class="number integer">100</span>) {
+          <span class="keyword">return</span> <span class="variable">false</span>;
+      }
+    }
+  }
+  <span class="keyword">return</span> <span class="variable">true</span>;
 }</code></pre>
 </td>
 </tr>
@@ -778,10 +955,13 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">run</span>(<span class="variable">files</span>) {
+    <span class="variable">cursor</span>(<span class="variable">false</span>);
     <span class="keyword">if</span> (!<span class="variable">files</span>.<span class="variable">length</span>) {
         <span class="keyword">try</span> {
-            <span class="variable">files</span> = <span class="variable">fs</span>.<span class="variable">readdirSync</span>(<span class="string">'test'</span>).<span class="variable">map</span>(<span class="keyword">function</span>(<span class="variable">file</span>){
+            <span class="variable">files</span> = <span class="variable">fs</span>.<span class="variable">readdirSync</span>(<span class="string">'test'</span>).<span class="variable">map</span>(<span class="keyword">function</span>(<span class="variable">file</span>) {
                 <span class="keyword">return</span> <span class="string">'test/'</span> + <span class="variable">file</span>;
+            }).<span class="variable">filter</span>(<span class="keyword">function</span>(<span class="variable">file</span>) {
+                <span class="keyword">return</span> !(<span class="regexp">/(^\.)|(\/</span>\.)/.<span class="variable">test</span>(<span class="variable">file</span>));
             });
         } <span class="keyword">catch</span> (<span class="variable">err</span>) {
             <span class="variable">print</span>(<span class="string">'\n  failed to load tests in [bold]{./test}\n'</span>);
@@ -789,7 +969,6 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
             <span class="variable">process</span>.<span class="variable">exit</span>(<span class="number integer">1</span>);
         }
     }
-    <span class="keyword">if</span> (<span class="variable">watch</span>) <span class="variable">watchFiles</span>(<span class="variable">files</span>);
     <span class="variable">runFiles</span>(<span class="variable">files</span>);
 }</code></pre>
 </td>
@@ -804,6 +983,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">cursor</span>(<span class="variable">show</span>) {
+    <span class="keyword">if</span> (<span class="variable">boring</span>) <span class="keyword">return</span>;
     <span class="keyword">if</span> (<span class="variable">show</span>) {
         <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\x1b[?25h'</span>);
     } <span class="keyword">else</span> {
@@ -822,14 +1002,19 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">runFiles</span>(<span class="variable">files</span>) {
+    <span class="variable">files</span> = <span class="variable">files</span>.<span class="variable">filter</span>(<span class="keyword">function</span>(<span class="variable">file</span>) {
+        <span class="keyword">return</span> <span class="variable">file</span>.<span class="variable">match</span>(<span class="variable">file_matcher</span>);
+    });
+    <span class="variable">suites</span> = <span class="variable">files</span>.<span class="variable">length</span>;
+
     <span class="keyword">if</span> (<span class="variable">serial</span>) {
-        (<span class="keyword">function</span> <span class="variable">next</span>(){
+        (<span class="keyword">function</span> <span class="variable">next</span>() {
             <span class="keyword">if</span> (<span class="variable">files</span>.<span class="variable">length</span>) {
                 <span class="variable">runFile</span>(<span class="variable">files</span>.<span class="variable">shift</span>(), <span class="variable">next</span>);
             }
         })();
     } <span class="keyword">else</span> {
-      <span class="variable">files</span>.<span class="variable">forEach</span>(<span class="variable">runFile</span>);
+        <span class="variable">files</span>.<span class="variable">forEach</span>(<span class="variable">runFile</span>);
     }
 }</code></pre>
 </td>
@@ -844,91 +1029,18 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">runFile</span>(<span class="variable">file</span>, <span class="variable">fn</span>) {
-    <span class="keyword">if</span> (<span class="variable">file</span>.<span class="variable">match</span>(<span class="regexp">/\.js$/</span>)) {
-        <span class="keyword">var</span> <span class="variable">title</span> = <span class="variable">path</span>.<span class="variable">basename</span>(<span class="variable">file</span>),
-            <span class="variable">file</span> = <span class="variable">path</span>.<span class="variable">join</span>(<span class="variable">cwd</span>, <span class="variable">file</span>),
-            <span class="variable">mod</span> = <span class="variable">require</span>(<span class="variable">file</span>.<span class="variable">replace</span>(<span class="regexp">/\.js$/</span>, <span class="string">''</span>));
-        (<span class="keyword">function</span> <span class="variable">check</span>(){
-           <span class="keyword">var</span> <span class="variable">len</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">mod</span>).<span class="variable">length</span>;
-           <span class="keyword">if</span> (<span class="variable">len</span>) {
-               <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">mod</span>, <span class="variable">fn</span>);
-           } <span class="keyword">else</span> {
-               <span class="variable">setTimeout</span>(<span class="variable">check</span>, <span class="number integer">20</span>);
-           }
-        })();
-    }
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Clear the module cache for the given <code>file</code>.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>String</em>  file</p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">clearCache</span>(<span class="variable">file</span>) {
-    <span class="keyword">var</span> <span class="variable">keys</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">module</span>.<span class="variable">moduleCache</span>);
-    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">len</span> = <span class="variable">keys</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">len</span>; ++<span class="variable">i</span>) {
-        <span class="keyword">var</span> <span class="variable">key</span> = <span class="variable">keys</span>[<span class="variable">i</span>];
-        <span class="keyword">if</span> (<span class="variable">key</span>.<span class="variable">indexOf</span>(<span class="variable">file</span>) === <span class="variable">key</span>.<span class="variable">length</span> - <span class="variable">file</span>.<span class="variable">length</span>) {
-            <span class="keyword">delete</span> <span class="variable">module</span>.<span class="variable">moduleCache</span>[<span class="variable">key</span>];
-        }
-    }
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Watch the given <code>files</code> for changes.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>Array</em>  files</p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">watchFiles</span>(<span class="variable">files</span>) {
-    <span class="keyword">var</span> <span class="variable">p</span> = <span class="number integer">0</span>,
-        <span class="variable">c</span> = [<span class="string">'▫   '</span>, <span class="string">'▫▫  '</span>, <span class="string">'▫▫▫ '</span>, <span class="string">' ▫▫▫'</span>,
-             <span class="string">'  ▫▫'</span>, <span class="string">'   ▫'</span>, <span class="string">'   ▫'</span>, <span class="string">'  ▫▫'</span>,
-             <span class="string">'▫▫▫ '</span>, <span class="string">'▫▫  '</span>, <span class="string">'▫   '</span>],
-        <span class="variable">l</span> = <span class="variable">c</span>.<span class="variable">length</span>;
-    <span class="variable">cursor</span>(<span class="variable">false</span>);
-    <span class="variable">setInterval</span>(<span class="keyword">function</span>(){
-        <span class="variable">sys</span>.<span class="variable">print</span>(<span class="variable">colorize</span>(<span class="string">'  [green]{'</span> + <span class="variable">c</span>[<span class="variable">p</span>++ % <span class="variable">l</span>] + <span class="string">'} watching\r'</span>));
-    }, <span class="number integer">100</span>);
-    <span class="variable">files</span>.<span class="variable">forEach</span>(<span class="keyword">function</span>(<span class="variable">file</span>){
-        <span class="variable">fs</span>.<span class="variable">watchFile</span>(<span class="variable">file</span>, { <span class="variable">interval</span>: <span class="number integer">100</span> }, <span class="keyword">function</span>(<span class="variable">curr</span>, <span class="variable">prev</span>){
-            <span class="keyword">if</span> (<span class="variable">curr</span>.<span class="variable">mtime</span> &<span class="variable">gt</span>; <span class="variable">prev</span>.<span class="variable">mtime</span>) {
-                <span class="variable">print</span>(<span class="string">'  [yellow]{◦} '</span> + <span class="variable">file</span>);
-                <span class="variable">clearCache</span>(<span class="variable">file</span>);
-                <span class="variable">runFile</span>(<span class="variable">file</span>);
-            }
-        });
-    });
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Report <code>err</code> for the given <code>test</code> and <code>suite</code>.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>String</em>  suite</p></li><li><p><strong>param</strong>: <em>String</em>  test</p></li><li><p><strong>param</strong>: <em>Error</em>  err</p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="keyword">function</span> <span class="variable">error</span>(<span class="variable">suite</span>, <span class="variable">test</span>, <span class="variable">err</span>) {
-    ++<span class="variable">failures</span>;
-    <span class="keyword">var</span> <span class="variable">name</span> = <span class="variable">err</span>.<span class="variable">name</span>,
-        <span class="variable">stack</span> = <span class="variable">err</span>.<span class="variable">stack</span>.<span class="variable">replace</span>(<span class="variable">err</span>.<span class="variable">name</span>, <span class="string">''</span>),
-        <span class="keyword">label</span> = <span class="variable">test</span> === <span class="string">'uncaught'</span>
-            ? <span class="variable">test</span>
-            : <span class="variable">suite</span> + <span class="string">' '</span> + <span class="variable">test</span>;
-    <span class="variable">print</span>(<span class="string">'\n   [bold]{'</span> + <span class="keyword">label</span> + <span class="string">'}: [red]{'</span> + <span class="variable">name</span> + <span class="string">'}'</span> + <span class="variable">stack</span> + <span class="string">'\n'</span>);
-    <span class="keyword">if</span> (<span class="variable">watch</span>) <span class="variable">notify</span>(<span class="keyword">label</span> + <span class="string">' failed'</span>);
+    <span class="keyword">var</span> <span class="variable">title</span> = <span class="variable">path</span>.<span class="variable">basename</span>(<span class="variable">file</span>),
+        <span class="variable">file</span> = <span class="variable">path</span>.<span class="variable">join</span>(<span class="variable">cwd</span>, <span class="variable">file</span>),
+        <span class="variable">mod</span> = <span class="variable">require</span>(<span class="variable">file</span>.<span class="variable">replace</span>(<span class="variable">file_matcher</span>,<span class="string">''</span>));
+    (<span class="keyword">function</span> <span class="variable">check</span>() {
+       <span class="keyword">var</span> <span class="variable">len</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">mod</span>).<span class="variable">length</span>;
+       <span class="keyword">if</span> (<span class="variable">len</span>) {
+           <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">mod</span>, <span class="variable">fn</span>);
+           <span class="variable">suitesRun</span>++;
+       } <span class="keyword">else</span> {
+           <span class="variable">setTimeout</span>(<span class="variable">check</span>, <span class="number integer">20</span>);
+       }
+    })();
 }</code></pre>
 </td>
 </tr>
@@ -942,67 +1054,155 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">var</span> <span class="variable">dots</span> = <span class="number integer">0</span>;
-<span class="keyword">function</span> <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">tests</span>, <span class="variable">fn</span>) {
+<span class="keyword">function</span> <span class="variable">runSuite</span>(<span class="variable">title</span>, <span class="variable">tests</span>, <span class="variable">callback</span>) {
     <span class="comment">// Keys</span>
     <span class="keyword">var</span> <span class="variable">keys</span> = <span class="variable">only</span>.<span class="variable">length</span>
         ? <span class="variable">only</span>.<span class="variable">slice</span>(<span class="number integer">0</span>)
         : <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">tests</span>);
 
     <span class="comment">// Setup</span>
-    <span class="keyword">var</span> <span class="variable">setup</span> = <span class="variable">tests</span>.<span class="variable">setup</span> || <span class="keyword">function</span>(<span class="variable">fn</span>){ <span class="variable">fn</span>(); };
+    <span class="keyword">var</span> <span class="variable">setup</span> = <span class="variable">tests</span>.<span class="variable">setup</span> || <span class="keyword">function</span>(<span class="variable">fn</span>, <span class="variable">assert</span>) { <span class="variable">fn</span>(); };
+    <span class="keyword">var</span> <span class="variable">teardown</span> = <span class="variable">tests</span>.<span class="variable">teardown</span> || <span class="keyword">function</span>(<span class="variable">fn</span>, <span class="variable">assert</span>) { <span class="variable">fn</span>(); };
+
+    <span class="variable">process</span>.<span class="variable">setMaxListeners</span>(<span class="number integer">10</span> + <span class="variable">process</span>.<span class="variable">listeners</span>(<span class="string">'beforeExit'</span>).<span class="variable">length</span>  + <span class="variable">keys</span>.<span class="variable">length</span>);
 
     <span class="comment">// Iterate tests</span>
-    (<span class="keyword">function</span> <span class="variable">next</span>(){
+    (<span class="keyword">function</span> <span class="variable">next</span>() {
         <span class="keyword">if</span> (<span class="variable">keys</span>.<span class="variable">length</span>) {
             <span class="keyword">var</span> <span class="variable">key</span>,
-                <span class="variable">test</span> = <span class="variable">tests</span>[<span class="variable">key</span> = <span class="variable">keys</span>.<span class="variable">shift</span>()];
+                <span class="variable">fn</span> = <span class="variable">tests</span>[<span class="variable">key</span> = <span class="variable">keys</span>.<span class="variable">shift</span>()];
             <span class="comment">// Non-tests</span>
-            <span class="keyword">if</span> (<span class="variable">key</span> === <span class="string">'setup'</span>) <span class="keyword">return</span> <span class="variable">next</span>();
+            <span class="keyword">if</span> (<span class="variable">key</span> === <span class="string">'setup'</span> || <span class="variable">key</span> === <span class="string">'teardown'</span>) <span class="keyword">return</span> <span class="variable">next</span>();
 
             <span class="comment">// Run test</span>
-            <span class="keyword">if</span> (<span class="variable">test</span>) {
-                <span class="keyword">try</span> {
-                    ++<span class="variable">testcount</span>;
-                    <span class="variable">assert</span>.<span class="variable">testTitle</span> = <span class="variable">key</span>;
-                    <span class="keyword">if</span> (<span class="variable">serial</span>) {
-                        <span class="keyword">if</span> (!<span class="variable">watch</span>) {
-                            <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'.'</span>);
-                            <span class="keyword">if</span> (++<span class="variable">dots</span> % <span class="number integer">25</span> === <span class="number integer">0</span>) <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\n'</span>);
-                        }
-                        <span class="variable">setup</span>(<span class="keyword">function</span>(){
-                            <span class="keyword">if</span> (<span class="variable">test</span>.<span class="variable">length</span> &<span class="variable">lt</span>; <span class="number integer">1</span>) {
-                                <span class="variable">test</span>();
-                                <span class="variable">next</span>();
-                            } <span class="keyword">else</span> {
-                                <span class="keyword">var</span> <span class="variable">id</span> = <span class="variable">setTimeout</span>(<span class="keyword">function</span>(){
-                                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(&<span class="variable">quot</span>;<span class="string">'&quot; + key + &quot;'</span> <span class="variable">timed</span> <span class="variable">out</span>&<span class="variable">quot</span>;);
-                                }, <span class="variable">timeout</span>);
-                                <span class="variable">test</span>(<span class="keyword">function</span>(){
-                                    <span class="variable">clearTimeout</span>(<span class="variable">id</span>);
-                                    <span class="variable">next</span>();
-                                });
-                            } 
-                        });
-                    } <span class="keyword">else</span> {
-                        <span class="variable">test</span>(<span class="keyword">function</span>(<span class="variable">fn</span>){
-                            <span class="variable">process</span>.<span class="variable">addListener</span>(<span class="string">'beforeExit'</span>, <span class="keyword">function</span>(){
-                                <span class="keyword">try</span> {
-                                    <span class="variable">fn</span>();
-                                } <span class="keyword">catch</span> (<span class="variable">err</span>) {
-                                    <span class="variable">error</span>(<span class="variable">title</span>, <span class="variable">key</span>, <span class="variable">err</span>);
-                                }
-                            });
-                        });
-                    }
-                } <span class="keyword">catch</span> (<span class="variable">err</span>) {
-                    <span class="variable">error</span>(<span class="variable">title</span>, <span class="variable">key</span>, <span class="variable">err</span>);
-                }
+            <span class="keyword">if</span> (<span class="variable">fn</span>) {
+                <span class="keyword">var</span> <span class="variable">test</span> = <span class="keyword">new</span> <span class="class">Test</span>({
+                    <span class="variable">fn</span>: <span class="variable">fn</span>,
+                    <span class="variable">suite</span>: <span class="variable">title</span>,
+                    <span class="variable">title</span>: <span class="variable">key</span>,
+                    <span class="variable">setup</span>: <span class="variable">setup</span>,
+                    <span class="variable">teardown</span>: <span class="variable">teardown</span>
+                })
+                <span class="variable">test</span>.<span class="variable">run</span>(<span class="variable">next</span>);
+            } <span class="keyword">else</span> {
+                <span class="comment">// @TODO: Add warning message that there's no test.</span>
+                <span class="variable">next</span>();
             }
-            <span class="keyword">if</span> (!<span class="variable">serial</span>) <span class="variable">next</span>();
         } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">serial</span>) {
-          <span class="variable">fn</span>();
+            <span class="variable">callback</span>();
         }
     })();
+}
+
+<span class="variable">require</span>(<span class="string">'util'</span>).<span class="variable">inherits</span>(<span class="class">Test</span>, <span class="variable">require</span>(<span class="string">'events'</span>).<span class="class">EventEmitter</span>);
+<span class="keyword">function</span> <span class="class">Test</span>(<span class="variable">options</span>) {
+    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">key</span> <span class="keyword">in</span> <span class="variable">options</span>) {
+        <span class="this">this</span>[<span class="variable">key</span>] = <span class="variable">options</span>[<span class="variable">key</span>];
+    }
+    <span class="this">this</span>.<span class="variable">_succeeded</span> = [];
+    <span class="this">this</span>.<span class="variable">_failed</span> = [];
+    <span class="this">this</span>.<span class="variable">_pending</span> = [];
+    <span class="this">this</span>.<span class="variable">_beforeExit</span> = [];
+    <span class="this">this</span>.<span class="variable">assert</span> = { <span class="variable">__proto__</span>: <span class="variable">assert</span>, <span class="variable">_test</span>: <span class="this">this</span> };
+
+    <span class="keyword">var</span> <span class="variable">test</span> = <span class="this">this</span>;
+    <span class="variable">process</span>.<span class="variable">on</span>(<span class="string">'beforeExit'</span>, <span class="keyword">function</span>() {
+        <span class="keyword">try</span> {
+            <span class="variable">test</span>.<span class="variable">emit</span>(<span class="string">'exit'</span>);
+        } <span class="keyword">catch</span> (<span class="variable">err</span>) {
+            <span class="variable">test</span>.<span class="variable">failure</span>(<span class="variable">err</span>);
+        }
+        <span class="variable">test</span>.<span class="variable">report</span>();
+    });
+}
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">success</span> = <span class="keyword">function</span>(<span class="variable">err</span>) {
+    <span class="this">this</span>.<span class="variable">_succeeded</span>.<span class="variable">push</span>(<span class="variable">err</span>);
+};
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">failure</span> = <span class="keyword">function</span>(<span class="variable">err</span>) {
+    <span class="this">this</span>.<span class="variable">_failed</span>.<span class="variable">push</span>(<span class="variable">err</span>);
+    <span class="this">this</span>.<span class="variable">error</span>(<span class="variable">err</span>);
+};
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">report</span> = <span class="keyword">function</span>() {
+    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="this">this</span>.<span class="variable">_pending</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+        <span class="this">this</span>.<span class="variable">error</span>(<span class="this">this</span>.<span class="variable">_pending</span>[<span class="variable">i</span>]);
+    }
+};
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">run</span> = <span class="keyword">function</span>(<span class="variable">callback</span>) {
+    <span class="keyword">try</span> {
+        ++<span class="variable">testcount</span>;
+        <span class="variable">assert</span>.<span class="variable">_test</span> = <span class="this">this</span>;
+
+        <span class="keyword">if</span> (<span class="variable">serial</span>) {
+            <span class="this">this</span>.<span class="variable">runSerial</span>(<span class="variable">callback</span>);
+        } <span class="keyword">else</span> {
+            <span class="comment">// @TODO: find a way to run setup/tearDown.</span>
+            <span class="this">this</span>.<span class="variable">runParallel</span>();
+            <span class="variable">callback</span>();
+        }
+    } <span class="keyword">catch</span> (<span class="variable">err</span>) {
+        <span class="this">this</span>.<span class="variable">failure</span>(<span class="variable">err</span>);
+        <span class="this">this</span>.<span class="variable">report</span>();
+    }
+};
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">runSerial</span> = <span class="keyword">function</span>(<span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">test</span> = <span class="this">this</span>;
+    <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'.'</span>);
+    <span class="keyword">if</span> (++<span class="variable">dots</span> % <span class="number integer">25</span> === <span class="number integer">0</span>) <span class="variable">sys</span>.<span class="variable">print</span>(<span class="string">'\n'</span>);
+    <span class="variable">test</span>.<span class="variable">setup</span>(<span class="keyword">function</span>() {
+        <span class="keyword">if</span> (<span class="variable">test</span>.<span class="variable">fn</span>.<span class="variable">length</span> &<span class="variable">lt</span>; <span class="number integer">1</span>) {
+            <span class="variable">test</span>.<span class="variable">fn</span>();
+            <span class="variable">test</span>.<span class="variable">teardown</span>(<span class="variable">callback</span>);
+        } <span class="keyword">else</span> {
+            <span class="keyword">var</span> <span class="variable">id</span> = <span class="variable">setTimeout</span>(<span class="keyword">function</span>() {
+                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(&<span class="variable">quot</span>;<span class="string">'&quot; + key + &quot;'</span> <span class="variable">timed</span> <span class="variable">out</span>&<span class="variable">quot</span>;);
+            }, <span class="variable">timeout</span>);
+            <span class="variable">test</span>.<span class="variable">callback</span> = <span class="keyword">function</span>() {
+                <span class="variable">clearTimeout</span>(<span class="variable">id</span>);
+                <span class="variable">test</span>.<span class="variable">teardown</span>(<span class="variable">callback</span>);
+                <span class="variable">process</span>.<span class="variable">nextTick</span>(<span class="keyword">function</span>() {
+                    <span class="variable">test</span>.<span class="variable">report</span>();
+                });
+            };
+            <span class="variable">test</span>.<span class="variable">fn</span>(<span class="variable">test</span>.<span class="variable">callback</span>);
+        }
+    });
+};
+
+<span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">runParallel</span> = <span class="keyword">function</span>() {
+    <span class="keyword">var</span> <span class="variable">test</span> = <span class="this">this</span>;
+    <span class="variable">test</span>.<span class="variable">fn</span>(<span class="keyword">function</span>(<span class="variable">fn</span>) {
+        <span class="variable">test</span>.<span class="variable">on</span>(<span class="string">'exit'</span>, <span class="keyword">function</span>() {
+            <span class="variable">fn</span>(<span class="variable">test</span>.<span class="variable">assert</span>);
+        });
+    }, <span class="variable">test</span>.<span class="variable">assert</span>);
+};</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Report <code>err</code> for the given <code>test</code> and <code>suite</code>.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>String</em>  suite</p></li><li><p><strong>param</strong>: <em>String</em>  test</p></li><li><p><strong>param</strong>: <em>Error</em>  err</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Test</span>.<span class="variable">prototype</span>.<span class="variable">error</span> = <span class="keyword">function</span>(<span class="variable">err</span>) {
+    <span class="keyword">if</span> (!<span class="variable">err</span>.<span class="variable">_reported</span>) {
+        ++<span class="variable">failures</span>;
+        <span class="keyword">var</span> <span class="variable">name</span> = <span class="variable">err</span>.<span class="variable">name</span>,
+            <span class="variable">stack</span> = <span class="variable">err</span>.<span class="variable">stack</span> ? <span class="variable">err</span>.<span class="variable">stack</span>.<span class="variable">replace</span>(<span class="variable">err</span>.<span class="variable">name</span>, <span class="string">''</span>) : <span class="string">''</span>,
+            <span class="keyword">label</span> = <span class="this">this</span>.<span class="variable">title</span> === <span class="string">'uncaught'</span>
+                ? <span class="this">this</span>.<span class="variable">title</span>
+                : <span class="this">this</span>.<span class="variable">suite</span> + <span class="string">' '</span> + <span class="this">this</span>.<span class="variable">title</span>;
+        <span class="variable">print</span>(<span class="string">'\n   [bold]{'</span> + <span class="keyword">label</span> + <span class="string">'}: [red]{'</span> + <span class="variable">name</span> + <span class="string">'}'</span> + <span class="variable">stack</span> + <span class="string">'\n'</span>);
+        <span class="variable">err</span>.<span class="variable">_reported</span> = <span class="variable">true</span>;
+    }
 }</code></pre>
 </td>
 </tr>
@@ -1013,8 +1213,12 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 </td>
 <td class="code">
 <pre><code><span class="keyword">function</span> <span class="variable">report</span>() {
+    <span class="variable">cursor</span>(<span class="variable">true</span>);
     <span class="variable">process</span>.<span class="variable">emit</span>(<span class="string">'beforeExit'</span>);
-    <span class="keyword">if</span> (<span class="variable">failures</span>) {
+    <span class="keyword">if</span> (<span class="variable">suitesRun</span> &<span class="variable">lt</span>; <span class="variable">suites</span>) {
+        <span class="variable">print</span>(<span class="string">'\n   [bold]{Failure}: [red]{Only '</span> + <span class="variable">suitesRun</span> + <span class="string">' of '</span> + <span class="variable">suites</span> + <span class="string">' suites have been started}\n\n'</span>);
+    }
+    <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">failures</span>) {
         <span class="variable">print</span>(<span class="string">'\n   [bold]{Failures}: [red]{'</span> + <span class="variable">failures</span> + <span class="string">'}\n\n'</span>);
         <span class="variable">notify</span>(<span class="string">'Failures: '</span> + <span class="variable">failures</span>);
     } <span class="keyword">else</span> {
@@ -1023,7 +1227,10 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
         <span class="variable">notify</span>(<span class="string">'100% ok'</span>);
     }
     <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">_</span>$<span class="variable">jscoverage</span> === <span class="string">'object'</span>) {
-        <span class="variable">reportCoverage</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>);
+        <span class="variable">populateCoverage</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>);
+        <span class="keyword">if</span> (!<span class="variable">hasFullCoverage</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>) || !<span class="variable">quiet</span>) {
+            (<span class="variable">jsonCoverage</span> ? <span class="variable">reportCoverageJson</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>) : <span class="variable">reportCoverageTable</span>(<span class="variable">_</span>$<span class="variable">jscoverage</span>));
+        }
     }
 }</code></pre>
 </td>
@@ -1044,15 +1251,19 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 }
 
 <span class="comment">// Report uncaught exceptions</span>
+<span class="keyword">var</span> <span class="variable">unknownTest</span> = <span class="keyword">new</span> <span class="class">Test</span>({
+    <span class="variable">suite</span>: <span class="string">'uncaught'</span>,
+    <span class="variable">test</span>: <span class="string">'uncaught'</span>
+});
 
-<span class="variable">process</span>.<span class="variable">addListener</span>(<span class="string">'uncaughtException'</span>, <span class="keyword">function</span>(<span class="variable">err</span>){
-    <span class="variable">error</span>(<span class="string">'uncaught'</span>, <span class="string">'uncaught'</span>, <span class="variable">err</span>);
+<span class="variable">process</span>.<span class="variable">on</span>(<span class="string">'uncaughtException'</span>, <span class="keyword">function</span>(<span class="variable">err</span>) {
+    <span class="variable">unknownTest</span>.<span class="variable">error</span>(<span class="variable">err</span>);
 });
 
 <span class="comment">// Show cursor</span>
 
-[<span class="string">'INT'</span>, <span class="string">'TERM'</span>, <span class="string">'QUIT'</span>].<span class="variable">forEach</span>(<span class="keyword">function</span>(<span class="variable">sig</span>){
-    <span class="variable">process</span>.<span class="variable">addListener</span>(<span class="string">'SIG'</span> + <span class="variable">sig</span>, <span class="keyword">function</span>(){
+[<span class="string">'INT'</span>, <span class="string">'TERM'</span>, <span class="string">'QUIT'</span>].<span class="variable">forEach</span>(<span class="keyword">function</span>(<span class="variable">sig</span>) {
+    <span class="variable">process</span>.<span class="variable">on</span>(<span class="string">'SIG'</span> + <span class="variable">sig</span>, <span class="keyword">function</span>() {
         <span class="variable">cursor</span>(<span class="variable">true</span>);
         <span class="variable">process</span>.<span class="variable">exit</span>(<span class="number integer">1</span>);
     });
@@ -1063,7 +1274,7 @@ the given <code>req</code> object and <code>res</code> assertions object.</p>
 <span class="comment">// final assertions</span>
 
 <span class="keyword">var</span> <span class="variable">orig</span> = <span class="variable">process</span>.<span class="variable">emit</span>;
-<span class="variable">process</span>.<span class="variable">emit</span> = <span class="keyword">function</span>(<span class="variable">event</span>){
+<span class="variable">process</span>.<span class="variable">emit</span> = <span class="keyword">function</span>(<span class="variable">event</span>) {
     <span class="keyword">if</span> (<span class="variable">event</span> === <span class="string">'exit'</span>) {
         <span class="variable">report</span>();
         <span class="variable">process</span>.<span class="variable">reallyExit</span>(<span class="variable">failures</span>);
