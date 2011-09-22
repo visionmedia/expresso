@@ -471,9 +471,7 @@ assert.response = function(server, req, res, msg){
             response.on('data', function(chunk){ response.body += chunk; });
             response.on('end', function(){
                 if (timer) clearTimeout(timer);
-
                 try {
-
                     // Assert response body
                     if (res.body !== undefined) {
                         var eql = res.body instanceof RegExp
@@ -825,7 +823,7 @@ function runFile(file, fn) {
  */
 
 var dots = 0;
-function runSuite(title, tests, fn) {
+function runSuite(title, tests, callback) {
     // Keys
     var keys = only.length
         ? only.slice(0)
@@ -860,7 +858,7 @@ function runSuite(title, tests, fn) {
                 next();
             }
         } else if (serial) {
-          fn();
+            callback();
         }
     })();
 }
@@ -925,9 +923,9 @@ Test.prototype.runSerial = function(callback) {
     sys.print('.');
     if (++dots % 25 === 0) sys.print('\n');
     test.setup(function() {
-        if (test.fn.length < 2) {
-            test.fn(test.assert);
-            test.teardown(callback, test.assert);
+        if (test.fn.length < 1) {
+            test.fn();
+            test.teardown(callback);
         } else {
             var id = setTimeout(function(){
                 throw new Error("'" + key + "' timed out");
@@ -935,11 +933,13 @@ Test.prototype.runSerial = function(callback) {
             test.callback = function(){
                 clearTimeout(id);
                 test.teardown(callback);
-                test.report();
+                process.nextTick(function() {
+                    test.report();
+                });
             };
-            test.fn(test.callback, test.assert);
+            test.fn(test.callback);
         }
-    }, test.assert);
+    });
 };
 
 Test.prototype.runParallel = function() {
