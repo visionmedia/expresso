@@ -3,16 +3,16 @@ var assert = require('assert');
 // Using a localized version of assert.
 exports['first'] = function(beforeExit, assert) {
     process.nextTick(function() {
-        assert.equal(assert.suiteTitle, 'local-assert.test.js');
-        assert.equal(assert.testTitle, 'first');
+        assert.equal(assert._test.suite, 'local-assert.test.js');
+        assert.equal(assert._test.title, 'first');
     });
 };
 
 // Using the broken global version of assert.
 exports['second'] = function(beforeExit) {
     process.nextTick(function() {
-        assert.equal(assert.suiteTitle, 'local-assert.test.js');
-        assert.equal(assert.testTitle, 'third');
+        assert.equal(assert._test.suite, 'local-assert.test.js');
+        assert.equal(assert._test.title, 'third');
     });
 };
 

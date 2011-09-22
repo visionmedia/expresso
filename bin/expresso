@@ -47,6 +47,12 @@ var version = '0.8.1';
 
 var failures = 0;
 
+/**
+ * Indicates whether all test files have been loaded.
+ */
+
+var suites = 0;
+var suitesRun = 0;
 
 /**
  * Number of tests executed.
@@ -192,7 +198,7 @@ while (args.length) {
                 if (err) throw err;
                 require.paths.unshift('lib-cov');
                 run(files);
-            })
+            });
             break;
         case '-q':
         case '--quiet':
@@ -370,11 +376,7 @@ assert.length = function(val, n, msg) {
  * @param {String} msg
  */
 assert.response = function(server, req, res, msg){
-    // @TODO: This is a big hack and breaks in asynchronous tests.
-    var suiteTitle = assert.suiteTitle;
-    var testTitle = assert.testTitle;
-    var testStatus = assert.testStatus;
-    var callbackFn = assert.callbackFn;
+    var test = assert._test;
 
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
@@ -385,13 +387,13 @@ assert.response = function(server, req, res, msg){
 
     // Default messate to test title
     if (typeof msg === 'function') msg = null;
-    msg = msg || testTitle;
+    msg = msg || test.title;
     msg += '. ';
 
     // Add a unique token for this call to assert.response(). We'll move it to
     // succeeded/failed when done
     var token = new Error('Response not completed: ' + msg);
-    testStatus.pending.push(token);
+    test._pending.push(token);
 
     function check(){
         try {
@@ -457,7 +459,7 @@ assert.response = function(server, req, res, msg){
             timer = setTimeout(function(){
                 check();
                 delete req.timeout;
-                error(suiteTitle, testTitle, msg + 'Request timed out after ' + requestTimeout + 'ms.');
+                test.failure(new Error(msg + 'Request timed out after ' + requestTimeout + 'ms.'));
             }, requestTimeout);
         }
 
@@ -519,20 +521,18 @@ assert.response = function(server, req, res, msg){
                     callback(response);
 
                     // Add this to the succeeded bin.
-                    testStatus.succeeded.push(msg);
+                    test.success(msg);
                 } catch (err) {
-                    testStatus.failed.push(err);
-                    if (callbackFn) {
-                        callbackFn();
-                    }
+                    test.failure(err);
+                    test.callback();
                 } finally {
                     // Remove our token.
-                    var idx = testStatus.pending.indexOf(token);
+                    var idx = test._pending.indexOf(token);
                     if (idx >= 0) {
-                        testStatus.pending.splice(idx, 1);
+                        test._pending.splice(idx, 1);
                     } else {
                         // Someone else took our token. This is an error.
-                        testStatus.failed.push(new Error('Request succeeded, but token vanished: ' + msg));
+                        test.failure(new Error('Request succeeded, but token vanished: ' + msg));
                     }
 
                     // Potentially shut down the server.
@@ -778,6 +778,11 @@ function cursor(show) {
  */
 
 function runFiles(files) {
+    files = files.filter(function(file) {
+        return file.match(file_matcher);
+    });
+    suites = files.length;
+
     if (serial) {
         (function next(){
             if (files.length) {
@@ -785,7 +790,7 @@ function runFiles(files) {
             }
         })();
     } else {
-      files.forEach(runFile);
+        files.forEach(runFile);
     }
 }
 
@@ -797,47 +802,18 @@ function runFiles(files) {
  */
 
 function runFile(file, fn) {
-    if (file.match(file_matcher)) {
-        var title = path.basename(file),
-            file = path.join(cwd, file),
-            mod = require(file.replace(file_matcher,''));
-        (function check(){
-           var len = Object.keys(mod).length;
-           if (len) {
-               runSuite(title, mod, fn);
-           } else {
-               setTimeout(check, 20);
-           }
-        })();
-    }
-}
-
-/**
- * Report `err` for the given `test` and `suite`.
- *
- * @param {String} suite
- * @param {String} test
- * @param {Error} err
- */
-
-function error(suite, test, err) {
-    ++failures;
-    var name = err.name,
-        stack = err.stack ? err.stack.replace(err.name, '') : '',
-        label = test === 'uncaught'
-            ? test
-            : suite + ' ' + test;
-    print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
-}
-
-function reportTest(test) {
-    test.failed.forEach(function(err) { error(test.suite, test.title, err); });
-    test.pending.forEach(function(err) { error(test.suite, test.title, err); })
-
-    var got = test.failed.length + test.succeeded.length + test.pending.length;
-    if (test.expected > 0 && test.expected !== got) {
-        error(test.suite, test.title, new Error('Expected ' + test.expected + ' assertions, but got ' + got));
-    }
+    var title = path.basename(file),
+        file = path.join(cwd, file),
+        mod = require(file.replace(file_matcher,''));
+    (function check(){
+       var len = Object.keys(mod).length;
+       if (len) {
+           runSuite(title, mod, fn);
+           suitesRun++;
+       } else {
+           setTimeout(check, 20);
+       }
+    })();
 }
 
 /**
@@ -856,10 +832,8 @@ function runSuite(title, tests, fn) {
         : Object.keys(tests);
 
     // Setup
-    var setup = tests.setup || function(fn){ fn(); };
-    var teardown = tests.teardown || function(fn){ fn(); };
-
-    assert.suiteTitle = title;
+    var setup = tests.setup || function(fn, assert) { fn(); };
+    var teardown = tests.teardown || function(fn, assert) { fn(); };
 
     process.setMaxListeners(10 + process.listeners('beforeExit').length  + keys.length);
 
@@ -873,7 +847,14 @@ function runSuite(title, tests, fn) {
 
             // Run test
             if (fn) {
-                runTest(fn, title, key, setup, teardown, next);
+                var test = new Test({
+                    fn: fn,
+                    suite: title,
+                    title: key,
+                    setup: setup,
+                    teardown: teardown
+                })
+                test.run(next);
             } else {
                 // @TODO: Add warning message that there's no test.
                 next();
@@ -884,80 +865,110 @@ function runSuite(title, tests, fn) {
     })();
 }
 
-function runTest(fn, suiteTitle, testTitle, setup, teardown, next) {
-    var test = {
-        fn: fn,
-        suite: suiteTitle,
-        title: testTitle,
-        setup: setup,
-        teardown: teardown,
-        expected: 0,
-        succeeded: [],
-        failed: [],
-        pending: []
-    };
-
-    try {
-        ++testcount;
-        assert.testTitle = testTitle;
-        assert.testStatus = test;
-
-        var customAssert = {
-            __proto__: assert,
-            suiteTitle: assert.suiteTitle,
-            testTitle: assert.testTitle,
-            testStatus: assert.testStatus
-        };
-
-        if (serial) {
-            runSerialTest(test, customAssert, next);
-        } else {
-            // @TODO: find a way to run setup/tearDown.
-            runParallelTest(test, customAssert);
-            next();
-        }
-    } catch (err) {
-        test.failed.push(err);
-        reportTest(test);
+require('util').inherits(Test, require('events').EventEmitter);
+function Test(options) {
+    for (var key in options) {
+        this[key] = options[key];
     }
+    this._succeeded = [];
+    this._failed = [];
+    this._pending = [];
+    this._beforeExit = [];
+    this.assert = { __proto__: assert, _test: this };
+
+    var test = this;
+    process.on('beforeExit', function() {
+        try {
+            test.emit('exit');
+        } catch (err) {
+            test.failure(err);
+        }
+        test.report();
+    });
 }
 
-function runSerialTest(test, customAssert, next) {
+Test.prototype.success = function(err) {
+    this._succeeded.push(err);
+};
+
+Test.prototype.failure = function(err) {
+    this._failed.push(err);
+    this.error(err);
+};
+
+Test.prototype.report = function() {
+    for (var i = 0; i < this._pending.length; i++) {
+        this.error(this._pending[i]);
+    }
+};
+
+Test.prototype.run = function(callback) {
+    try {
+        ++testcount;
+        assert._test = this;
+
+        if (serial) {
+            this.runSerial(callback);
+        } else {
+            // @TODO: find a way to run setup/tearDown.
+            this.runParallel();
+            callback();
+        }
+    } catch (err) {
+        this.failure(err);
+        this.report();
+    }
+};
+
+Test.prototype.runSerial = function(callback) {
+    var test = this;
     sys.print('.');
     if (++dots % 25 === 0) sys.print('\n');
-    test.setup(function(){
+    test.setup(function() {
         if (test.fn.length < 2) {
-            test.fn(customAssert);
-            test.teardown(next);
+            test.fn(test.assert);
+            test.teardown(callback, test.assert);
         } else {
             var id = setTimeout(function(){
                 throw new Error("'" + key + "' timed out");
             }, timeout);
-            customAssert.callbackFn = assert.callbackFn = function(){
+            test.callback = function(){
                 clearTimeout(id);
-                test.teardown(next);
-                reportTest(test);
+                test.teardown(callback);
+                test.report();
             };
-            test.fn(assert.callbackFn, customAssert);
+            test.fn(test.callback, test.assert);
         }
-    });
-}
+    }, test.assert);
+};
 
-function runParallelTest(test, customAssert) {
-    process.on('beforeExit', function() {
-        if (test.beforeExit) {
-            try {
-                test.beforeExit();
-            } catch (err) {
-                test.failed.push(err);
-            }
-        }
-        reportTest(test);
-    });
-
+Test.prototype.runParallel = function() {
+    var test = this;
     test.fn(function(fn) {
-        test.beforeExit = fn;
-    }, customAssert);
+        test.on('exit', function() {
+            fn(test.assert);
+        });
+    }, test.assert);
+};
+
+/**
+ * Report `err` for the given `test` and `suite`.
+ *
+ * @param {String} suite
+ * @param {String} test
+ * @param {Error} err
+ */
+Test.prototype.error = function(err) {
+    if (!err._reported) {
+        ++failures;
+        var name = err.name,
+            stack = err.stack ? err.stack.replace(err.name, '') : '',
+            label = this.title === 'uncaught'
+                ? this.title
+                : this.suite + ' ' + this.title;
+        print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
+        err._reported = true;
+    }
 }
 
 /**
@@ -967,7 +978,10 @@ function runParallelTest(test, customAssert) {
 function report() {
     cursor(true);
     process.emit('beforeExit');
-    if (failures) {
+    if (suitesRun < suites) {
+        print('\n   [bold]{Failure}: [red]{Only ' + suitesRun + ' of ' + suites + ' suites have been started}\n\n');
+    }
+    else if (failures) {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
@@ -996,9 +1010,13 @@ function notify(msg) {
 }
 
 // Report uncaught exceptions
+var unknownTest = new Test({
+    suite: 'uncaught',
+    test: 'uncaught'
+});
 
-process.on('uncaughtException', function(err){
-    error('uncaught', 'uncaught', err);
+process.on('uncaughtException', function(err) {
+    unknownTest.error(err);
 });
 
 // Show cursor
