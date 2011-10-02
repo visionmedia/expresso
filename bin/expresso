@@ -950,7 +950,7 @@ Test.prototype.runSerial = function(callback) {
             test.teardown(callback);
         } else {
             var id = setTimeout(function() {
-                throw new Error("'" + key + "' timed out");
+                throw new Error("'" + test.title + "' timed out");
             }, timeout);
             test.callback = function() {
                 clearTimeout(id);
