@@ -67,6 +67,12 @@ var testcount = 0;
 var only = [];
 
 /**
+ * Regex expression filtering tests to run.
+ */
+
+var match = '';
+
+/**
  * Boring output.
  */
 
@@ -123,6 +129,7 @@ var usage = ''
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
+    + '\n  -m, --match EXP      Execute only tests matching a given regular expression (can be set several times)'
     + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -s, --serial         Execute tests serially'
@@ -164,6 +171,14 @@ while (args.length) {
                 only = only.concat(arg.split(/ *, */));
             } else {
                 throw new Error('--only requires comma-separated test names');
+            }
+            break;
+        case '-m':
+        case '--match':
+            if (arg = args.shift()) {
+                match += (match.length > 0 ? '|' : '') + arg;
+            } else {
+                throw new Error('--match requires argument');
             }
             break;
         case '-p':
@@ -828,7 +843,10 @@ function runSuite(title, tests, callback) {
     var keys = only.length
         ? only.slice(0)
         : Object.keys(tests);
-
+    
+    // Regular expression test filter
+    var filter = new RegExp('(?:' + (match.length == 0 ? '.' : match) + ')');
+    
     // Setup
     var setup = tests.setup || function(fn, assert) { fn(); };
     var teardown = tests.teardown || function(fn, assert) { fn(); };
@@ -840,6 +858,10 @@ function runSuite(title, tests, callback) {
         if (keys.length) {
             var key,
                 fn = tests[key = keys.shift()];
+            
+            // Filter
+            if (filter.test(key) === false) return next();
+            
             // Non-tests
             if (key === 'setup' || key === 'teardown') return next();
 
