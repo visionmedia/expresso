@@ -932,8 +932,8 @@ Test.prototype.run = function(callback) {
 
 Test.prototype.runSerial = function(callback) {
     var test = this;
-    sys.print('.');
-    if (++dots % 25 === 0) sys.print('\n');
+    process.stdout.write('.');
+    if (++dots % 25 === 0) console.log();
     test.setup(function() {
         if (test.fn.length < 1) {
             test.fn();
