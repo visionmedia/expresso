@@ -14,7 +14,7 @@ var assert = require('assert'),
     childProcess = require('child_process'),
     http = require('http'),
     path = require('path'),
-    sys = require('sys'),
+    util = require('util'),
     cwd = process.cwd(),
     fs = require('fs'),
     defer;
@@ -139,7 +139,7 @@ while (args.length) {
             break;
         case '-v':
         case '--version':
-            sys.puts(version);
+            console.log(version);
             process.exit(1);
             break;
         case '-o':
@@ -218,13 +218,13 @@ while (args.length) {
 }
 
 /**
- * Colorized sys.error().
+ * Colorized console.error().
  *
  * @param {String} str
  */
 
 function print(str){
-    sys.error(colorize(str));
+    console.error(colorize(str));
 }
 
 /**
@@ -302,7 +302,7 @@ assert.isDefined = function(val, msg) {
 
 assert.type = function(obj, type, msg){
     var real = typeof obj;
-    msg = msg || 'typeof ' + sys.inspect(obj) + ' is ' + real + ', expected ' + type;
+    msg = msg || 'typeof ' + util.inspect(obj) + ' is ' + real + ', expected ' + type;
     assert.ok(type === real, msg);
 };
 
@@ -315,7 +315,7 @@ assert.type = function(obj, type, msg){
  */
 
 assert.match = function(str, regexp, msg) {
-    msg = msg || sys.inspect(str) + ' does not match ' + sys.inspect(regexp);
+    msg = msg || util.inspect(str) + ' does not match ' + util.inspect(regexp);
     assert.ok(regexp.test(str), msg);
 };
 
@@ -333,7 +333,7 @@ assert.match = function(str, regexp, msg) {
  */
 
 assert.includes = function(obj, val, msg) {
-    msg = msg || sys.inspect(obj) + ' does not include ' + sys.inspect(val);
+    msg = msg || util.inspect(obj) + ' does not include ' + util.inspect(val);
     assert.ok(obj.indexOf(val) >= 0, msg);
 };
 
@@ -346,7 +346,7 @@ assert.includes = function(obj, val, msg) {
  */
 
 assert.length = function(val, n, msg) {
-    msg = msg || sys.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
+    msg = msg || util.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
     assert.equal(n, val.length, msg);
 };
 
@@ -472,8 +472,8 @@ assert.response = function(server, req, res, msg){
                         assert.ok(
                             eql,
                             msg + 'Invalid response body.\n'
-                                + '    Expected: ' + sys.inspect(res.body) + '\n'
-                                + '    Got: ' + sys.inspect(response.body)
+                                + '    Expected: ' + util.inspect(res.body) + '\n'
+                                + '    Got: ' + util.inspect(response.body)
                         );
                     }
 
@@ -566,28 +566,28 @@ function reportCoverageTable(cov) {
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
         lastSep = '                                              +----------+------+------+--------+';
-    sys.puts(sep);
-    sys.puts('   | filename                                 | coverage | LOC  | SLOC | missed |');
-    sys.puts(sep);
+    console.log(sep);
+    console.log('   | filename                                 | coverage | LOC  | SLOC | missed |');
+    console.log(sep);
     for (var name in cov) {
         var file = cov[name];
         if (Array.isArray(file)) {
-            sys.print('   | ' + rpad(name, 40));
-            sys.print(' | ' + lpad(file.coverage.toFixed(2), 8));
-            sys.print(' | ' + lpad(file.LOC, 4));
-            sys.print(' | ' + lpad(file.SLOC, 4));
-            sys.print(' | ' + lpad(file.totalMisses, 6));
-            sys.print(' |\n');
+            process.stdout.write('   | ' + rpad(name, 40));
+            process.stdout.write(' | ' + lpad(file.coverage.toFixed(2), 8));
+            process.stdout.write(' | ' + lpad(file.LOC, 4));
+            process.stdout.write(' | ' + lpad(file.SLOC, 4));
+            process.stdout.write(' | ' + lpad(file.totalMisses, 6));
+            process.stdout.write(' |\n');
         }
     }
-    sys.puts(sep);
-    sys.print('     ' + rpad('', 40));
-    sys.print(' | ' + lpad(cov.coverage.toFixed(2), 8));
-    sys.print(' | ' + lpad(cov.LOC, 4));
-    sys.print(' | ' + lpad(cov.SLOC, 4));
-    sys.print(' | ' + lpad(cov.totalMisses, 6));
-    sys.print(' |\n');
-    sys.puts(lastSep);
+    console.log(sep);
+    process.stdout.write('     ' + rpad('', 40));
+    process.stdout.write(' | ' + lpad(cov.coverage.toFixed(2), 8));
+    process.stdout.write(' | ' + lpad(cov.LOC, 4));
+    process.stdout.write(' | ' + lpad(cov.SLOC, 4));
+    process.stdout.write(' | ' + lpad(cov.totalMisses, 6));
+    process.stdout.write(' |\n');
+    console.log(lastSep);
     // Source
     for (var name in cov) {
         if (name.match(file_matcher)) {
@@ -595,7 +595,7 @@ function reportCoverageTable(cov) {
             if ((file.coverage < 100) || !quiet) {
                print('\n   [bold]{' + name + '}:');
                print(file.source);
-               sys.print('\n');
+               process.stdout.write('\n');
             }
         }
     }
@@ -741,9 +741,9 @@ function run(files) {
 function cursor(show) {
     if (boring) return;
     if (show) {
-        sys.print('\x1b[?25h');
+        process.stdout.write('\x1b[?25h');
     } else {
-        sys.print('\x1b[?25l');
+        process.stdout.write('\x1b[?25l');
     }
 }
 
@@ -843,8 +843,8 @@ function runSuite(title, tests, fn) {
                     ++testcount;
                     assert.testTitle = key;
                     if (serial) {
-                        sys.print('.');
-                        if (++dots % 25 === 0) sys.print('\n');
+                        process.stdout.write('.');
+                        if (++dots % 25 === 0) process.stdout.write('\n');
                         setup(function(){
                             if (test.length < 1) {
                                 test();
