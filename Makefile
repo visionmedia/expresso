@@ -9,7 +9,7 @@ test: $(BIN)
 	@./$(BIN) --growl $(TEST_FLAGS) test/*.test.js
 
 test-cov:
-	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
+	@./$(BIN) -I lib --cov $(TEST_FLAGS)
 
 test-serial:
 	@./$(BIN) --serial $(TEST_FLAGS) test/serial/*.test.js
@@ -36,7 +36,7 @@ docs: docs/api.html $(HTMLDOCS)
 
 %.html: %.md
 	@echo "... $< > $@"
-	@ronn -5 --pipe --fragment $< \
+	@ronn --html $< \
 		| cat docs/layout/head.html - docs/layout/foot.html \
 		> $@
 
