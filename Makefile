@@ -6,7 +6,7 @@ DOCS = docs/index.md
 HTMLDOCS = $(DOCS:.md=.html)
 
 test: $(BIN)
-	@./$(BIN) --growl $(TEST_FLAGS) test/*.test.js
+	@./$(BIN) --growl $(TEST_FLAGS)
 
 test-cov:
 	@./$(BIN) -I lib --cov $(TEST_FLAGS)
