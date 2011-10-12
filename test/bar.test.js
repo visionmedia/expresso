@@ -4,7 +4,7 @@
  */
 
 var assert = require('assert')
-  , bar = require('bar');
+  , bar = require('../lib/bar');
 
 module.exports = {
     'bar()': function(){

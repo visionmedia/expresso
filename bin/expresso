@@ -117,7 +117,6 @@ var usage = ''
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
-    + '\n  -I, --include PATH   Unshift the given path to require.paths'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -s, --serial         Execute tests serially'
     + '\n  -b, --boring         Suppress ansi-escape colors'
@@ -142,15 +141,6 @@ while (args.length) {
         case '--version':
             sys.puts(version);
             process.exit(1);
-            break;
-        case '-i':
-        case '-I':
-        case '--include':
-            if (arg = args.shift()) {
-                require.paths.unshift(arg);
-            } else {
-                throw new Error('--include requires a path');
-            }
             break;
         case '-o':
         case '--only':
@@ -184,16 +174,16 @@ while (args.length) {
             throw new Error('--timeout requires an argument');
           }
           break;
-        case '-c':
-        case '--cov':
-        case '--coverage':
-            defer = true;
-            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
-                if (err) throw err;
-                require.paths.unshift('lib-cov');
-                run(files);
-            })
-            break;
+        // case '-c':
+        // case '--cov':
+        // case '--coverage':
+        //     defer = true;
+        //     childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
+        //         if (err) throw err;
+        //         require.paths.unshift('lib-cov');
+        //         run(files);
+        //     })
+        //     break;
         case '-q':
         case '--quiet':
             quiet = true;

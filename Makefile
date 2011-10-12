@@ -6,13 +6,13 @@ DOCS = docs/index.md
 HTMLDOCS = $(DOCS:.md=.html)
 
 test: $(BIN)
-	@./$(BIN) -I lib --growl $(TEST_FLAGS) test/*.test.js
+	@./$(BIN) --growl $(TEST_FLAGS) test/*.test.js
 
 test-cov:
 	@./$(BIN) -I lib --cov $(TEST_FLAGS) test/*.test.js
 
 test-serial:
-	@./$(BIN) --serial -I lib $(TEST_FLAGS) test/serial/*.test.js
+	@./$(BIN) --serial $(TEST_FLAGS) test/serial/*.test.js
 
 install: install-jscov install-expresso
 
