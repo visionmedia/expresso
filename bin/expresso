@@ -415,6 +415,7 @@ assert.response = function(server, req, res, msg) {
     }
 
     // Pending responses
+    server.setMaxListeners(99999);
     server.__pending = server.__pending || 0;
     server.__pending++;
 
