@@ -791,6 +791,10 @@ function runFiles(files) {
         (function next() {
             if (files.length) {
                 runFile(files.shift(), next);
+            } else {
+                setTimeout(function() {
+                    process.exit(0);
+                }, 0);
             }
         })();
     } else {
