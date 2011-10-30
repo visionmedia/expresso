@@ -792,9 +792,9 @@ function runFiles(files) {
             if (files.length) {
                 runFile(files.shift(), next);
             } else {
-                setTimeout(function() {
+                process.nextTick(function() {
                     process.exit(0);
-                }, 0);
+                });
             }
         })();
     } else {
