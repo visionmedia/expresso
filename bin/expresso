@@ -706,7 +706,7 @@ function populateCoverage(cov) {
 function coverage(data, val) {
     var n = 0;
     for (var i = 0, len = data.length; i < len; ++i) {
-        if (data[i] !== undefined && data[i] == val) ++n;
+        if (data[i] !== undefined && val ? data[i] >= 1 : data[i]==0) ++n;
     }
     return n;
 }
