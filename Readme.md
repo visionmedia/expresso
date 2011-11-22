@@ -1,7 +1,7 @@
 
 # Expresso
 
-  TDD framework for [nodejs](http://nodejs.org).
+  TDD framework for [nodejs](http://nodejs.org). Be sure to check out Expresso's successor [Mocha](http://visionmedia.github.com/mocha/).
   
 ## Features
 
