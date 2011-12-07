@@ -937,7 +937,11 @@ Test.prototype.runSerial = function(callback) {
     if (++dots % 25 === 0) console.log();
     test.setup(function() {
         if (test.fn.length < 1) {
-            test.fn();
+            try {
+              test.fn();
+            } catch (err) {
+              test.failure(err);
+            }
             test.teardown(callback);
         } else {
             var id = setTimeout(function() {
@@ -950,7 +954,12 @@ Test.prototype.runSerial = function(callback) {
                     test.report();
                 });
             };
-            test.fn(test.callback);
+
+            try {
+              test.fn(test.callback);
+            } catch (err) {
+              test.failure(err);
+            }
         }
     });
 };
