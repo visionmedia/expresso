@@ -528,7 +528,11 @@ assert.response = function(server, req, res, msg) {
                     test.success(msg);
                 } catch (err) {
                     test.failure(err);
-                    test.callback();
+
+                    // Tests only have callbacks when there is more than one test
+                    if (typeof test.callback === "function") {
+                      test.callback();
+                    }
                 } finally {
                     // Remove our token.
                     var idx = test._pending.indexOf(token);
