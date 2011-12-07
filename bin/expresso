@@ -957,11 +957,15 @@ Test.prototype.runSerial = function(callback) {
 
 Test.prototype.runParallel = function() {
     var test = this;
-    test.fn(function(fn) {
-        test.on('exit', function() {
-            fn(test.assert);
-        });
-    }, test.assert);
+    try {
+      test.fn(function(fn) {
+          test.on('exit', function() {
+              fn(test.assert);
+          });
+      }, test.assert);
+    } catch (err) {
+      test.failure(err);
+    }
 };
 
 /**
