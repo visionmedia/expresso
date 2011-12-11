@@ -1,4 +1,16 @@
 
+0.9.2 / 2011-10-12 
+==================
+
+  * Fixed serial support
+
+0.9.1 / 2011-10-12 
+==================
+
+  * Added 0.5.x support
+  * Added regex based test name filtering argument
+  * Removed "sys" module related calls
+
 0.8.1 / 2011-07-07 
 ==================
 

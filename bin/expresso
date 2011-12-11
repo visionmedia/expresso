@@ -14,7 +14,7 @@ var assert = require('assert'),
     childProcess = require('child_process'),
     http = require('http'),
     path = require('path'),
-    sys = require('sys'),
+    util = require('util'),
     cwd = process.cwd(),
     fs = require('fs'),
     defer;
@@ -39,7 +39,7 @@ try {
  * Expresso version.
  */
 
-var version = '0.8.1';
+var version = '0.9.2';
 
 /**
  * Failure count.
@@ -47,6 +47,12 @@ var version = '0.8.1';
 
 var failures = 0;
 
+/**
+ * Indicates whether all test files have been loaded.
+ */
+
+var suites = 0;
+var suitesRun = 0;
 
 /**
  * Number of tests executed.
@@ -59,6 +65,12 @@ var testcount = 0;
  */
 
 var only = [];
+
+/**
+ * Regex expression filtering tests to run.
+ */
+
+var match = '';
 
 /**
  * Boring output.
@@ -117,7 +129,7 @@ var usage = ''
     + '\n  -t, --timeout MS     Timeout in milliseconds, defaults to 2000'
     + '\n  -r, --require PATH   Require the given module path'
     + '\n  -o, --only TESTS     Execute only the comma sperated TESTS (can be set several times)'
-    + '\n  -I, --include PATH   Unshift the given path to require.paths'
+    + '\n  -m, --match EXP      Execute only tests matching a given regular expression (can be set several times)'
     + '\n  -p, --port NUM       Port number for test servers, starts at 5555'
     + '\n  -s, --serial         Execute tests serially'
     + '\n  -b, --boring         Suppress ansi-escape colors'
@@ -140,17 +152,8 @@ while (args.length) {
             break;
         case '-v':
         case '--version':
-            sys.puts(version);
+            console.log(version);
             process.exit(1);
-            break;
-        case '-i':
-        case '-I':
-        case '--include':
-            if (arg = args.shift()) {
-                require.paths.unshift(arg);
-            } else {
-                throw new Error('--include requires a path');
-            }
             break;
         case '-o':
         case '--only':
@@ -158,6 +161,14 @@ while (args.length) {
                 only = only.concat(arg.split(/ *, */));
             } else {
                 throw new Error('--only requires comma-separated test names');
+            }
+            break;
+        case '-m':
+        case '--match':
+            if (arg = args.shift()) {
+                match += (match.length > 0 ? '|' : '') + arg;
+            } else {
+                throw new Error('--match requires argument');
             }
             break;
         case '-p':
@@ -184,16 +195,16 @@ while (args.length) {
             throw new Error('--timeout requires an argument');
           }
           break;
-        case '-c':
-        case '--cov':
-        case '--coverage':
-            defer = true;
-            childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
-                if (err) throw err;
-                require.paths.unshift('lib-cov');
-                run(files);
-            })
-            break;
+        // case '-c':
+        // case '--cov':
+        // case '--coverage':
+        //     defer = true;
+        //     childProcess.exec('rm -fr lib-cov && node-jscoverage lib lib-cov', function(err){
+        //         if (err) throw err;
+        //         require.paths.unshift('lib-cov');
+        //         run(files);
+        //     })
+        //     break;
         case '-q':
         case '--quiet':
             quiet = true;
@@ -228,13 +239,13 @@ while (args.length) {
 }
 
 /**
- * Colorized sys.error().
+ * Colorized console.error().
  *
  * @param {String} str
  */
 
 function print(str){
-    sys.error(colorize(str));
+    console.error(colorize(str));
 }
 
 /**
@@ -245,9 +256,9 @@ function print(str){
  * @return {String}
  */
 
-function colorize(str){
+function colorize(str) {
     var colors = { bold: 1, red: 31, green: 32, yellow: 33 };
-    return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str){
+    return str.replace(/\[(\w+)\]\{([^]*?)\}/g, function(_, color, str) {
         return boring
             ? str
             : '\x1B[' + colors[color] + 'm' + str + '\x1B[0m';
@@ -310,9 +321,9 @@ assert.isDefined = function(val, msg) {
  * @api public
  */
 
-assert.type = function(obj, type, msg){
+assert.type = function(obj, type, msg) {
     var real = typeof obj;
-    msg = msg || 'typeof ' + sys.inspect(obj) + ' is ' + real + ', expected ' + type;
+    msg = msg || 'typeof ' + util.inspect(obj) + ' is ' + real + ', expected ' + type;
     assert.ok(type === real, msg);
 };
 
@@ -325,7 +336,7 @@ assert.type = function(obj, type, msg){
  */
 
 assert.match = function(str, regexp, msg) {
-    msg = msg || sys.inspect(str) + ' does not match ' + sys.inspect(regexp);
+    msg = msg || util.inspect(str) + ' does not match ' + util.inspect(regexp);
     assert.ok(regexp.test(str), msg);
 };
 
@@ -343,7 +354,7 @@ assert.match = function(str, regexp, msg) {
  */
 
 assert.includes = function(obj, val, msg) {
-    msg = msg || sys.inspect(obj) + ' does not include ' + sys.inspect(val);
+    msg = msg || util.inspect(obj) + ' does not include ' + util.inspect(val);
     assert.ok(obj.indexOf(val) >= 0, msg);
 };
 
@@ -356,7 +367,7 @@ assert.includes = function(obj, val, msg) {
  */
 
 assert.length = function(val, n, msg) {
-    msg = msg || sys.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
+    msg = msg || util.inspect(val) + ' has length of ' + val.length + ', expected ' + n;
     assert.equal(n, val.length, msg);
 };
 
@@ -369,13 +380,27 @@ assert.length = function(val, n, msg) {
  * @param {Object|Function} res
  * @param {String} msg
  */
+assert.response = function(server, req, res, msg) {
+    var test = assert._test;
 
-assert.response = function(server, req, res, msg){
-    var suiteTitle = assert.suiteTitle;
-    var testTitle = assert.testTitle;
-    var callbackFn = assert.callbackFn;
+    // Callback as third or fourth arg
+    var callback = typeof res === 'function'
+        ? res
+        : typeof msg === 'function'
+            ? msg
+            : function() {};
 
-    function check(){
+    // Default messate to test title
+    if (typeof msg === 'function') msg = null;
+    msg = msg || test.title;
+    msg += '. ';
+
+    // Add a unique token for this call to assert.response(). We'll move it to
+    // succeeded/failed when done
+    var token = new Error('Response not completed: ' + msg);
+    test._pending.push(token);
+
+    function check() {
         try {
             server.__port = server.address().port;
             server.__listening = true;
@@ -384,12 +409,15 @@ assert.response = function(server, req, res, msg){
             return;
         }
         if (server.__deferred) {
-            server.__deferred.forEach(function(args){
-                assert.response.apply(assert, args);
-            });
+            server.__deferred.forEach(function(fn) { fn(); });
             server.__deferred = null;
         }
     }
+
+    // Pending responses
+    server.setMaxListeners(99999);
+    server.__pending = server.__pending || 0;
+    server.__pending++;
 
     // Check that the server is ready or defer
     if (!server.fd) {
@@ -402,35 +430,13 @@ assert.response = function(server, req, res, msg){
 
     // The socket was created but is not yet listening, so keep deferring
     if (!server.__listening) {
-        server.__deferred.push(arguments);
+        server.__deferred.push(issue);
         return;
-    }
-
-    // Callback as third or fourth arg
-    var callback = typeof res === 'function'
-        ? res
-        : typeof msg === 'function'
-            ? msg
-            : function(){};
-
-    // Default messate to test title
-    if (typeof msg === 'function') msg = null;
-    msg = msg || testTitle;
-    msg += '. ';
-
-    // Pending responses
-    server.__pending = server.__pending || 0;
-    server.__pending++;
-
-    // Create client
-    if (!server.fd) {
-        server.listen(server.__port = port++, '127.0.0.1', issue);
     } else {
         issue();
     }
 
-    function issue(){
-
+    function issue() {
         // Issue request
         var timer,
             method = req.method || 'GET',
@@ -456,24 +462,22 @@ assert.response = function(server, req, res, msg){
 
         // Timeout
         if (requestTimeout) {
-            timer = setTimeout(function(){
+            timer = setTimeout(function() {
                 check();
                 delete req.timeout;
-                error(suiteTitle, testTitle, msg + 'Request timed out after ' + requestTimeout + 'ms.');
+                test.failure(new Error(msg + 'Request timed out after ' + requestTimeout + 'ms.'));
             }, requestTimeout);
         }
 
         if (data) request.write(data);
 
-        request.on('response', function(response){
+        request.on('response', function(response) {
             response.body = '';
             response.setEncoding(encoding);
-            response.on('data', function(chunk){ response.body += chunk; });
-            response.on('end', function(){
+            response.on('data', function(chunk) { response.body += chunk; });
+            response.on('end', function() {
                 if (timer) clearTimeout(timer);
-
                 try {
-
                     // Assert response body
                     if (res.body !== undefined) {
                         var eql = res.body instanceof RegExp
@@ -482,8 +486,8 @@ assert.response = function(server, req, res, msg){
                         assert.ok(
                             eql,
                             msg + 'Invalid response body.\n'
-                                + '    Expected: ' + sys.inspect(res.body) + '\n'
-                                + '    Got: ' + sys.inspect(response.body)
+                                + '    Expected: ' + util.inspect(res.body) + '\n'
+                                + '    Got: ' + util.inspect(response.body)
                         );
                     }
 
@@ -519,11 +523,23 @@ assert.response = function(server, req, res, msg){
 
                     // Callback
                     callback(response);
+
+                    // Add this to the succeeded bin.
+                    test.success(msg);
                 } catch (err) {
-                    error(suiteTitle, testTitle, err);
-                    if (callbackFn)
-                      callbackFn();
+                    test.failure(err);
+                    test.callback();
                 } finally {
+                    // Remove our token.
+                    var idx = test._pending.indexOf(token);
+                    if (idx >= 0) {
+                        test._pending.splice(idx, 1);
+                    } else {
+                        // Someone else took our token. This is an error.
+                        test.failure(new Error('Request succeeded, but token vanished: ' + msg));
+                    }
+
+                    // Potentially shut down the server.
                     check();
                 }
             });
@@ -576,28 +592,28 @@ function reportCoverageTable(cov) {
     print('\n   [bold]{Test Coverage}\n');
     var sep = '   +------------------------------------------+----------+------+------+--------+',
         lastSep = '                                              +----------+------+------+--------+';
-    sys.puts(sep);
-    sys.puts('   | filename                                 | coverage | LOC  | SLOC | missed |');
-    sys.puts(sep);
+    console.log(sep);
+    console.log('   | filename                                 | coverage | LOC  | SLOC | missed |');
+    console.log(sep);
     for (var name in cov) {
         var file = cov[name];
         if (Array.isArray(file)) {
-            sys.print('   | ' + rpad(name, 40));
-            sys.print(' | ' + lpad(file.coverage.toFixed(2), 8));
-            sys.print(' | ' + lpad(file.LOC, 4));
-            sys.print(' | ' + lpad(file.SLOC, 4));
-            sys.print(' | ' + lpad(file.totalMisses, 6));
-            sys.print(' |\n');
+            process.stdout.write('   | ' + rpad(name, 40));
+            process.stdout.write(' | ' + lpad(file.coverage.toFixed(2), 8));
+            process.stdout.write(' | ' + lpad(file.LOC, 4));
+            process.stdout.write(' | ' + lpad(file.SLOC, 4));
+            process.stdout.write(' | ' + lpad(file.totalMisses, 6));
+            process.stdout.write(' |\n');
         }
     }
-    sys.puts(sep);
-    sys.print('     ' + rpad('', 40));
-    sys.print(' | ' + lpad(cov.coverage.toFixed(2), 8));
-    sys.print(' | ' + lpad(cov.LOC, 4));
-    sys.print(' | ' + lpad(cov.SLOC, 4));
-    sys.print(' | ' + lpad(cov.totalMisses, 6));
-    sys.print(' |\n');
-    sys.puts(lastSep);
+    console.log(sep);
+    process.stdout.write('     ' + rpad('', 40));
+    process.stdout.write(' | ' + lpad(cov.coverage.toFixed(2), 8));
+    process.stdout.write(' | ' + lpad(cov.LOC, 4));
+    process.stdout.write(' | ' + lpad(cov.SLOC, 4));
+    process.stdout.write(' | ' + lpad(cov.totalMisses, 6));
+    process.stdout.write(' |\n');
+    console.log(lastSep);
     // Source
     for (var name in cov) {
         if (name.match(file_matcher)) {
@@ -605,7 +621,7 @@ function reportCoverageTable(cov) {
             if ((file.coverage < 100) || !quiet) {
                print('\n   [bold]{' + name + '}:');
                print(file.source);
-               sys.print('\n');
+               process.stdout.write('\n');
             }
         }
     }
@@ -668,7 +684,7 @@ function populateCoverage(cov) {
             file.coverage = (file.totalHits / file.totalLines) * 100;
             // Source
             var width = file.source.length.toString().length;
-            file.source = file.source.map(function(line, i){
+            file.source = file.source.map(function(line, i) {
                 ++i;
                 var hits = file[i] === 0 ? 0 : (file[i] || ' ');
                 if (!boring) {
@@ -730,8 +746,10 @@ function run(files) {
     cursor(false);
     if (!files.length) {
         try {
-            files = fs.readdirSync('test').map(function(file){
+            files = fs.readdirSync('test').map(function(file) {
                 return 'test/' + file;
+            }).filter(function(file) {
+                return !(/(^\.)|(\/\.)/.test(file));
             });
         } catch (err) {
             print('\n  failed to load tests in [bold]{./test}\n');
@@ -751,9 +769,9 @@ function run(files) {
 function cursor(show) {
     if (boring) return;
     if (show) {
-        sys.print('\x1b[?25h');
+        process.stdout.write('\x1b[?25h');
     } else {
-        sys.print('\x1b[?25l');
+        process.stdout.write('\x1b[?25l');
     }
 }
 
@@ -764,14 +782,19 @@ function cursor(show) {
  */
 
 function runFiles(files) {
+    files = files.filter(function(file) {
+        return file.match(file_matcher);
+    });
+    suites = files.length;
+
     if (serial) {
-        (function next(){
+        (function next() {
             if (files.length) {
                 runFile(files.shift(), next);
             }
         })();
     } else {
-      files.forEach(runFile);
+        files.forEach(runFile);
     }
 }
 
@@ -783,37 +806,18 @@ function runFiles(files) {
  */
 
 function runFile(file, fn) {
-    if (file.match(file_matcher)) {
-        var title = path.basename(file),
-            file = path.join(cwd, file),
-            mod = require(file.replace(file_matcher,''));
-        (function check(){
-           var len = Object.keys(mod).length;
-           if (len) {
-               runSuite(title, mod, fn);
-           } else {
-               setTimeout(check, 20);
-           }
-        })();
-    }
-}
-
-/**
- * Report `err` for the given `test` and `suite`.
- *
- * @param {String} suite
- * @param {String} test
- * @param {Error} err
- */
-
-function error(suite, test, err) {
-    ++failures;
-    var name = err.name,
-        stack = err.stack ? err.stack.replace(err.name, '') : '',
-        label = test === 'uncaught'
-            ? test
-            : suite + ' ' + test;
-    print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
+    var title = path.basename(file),
+        file = path.join(cwd, file),
+        mod = require(file.replace(file_matcher,''));
+    (function check() {
+       var len = Object.keys(mod).length;
+       if (len) {
+           runSuite(title, mod, fn);
+           suitesRun++;
+       } else {
+           setTimeout(check, 20);
+       }
+    })();
 }
 
 /**
@@ -826,72 +830,160 @@ function error(suite, test, err) {
 
 var dots = 0;
 var maxListeners = 10;
-function runSuite(title, tests, fn) {
+function runSuite(title, tests, callback) {
     // Keys
     var keys = only.length
         ? only.slice(0)
         : Object.keys(tests);
-
+    
+    // Regular expression test filter
+    var filter = new RegExp('(?:' + (match.length == 0 ? '.' : match) + ')');
+    
     // Setup
-    var setup = tests.setup || function(fn){ fn(); };
-    var teardown = tests.teardown || function(fn){ fn(); };
-
-    assert.suiteTitle = title;
+    var setup = tests.setup || function(fn, assert) { fn(); };
+    var teardown = tests.teardown || function(fn, assert) { fn(); };
 
     maxListeners += keys.length;
     process.setMaxListeners(maxListeners);
 
     // Iterate tests
-    (function next(){
+    (function next() {
         if (keys.length) {
             var key,
-                test = tests[key = keys.shift()];
+                fn = tests[key = keys.shift()];
+            
+            // Filter
+            if (filter.test(key) === false) return next();
+            
             // Non-tests
             if (key === 'setup' || key === 'teardown') return next();
 
             // Run test
-            if (test) {
-                try {
-                    ++testcount;
-                    assert.testTitle = key;
-                    if (serial) {
-                        sys.print('.');
-                        if (++dots % 25 === 0) sys.print('\n');
-                        setup(function(){
-                            if (test.length < 1) {
-                                test();
-                                teardown(next);
-                            } else {
-                                var id = setTimeout(function(){
-                                    throw new Error("'" + key + "' timed out");
-                                }, timeout);
-                                assert.callbackFn = function(){
-                                    clearTimeout(id);
-                                    teardown(next);
-                                };
-                                test(assert.callbackFn);
-                            }
-                        });
-                    } else {
-                        test(function(fn){
-                            process.on('beforeExit', function(){
-                                try {
-                                    fn();
-                                } catch (err) {
-                                    error(title, key, err);
-                                }
-                            });
-                        });
-                    }
-                } catch (err) {
-                    error(title, key, err);
-                }
+            if (fn) {
+                var test = new Test({
+                    fn: fn,
+                    suite: title,
+                    title: key,
+                    setup: setup,
+                    teardown: teardown
+                })
+                test.run(next);
+            } else {
+                // @TODO: Add warning message that there's no test.
+                next();
             }
-            if (!serial) next();
         } else if (serial) {
-          fn();
+            callback();
         }
     })();
+}
+
+require('util').inherits(Test, require('events').EventEmitter);
+function Test(options) {
+    for (var key in options) {
+        this[key] = options[key];
+    }
+    this._succeeded = [];
+    this._failed = [];
+    this._pending = [];
+    this._beforeExit = [];
+    this.assert = { __proto__: assert, _test: this };
+
+    var test = this;
+    process.on('beforeExit', function() {
+        try {
+            test.emit('exit');
+        } catch (err) {
+            test.failure(err);
+        }
+        test.report();
+    });
+}
+
+Test.prototype.success = function(err) {
+    this._succeeded.push(err);
+};
+
+Test.prototype.failure = function(err) {
+    this._failed.push(err);
+    this.error(err);
+};
+
+Test.prototype.report = function() {
+    for (var i = 0; i < this._pending.length; i++) {
+        this.error(this._pending[i]);
+    }
+};
+
+Test.prototype.run = function(callback) {
+    try {
+        ++testcount;
+        assert._test = this;
+
+        if (serial) {
+            this.runSerial(callback);
+        } else {
+            // @TODO: find a way to run setup/tearDown.
+            this.runParallel();
+            callback();
+        }
+    } catch (err) {
+        this.failure(err);
+        this.report();
+    }
+};
+
+Test.prototype.runSerial = function(callback) {
+    var test = this;
+    process.stdout.write('.');
+    if (++dots % 25 === 0) console.log();
+    test.setup(function() {
+        if (test.fn.length < 1) {
+            test.fn();
+            test.teardown(callback);
+        } else {
+            var id = setTimeout(function() {
+                throw new Error("'" + test.title + "' timed out");
+            }, timeout);
+            test.callback = function() {
+                clearTimeout(id);
+                test.teardown(callback);
+                process.nextTick(function() {
+                    test.report();
+                });
+            };
+            test.fn(test.callback);
+        }
+    });
+};
+
+Test.prototype.runParallel = function() {
+    var test = this;
+    test.fn(function(fn) {
+        test.on('exit', function() {
+            fn(test.assert);
+        });
+    }, test.assert);
+};
+
+/**
+ * Report `err` for the given `test` and `suite`.
+ *
+ * @param {String} suite
+ * @param {String} test
+ * @param {Error} err
+ */
+Test.prototype.error = function(err) {
+    if (!err._reported) {
+        ++failures;
+        var name = err.name,
+            stack = err.stack ? err.stack.replace(err.name, '') : '',
+            label = this.title === 'uncaught'
+                ? this.title
+                : this.suite + ' ' + this.title;
+        print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
+        err._reported = true;
+    }
 }
 
 /**
@@ -901,7 +993,10 @@ function runSuite(title, tests, fn) {
 function report() {
     cursor(true);
     process.emit('beforeExit');
-    if (failures) {
+    if (suitesRun < suites) {
+        print('\n   [bold]{Failure}: [red]{Only ' + suitesRun + ' of ' + suites + ' suites have been started}\n\n');
+    }
+    else if (failures) {
         print('\n   [bold]{Failures}: [red]{' + failures + '}\n\n');
         notify('Failures: ' + failures);
     } else {
@@ -930,15 +1025,19 @@ function notify(msg) {
 }
 
 // Report uncaught exceptions
+var unknownTest = new Test({
+    suite: 'uncaught',
+    test: 'uncaught'
+});
 
-process.on('uncaughtException', function(err){
-    error('uncaught', 'uncaught', err);
+process.on('uncaughtException', function(err) {
+    unknownTest.error(err);
 });
 
 // Show cursor
 
-['INT', 'TERM', 'QUIT'].forEach(function(sig){
-    process.on('SIG' + sig, function(){
+['INT', 'TERM', 'QUIT'].forEach(function(sig) {
+    process.on('SIG' + sig, function() {
         cursor(true);
         process.exit(1);
     });
@@ -949,7 +1048,7 @@ process.on('uncaughtException', function(err){
 // final assertions
 
 var orig = process.emit;
-process.emit = function(event){
+process.emit = function(event) {
     if (event === 'exit') {
         report();
         process.reallyExit(failures);

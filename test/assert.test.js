@@ -23,7 +23,7 @@ module.exports = {
         assert.throws(function(){
            assert.include('some random string', 'foobar');
         });
-
+    
         assert.includes(['foo', 'bar'], 'bar');
         assert.includes(['foo', 'bar'], 'foo');
         assert.includes([1,2,3], 3);
@@ -78,14 +78,6 @@ module.exports = {
         assert.match('foobar', /foo(bar)?/);
         assert.throws(function(){
             assert.match('something', /rawr/);
-        });
-    },
-    
-    'assert.length()': function(){
-        assert.length('test', 4);
-        assert.length([1,2,3,4], 4);
-        assert.throws(function(){
-            assert.length([1,2,3], 4);
         });
     }
 };
