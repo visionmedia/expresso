@@ -829,6 +829,7 @@ function runFile(file, fn) {
  */
 
 var dots = 0;
+var maxListeners = 10;
 function runSuite(title, tests, callback) {
     // Keys
     var keys = only.length
@@ -842,7 +843,8 @@ function runSuite(title, tests, callback) {
     var setup = tests.setup || function(fn, assert) { fn(); };
     var teardown = tests.teardown || function(fn, assert) { fn(); };
 
-    process.setMaxListeners(10 + process.listeners('beforeExit').length  + keys.length);
+    maxListeners += keys.length;
+    process.setMaxListeners(maxListeners);
 
     // Iterate tests
     (function next() {
