@@ -453,7 +453,7 @@ assert.response = function(server, req, res, msg) {
             headers: req.headers
         });
 
-        var check = function() {
+        var onResponse = function() {
             if (--server.__pending === 0) {
                 server.close();
                 server.__listening = false;
@@ -463,7 +463,7 @@ assert.response = function(server, req, res, msg) {
         // Timeout
         if (requestTimeout) {
             timer = setTimeout(function() {
-                check();
+                onResponse();
                 delete req.timeout;
                 test.failure(new Error(msg + 'Request timed out after ' + requestTimeout + 'ms.'));
             }, requestTimeout);
@@ -476,6 +476,8 @@ assert.response = function(server, req, res, msg) {
             response.setEncoding(encoding);
             response.on('data', function(chunk) { response.body += chunk; });
             response.on('end', function() {
+                onResponse();
+
                 if (timer) clearTimeout(timer);
                 try {
                     // Assert response body
@@ -542,9 +544,6 @@ assert.response = function(server, req, res, msg) {
                         // Someone else took our token. This is an error.
                         test.failure(new Error('Request succeeded, but token vanished: ' + msg));
                     }
-
-                    // Potentially shut down the server.
-                    check();
                 }
             });
         });
