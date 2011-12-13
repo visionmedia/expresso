@@ -381,7 +381,7 @@ assert.length = function(val, n, msg) {
  * @param {String} msg
  */
 assert.response = function(server, req, res, msg) {
-    var test = assert._test;
+    var test = this._test;
 
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
