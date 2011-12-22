@@ -932,6 +932,8 @@ Test.prototype.run = function(callback) {
 };
 
 Test.prototype.runSerial = function(callback) {
+    serialTest = this;
+
     var test = this;
     process.stdout.write('.');
     if (++dots % 25 === 0) console.log();
@@ -1027,9 +1029,15 @@ var unknownTest = new Test({
     suite: 'uncaught',
     test: 'uncaught'
 });
+var serialTest;
 
 process.on('uncaughtException', function(err) {
-    unknownTest.error(err);
+    if (!serial) {
+        unknownTest.error(err);
+    } else {
+        serialTest.failure(err);
+        serialTest.callback();
+    }
 });
 
 // Show cursor
