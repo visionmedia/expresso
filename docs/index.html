@@ -45,14 +45,14 @@ the command below, which will first compile node-jscoverage:</p><pre><code>$ mak
     assert.equal(6, 'foobar'.length);
 };</code></pre><p>Alternatively for large numbers of tests you may want to
 export your own object containing the tests, however this
-is essentially the as above:</p><pre><code>module.exports = {
+is essentially the same as above:</p><pre><code>module.exports = {
     'test String#length': function(beforeExit, assert) {
       assert.equal(6, 'foobar'.length);
     }
 };</code></pre><p>If you prefer not to use quoted keys:</p><pre><code>exports.testsStringLength = function(beforeExit, assert) {
     assert.equal(6, 'foobar'.length);
 };</code></pre><p>The argument passed to each callback is <code>beforeExit</code> and <code>assert</code>.
-The context ("<code>this</code>") of each test function is a <em>Test</em> object. You can pass a function to <code>beforeExit</code> to make sure the assertions are run before the tests exit. This is can be used to verify that tests have indeed been run. <code>beforeExit</code> is a shortcut for listening to the <code>exit</code> event on <code>this</code>. The second parameter <code>assert</code> is the <code>assert</code> object localized to that test. It makes sure that assertions in asynchronous callbacks are associated with the correct test.</p><pre><code>exports.testAsync = function(beforeExit, assert) {
+The context ("<code>this</code>") of each test function is a <em>Test</em> object. You can pass a function to <code>beforeExit</code> to make sure the assertions are run before the tests exit. This can be used to verify that tests have indeed been run. <code>beforeExit</code> is a shortcut for listening to the <code>exit</code> event on <code>this</code>. The second parameter <code>assert</code> is the <code>assert</code> object localized to that test. It makes sure that assertions in asynchronous callbacks are associated with the correct test.</p><pre><code>exports.testAsync = function(beforeExit, assert) {
     var n = 0;
     setTimeout(function() {
         ++n;
@@ -81,7 +81,7 @@ alias for the core <code>assert.deepEqual()</code> method which does complex
 comparisons, opposed to <code>assert.equal()</code> which uses <code>==</code>.</p><pre><code>assert.eql('foo', 'foo');
 assert.eql([1,2], [1,2]);
 assert.eql({ foo: 'bar' }, { foo: 'bar' });</code></pre><h3 id="assert-includes-obj-val-msg">assert.includes(obj, val[, msg])</h3><p>Assert that <code>obj</code> is within <code>val</code>. This method supports <code>Array</code>s
-and <code>Strings</code>s.</p><pre><code>assert.includes([1,2,3], 3);
+and <code>String</code>s.</p><pre><code>assert.includes([1,2,3], 3);
 assert.includes('foobar', 'foo');
 assert.includes('foobar', 'bar');</code></pre><h3 id="assert-response-server-req-res-fn-msg-fn">assert.response(server, req, res|fn[, msg|fn])</h3><p>Performs assertions on the given <code>server</code>, which should <em>not</em> call
 <code>listen()</code>, as this is handled internally by expresso and the server
@@ -137,7 +137,7 @@ assert.response(server, {
 so the following is equivalent to the command above:</p><pre><code>$ expresso</code></pre><p>If you wish to unshift a path to <code>require.paths</code> before
 running tests, you may use the <code>-I</code> or <code>--include</code> flag.</p><pre><code>$ expresso --include lib test/*</code></pre><p>The previous example is typically what I would recommend, since expresso
 supports test coverage via <a href="http://github.com/visionmedia/node-jscoverage">node-jscoverage</a> (bundled with expresso),
-so you will need to expose an instrumented version of you library.</p><p>To instrument your library, simply run <a href="http://github.com/visionmedia/node-jscoverage">node-jscoverage</a>,
+so you will need to expose an instrumented version of your library.</p><p>To instrument your library, simply run <a href="http://github.com/visionmedia/node-jscoverage">node-jscoverage</a>,
 passing the <em>src</em> and <em>dest</em> directories:</p><pre><code>$ node-jscoverage lib lib-cov</code></pre><p>Now we can run our tests again, using the <em>lib-cov</em> directory that has been
 instrumented with coverage statements:</p><pre><code>$ expresso -I lib-cov test/*</code></pre><p>The output will look similar to below, depending on your test coverage of course :)</p><p><img alt="node coverage" src="http://dl.dropbox.com/u/6396913/cov.png" /></p><p>To make this process easier expresso has the <code>-c</code> or <code>--cov</code> which essentially
 does the same as the two commands above. The following two commands will

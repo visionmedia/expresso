@@ -43,7 +43,7 @@ To define tests we simply export several functions:
 
 Alternatively for large numbers of tests you may want to
 export your own object containing the tests, however this
-is essentially the as above:
+is essentially the same as above:
 
     module.exports = {
         'test String#length': function(beforeExit, assert) {
@@ -58,7 +58,7 @@ If you prefer not to use quoted keys:
     };
 
 The argument passed to each callback is `beforeExit` and `assert`.
-The context ("`this`") of each test function is a _Test_ object. You can pass a function to `beforeExit` to make sure the assertions are run before the tests exit. This is can be used to verify that tests have indeed been run. `beforeExit` is a shortcut for listening to the `exit` event on `this`. The second parameter `assert` is the `assert` object localized to that test. It makes sure that assertions in asynchronous callbacks are associated with the correct test.
+The context ("`this`") of each test function is a _Test_ object. You can pass a function to `beforeExit` to make sure the assertions are run before the tests exit. This can be used to verify that tests have indeed been run. `beforeExit` is a shortcut for listening to the `exit` event on `this`. The second parameter `assert` is the `assert` object localized to that test. It makes sure that assertions in asynchronous callbacks are associated with the correct test.
 
     exports.testAsync = function(beforeExit, assert) {
         var n = 0;
@@ -143,7 +143,7 @@ comparisons, opposed to `assert.equal()` which uses `==`.
 ### assert.includes(obj, val[, msg])
 
 Assert that `obj` is within `val`. This method supports `Array`s
-and `Strings`s.
+and `String`s.
 
     assert.includes([1,2,3], 3);
     assert.includes('foobar', 'foo');
@@ -260,7 +260,7 @@ running tests, you may use the `-I` or `--include` flag.
 
 The previous example is typically what I would recommend, since expresso
 supports test coverage via [node-jscoverage](http://github.com/visionmedia/node-jscoverage) (bundled with expresso),
-so you will need to expose an instrumented version of you library.
+so you will need to expose an instrumented version of your library.
 
 To instrument your library, simply run [node-jscoverage](http://github.com/visionmedia/node-jscoverage),
 passing the _src_ and _dest_ directories:
