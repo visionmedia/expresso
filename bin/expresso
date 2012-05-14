@@ -952,7 +952,7 @@ Test.prototype.runSerial = function(callback) {
                     test.report();
                 });
             };
-            test.fn(test.callback);
+            test.fn(test.callback, test.assert);
         }
     });
 };
