@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/visionmedia/expresso.png)](http://travis-ci.org/visionmedia/expresso)
 # Expresso
 
   TDD framework for [nodejs](http://nodejs.org). This module is
