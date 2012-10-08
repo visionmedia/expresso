@@ -550,6 +550,24 @@ assert.response = function(server, req, res, msg) {
 };
 
 /**
+ * Custom assert module that tacks on the current test to every error
+ */
+var customAssert = { __proto__: assert };
+Object.keys(assert).forEach(function (method) {
+   customAssert[method] = function () {
+      try {
+         return assert[method].apply(assert, arguments);
+      } catch (err) {
+         // 'this' is this assert object from the test
+         if (this._test) {
+            err._test = this._test;
+         }
+         throw err;
+      }
+   };
+});
+
+/**
  * Pad the given string to the maximum width provided.
  *
  * @param  {String} str
@@ -885,7 +903,7 @@ function Test(options) {
     this._failed = [];
     this._pending = [];
     this._beforeExit = [];
-    this.assert = { __proto__: assert, _test: this };
+    this.assert = { __proto__: customAssert, _test: this };
 
     var test = this;
     process.on('beforeExit', function() {
@@ -976,11 +994,10 @@ Test.prototype.runParallel = function() {
 Test.prototype.error = function(err) {
     if (!err._reported) {
         ++failures;
+        var test = err._test || this;
         var name = err.name,
             stack = err.stack ? err.stack.replace(err.name, '') : '',
-            label = this.title === 'uncaught'
-                ? this.title
-                : this.suite + ' ' + this.title;
+            label = test.suite + ' ' + test.title;
         print('\n   [bold]{' + label + '}: [red]{' + name + '}' + stack + '\n');
         err._reported = true;
     }
