@@ -5,6 +5,14 @@ exports['first'] = function(beforeExit, assert) {
     process.nextTick(function() {
         assert.equal(assert._test.suite, 'local-assert.test.js');
         assert.equal(assert._test.title, 'first');
+        try {
+           var error = false;
+           assert.ok(false);
+        } catch (err) {
+           assert.equal(err._test, assert._test);
+           error = true;
+        }
+        assert.ok(error);
     });
 };
 
