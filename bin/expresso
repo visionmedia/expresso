@@ -381,7 +381,7 @@ assert.length = function(val, n, msg) {
  * @param {String} msg
  */
 assert.response = function(server, req, res, msg) {
-    var test = assert._test;
+    var test = this._test;
 
     // Callback as third or fourth arg
     var callback = typeof res === 'function'
@@ -453,7 +453,7 @@ assert.response = function(server, req, res, msg) {
             headers: req.headers
         });
 
-        var check = function() {
+        var onResponse = function() {
             if (--server.__pending === 0) {
                 server.close();
                 server.__listening = false;
@@ -463,7 +463,7 @@ assert.response = function(server, req, res, msg) {
         // Timeout
         if (requestTimeout) {
             timer = setTimeout(function() {
-                check();
+                onResponse();
                 delete req.timeout;
                 test.failure(new Error(msg + 'Request timed out after ' + requestTimeout + 'ms.'));
             }, requestTimeout);
@@ -476,6 +476,8 @@ assert.response = function(server, req, res, msg) {
             response.setEncoding(encoding);
             response.on('data', function(chunk) { response.body += chunk; });
             response.on('end', function() {
+                onResponse();
+
                 if (timer) clearTimeout(timer);
                 try {
                     // Assert response body
@@ -528,7 +530,11 @@ assert.response = function(server, req, res, msg) {
                     test.success(msg);
                 } catch (err) {
                     test.failure(err);
-                    test.callback();
+
+                    // Tests only have callbacks when there is more than one test
+                    if (typeof test.callback === "function") {
+                      test.callback();
+                    }
                 } finally {
                     // Remove our token.
                     var idx = test._pending.indexOf(token);
@@ -538,9 +544,6 @@ assert.response = function(server, req, res, msg) {
                         // Someone else took our token. This is an error.
                         test.failure(new Error('Request succeeded, but token vanished: ' + msg));
                     }
-
-                    // Potentially shut down the server.
-                    check();
                 }
             });
         });
@@ -957,7 +960,11 @@ Test.prototype.runSerial = function(callback) {
     if (++dots % 25 === 0) console.log();
     test.setup(function() {
         if (test.fn.length < 1) {
-            test.fn();
+            try {
+              test.fn();
+            } catch (err) {
+              test.failure(err);
+            }
             test.teardown(callback);
         } else {
             var id = setTimeout(function() {
@@ -970,18 +977,27 @@ Test.prototype.runSerial = function(callback) {
                     test.report();
                 });
             };
-            test.fn(test.callback);
+
+            try {
+              test.fn(test.callback);
+            } catch (err) {
+              test.failure(err);
+            }
         }
     });
 };
 
 Test.prototype.runParallel = function() {
     var test = this;
-    test.fn(function(fn) {
-        test.on('exit', function() {
-            fn(test.assert);
-        });
-    }, test.assert);
+    try {
+      test.fn(function(fn) {
+          test.on('exit', function() {
+              fn(test.assert);
+          });
+      }, test.assert);
+    } catch (err) {
+      test.failure(err);
+    }
 };
 
 /**
