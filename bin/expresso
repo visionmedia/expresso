@@ -1057,14 +1057,14 @@ process.on('uncaughtException', function(err) {
     }
 });
 
-// Show cursor
-
-['INT', 'TERM', 'QUIT'].forEach(function(sig) {
-    process.on('SIG' + sig, function() {
-        cursor(true);
-        process.exit(1);
+// Show cursor - for nonwindows
+if (process.platform.substr(0,3) !== 'win')
+    ['INT', 'TERM', 'QUIT'].forEach(function(sig) {
+        process.on('SIG' + sig, function() {
+            cursor(true);
+            process.exit(1);
+        });
     });
-});
 
 // Report test coverage when available
 // and emit "beforeExit" event to perform
