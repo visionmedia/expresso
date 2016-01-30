@@ -809,6 +809,10 @@ function runFiles(files) {
         (function next() {
             if (files.length) {
                 runFile(files.shift(), next);
+            } else {
+                process.nextTick(function() {
+                    process.exit(0);
+                });
             }
         })();
     } else {
