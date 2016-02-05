@@ -26,6 +26,8 @@
 
 To install both expresso _and_ node-jscoverage run:
 
+    $ git submodule init
+    $ git submodule update
     $ make install
 
 To install expresso alone (no build required) run:
