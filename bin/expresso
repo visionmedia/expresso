@@ -428,6 +428,12 @@ assert.response = function(server, req, res, msg) {
         process.nextTick(check);
     }
 
+    if (req.method && req.method.toLowerCase() != 'get') {
+      if(!req.headers) req.headers = {}
+      req.headers['Content-Type'] = req.headers['Content-Type'] || 'application/x-www-form-urlencoded';
+      req.headers['Content-Length'] = req.headers['Content-Length'] || (req.data && req.data.length) || (req.body && req.body.length) || 0;
+    }
+
     // The socket was created but is not yet listening, so keep deferring
     if (!server.__listening) {
         server.__deferred.push(issue);
