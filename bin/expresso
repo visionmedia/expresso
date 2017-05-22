@@ -970,7 +970,12 @@ Test.prototype.runSerial = function(callback) {
                     test.report();
                 });
             };
-            test.fn(test.callback);
+
+            // @TODO: test MUST call beforeExit function in order to iterate to next test.
+            // tested on node v.10.20.
+            // If you will not call beforeExit -> then will receive 'test timed out' error.
+            //
+            test.fn(test.callback,test.assert);
         }
     });
 };
